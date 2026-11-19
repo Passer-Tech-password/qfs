@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   AtSign,
   Eye,
@@ -78,6 +79,7 @@ const inputClass =
 
 export function AuthForm({ mode }: { mode: AuthMode }) {
   const isRegister = mode === "register";
+  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -96,10 +98,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
       if (!isRegister) {
         await signInWithEmailAndPassword(auth, email, password);
-        setMessage({
-          type: "success",
-          text: "You're signed in. Your member dashboard will be added in the next project stage.",
-        });
+        router.push("/dashboard");
         return;
       }
 
@@ -136,9 +135,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
       setMessage({
         type: "success",
-        text: "Your QFS account is ready. The member dashboard will be added in the next project stage.",
+        text: "Your QFS account is ready. Taking you to your dashboard…",
       });
       formElement.reset();
+      router.push("/dashboard");
     } catch (error) {
       setMessage({ type: "error", text: firebaseMessage(error) });
     } finally {
@@ -276,7 +276,7 @@ export function AuthCard({ mode }: { mode: AuthMode }) {
       <p className="mx-auto mt-6 max-w-[600px] text-center text-[9px] leading-relaxed text-slate-500">
         {isRegister
           ? "Asset custody, transaction PINs, and payment services are not active on this preview."
-          : "Wallet connections, transfers, and the member dashboard are not active on this preview."}
+          : "Wallet connections and transfers are not active on this preview."}
       </p>
     </main>
   );

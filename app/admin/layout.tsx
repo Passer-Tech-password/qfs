@@ -25,6 +25,7 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const title = pathname ? TITLES[pathname] ?? "Admin" : "Admin";
+  const isLoginRoute = pathname === "/admin/login";
   const [navOpen, setNavOpen] = useState(false);
 
   // Close the mobile drawer whenever the route changes.
@@ -42,10 +43,16 @@ export default function AdminLayout({
   }, []);
 
   useEffect(() => {
+    if (isLoginRoute) return;
     if (admin.status === "signed-out" || admin.status === "not-admin") {
       router.replace("/admin/login");
     }
-  }, [admin.status, router]);
+  }, [admin.status, router, isLoginRoute]);
+
+  // The sign-in page renders on its own, without the admin guard or shell.
+  if (isLoginRoute) {
+    return <>{children}</>;
+  }
 
   if (admin.status === "loading") {
     return (

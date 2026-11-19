@@ -76,15 +76,15 @@ export default function QfsCardPage() {
               <CreditCard size={12} /> Quantum Card Operations
             </span>
             <p className="mt-3 text-[12.5px] text-indigo-100">Total Portfolio Value</p>
-            <p className="mt-0.5 text-[42px] font-black leading-none tracking-tight">
+            <p className="mt-0.5 text-[32px] font-black leading-none tracking-tight sm:text-[38px] lg:text-[42px]">
               $0.00
             </p>
-            <p className="mt-2 text-[12px] text-indigo-200">
+            <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-indigo-200">
               <span className="font-semibold text-white">Available Assets: $0.00</span>
-              <span className="mx-1.5">·</span>
+              <span aria-hidden="true">·</span>
               <span className="font-semibold text-emerald-300">USDT/Fiat: $0.00</span>
-              <span className="mx-1.5">·</span>
-              Crypto Holdings: $0.00
+              <span aria-hidden="true">·</span>
+              <span>Crypto Holdings: $0.00</span>
             </p>
           </div>
 

@@ -67,14 +67,14 @@ export default function SwapPage() {
         <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-white/5 blur-3xl" />
 
-        <div className="relative flex items-start justify-between">
+        <div className="relative flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-[24px] font-black tracking-tight">Exchange Assets</h2>
             <p className="mt-1 text-[13px] text-indigo-100">
               Instant zero-slippage quantum liquidity swap.
             </p>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold">
             <Zap size={12} className="text-yellow-300" /> Instant
           </span>
         </div>
@@ -113,7 +113,7 @@ export default function SwapPage() {
               type="text"
               value={payAmount}
               onChange={(e) => setPayAmount(e.target.value)}
-              className="w-40 bg-transparent text-right text-[26px] font-black text-white outline-none"
+              className="w-32 bg-transparent text-right text-[26px] font-black text-white outline-none sm:w-40"
             />
           </div>
 
@@ -184,7 +184,7 @@ export default function SwapPage() {
               type="text"
               value="0.000000"
               readOnly
-              className="w-40 bg-transparent text-right text-[26px] font-black text-white outline-none"
+              className="w-32 bg-transparent text-right text-[26px] font-black text-white outline-none sm:w-40"
             />
           </div>
         </div>

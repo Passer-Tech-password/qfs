@@ -221,7 +221,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Identity Verification KYC banner */}
-      <div className="mt-5 flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-5">
+      <div className="mt-5 flex flex-col items-start gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-200/70">
             <Shield size={20} className="text-amber-700" />
@@ -238,7 +238,7 @@ export default function ProfilePage() {
         </div>
         <Link
           href="/dashboard/kyc"
-          className="inline-flex shrink-0 items-center rounded-xl bg-amber-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-amber-500/25 transition hover:bg-amber-600"
+          className="inline-flex w-full shrink-0 items-center justify-center rounded-xl bg-amber-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-amber-500/25 transition hover:bg-amber-600 sm:w-auto"
         >
           Verify Identity →
         </Link>

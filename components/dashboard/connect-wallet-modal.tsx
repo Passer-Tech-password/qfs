@@ -68,15 +68,15 @@ export function ConnectWalletModal({
       />
 
       {/* Outer modal */}
-      <div className="relative w-full max-w-[640px] overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f1530] to-[#1a2150] shadow-2xl ring-1 ring-white/10">
+      <div className="relative max-h-[calc(100dvh-2rem)] w-full max-w-[640px] overflow-y-auto rounded-3xl bg-gradient-to-br from-[#0f1530] to-[#1a2150] shadow-2xl ring-1 ring-white/10">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-600/40 ring-1 ring-indigo-400/40">
+        <div className="flex items-start justify-between gap-3 px-6 py-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-600/40 ring-1 ring-indigo-400/40">
               <Wallet size={20} className="text-indigo-200" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-[17px] font-bold text-white">Connect Web3 Wallet</h3>
                 <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300 ring-1 ring-emerald-400/40">
                   Secure Bridge
@@ -88,7 +88,7 @@ export function ConnectWalletModal({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
               aria-label="Expand"
@@ -156,7 +156,7 @@ export function ConnectWalletModal({
               </div>
 
               {/* Tabs */}
-              <div className="mt-6 flex gap-6 border-b border-slate-200">
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-b border-slate-200">
                 {(
                   [
                     ["phrase", "Phrase"],

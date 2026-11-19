@@ -20,7 +20,7 @@ export function SignOutModal({
         onClick={onCancel}
       />
 
-      <div className="relative w-full max-w-[420px] rounded-3xl bg-white p-7 text-center shadow-2xl ring-1 ring-black/5">
+      <div className="relative max-h-[calc(100dvh-2rem)] w-full max-w-[420px] overflow-y-auto rounded-3xl bg-white p-7 text-center shadow-2xl ring-1 ring-black/5">
         {/* Icon */}
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 ring-1 ring-rose-100">
           <LogOut size={26} className="text-rose-500" />

@@ -249,7 +249,7 @@ export function Sidebar({
         </div>
       </nav>
 
-      <div className="pointer-events-none fixed bottom-3 left-3 w-[228px]">
+      <div className="pointer-events-none fixed bottom-3 left-3 w-[228px] max-w-[calc(85vw-1.5rem)]">
         <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500/30">
             <HelpCircle size={16} className="text-indigo-200" />

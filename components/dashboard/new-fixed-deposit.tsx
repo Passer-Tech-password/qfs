@@ -99,7 +99,7 @@ export function FixedDepositHero() {
             QUANTUM YIELD VAULT
           </span>
           <p className="mt-3 text-[12.5px] text-indigo-100">Investment Package</p>
-          <h2 className="text-[34px] font-black leading-none tracking-tight">Basic</h2>
+          <h2 className="text-[28px] font-black leading-none tracking-tight sm:text-[34px]">Basic</h2>
           <p className="mt-1 text-[12.5px] text-indigo-200">No active investment</p>
         </div>
         <div className="flex flex-wrap gap-2.5">

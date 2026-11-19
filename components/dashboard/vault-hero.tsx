@@ -13,13 +13,13 @@ export function VaultHero() {
           </span>
 
           <p className="mt-4 text-[13px] text-indigo-100">Total Portfolio Value</p>
-          <p className="mt-1 text-[44px] font-black leading-none tracking-tight">$0.00</p>
-          <p className="mt-2 text-[12.5px] text-indigo-100">
+          <p className="mt-1 text-[32px] font-black leading-none tracking-tight sm:text-[38px] lg:text-[44px]">$0.00</p>
+          <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-indigo-100">
             <span className="font-semibold text-emerald-300">↗ 3.48%</span>
-            <span className="mx-2 text-indigo-200/60">·</span>
-            Available Assets: <span className="font-semibold">$0.00</span>
-            <span className="mx-2 text-indigo-200/60">·</span>
-            APY: <span className="font-semibold text-emerald-300">+$0.00</span>
+            <span aria-hidden="true" className="text-indigo-200/60">·</span>
+            <span>Available Assets: <span className="font-semibold">$0.00</span></span>
+            <span aria-hidden="true" className="text-indigo-200/60">·</span>
+            <span>APY: <span className="font-semibold text-emerald-300">+$0.00</span></span>
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2.5">
