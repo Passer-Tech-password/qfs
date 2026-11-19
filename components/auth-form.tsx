@@ -46,6 +46,13 @@ function firebaseMessage(error: unknown) {
   return messages[code] ?? "We couldn't complete that request. Please try again.";
 }
 
+// A stale or partially cached JS bundle can leave an older Firebase runtime in
+// memory, so the auth module never registers and getAuth() throws
+// "Component auth has not been registered yet".
+function isStaleBundleError(error: unknown) {
+  return error instanceof Error && /has not been registered yet/i.test(error.message);
+}
+
 function Field({
   label,
   icon,
@@ -140,6 +147,15 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       formElement.reset();
       router.push("/dashboard");
     } catch (error) {
+      if (isStaleBundleError(error) && sessionStorage.getItem("qfs-stale-bundle-reload") !== "1") {
+        sessionStorage.setItem("qfs-stale-bundle-reload", "1");
+        setMessage({
+          type: "error",
+          text: "Secure services didn't finish loading on this page. Refreshing to load the latest version…",
+        });
+        window.location.reload();
+        return;
+      }
       setMessage({ type: "error", text: firebaseMessage(error) });
     } finally {
       setPending(false);
