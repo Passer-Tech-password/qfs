@@ -1,9 +1,11 @@
+
 @import "tailwindcss";
 
 @theme {
   --animate-marquee: marquee 35s linear infinite;
   --animate-shake: shake 6s ease-in-out infinite;
   --animate-ledger-pulse: ledger-live-pulse 4s ease-in-out infinite;
+  --animate-ledger-live: ledger-live-pulse 4s ease-in-out infinite;
 }
 
 @keyframes marquee {
@@ -43,11 +45,19 @@
   }
 
   50% {
-    transform: scale(1.008);
+    transform: scale(1.015);
   }
 }
 
+/* Original pulse class */
 .animate-ledger-pulse {
+  transform-origin: center;
+  animation: ledger-live-pulse 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Ledger live pulse class */
+.animate-ledger-live {
   transform-origin: center;
   animation: ledger-live-pulse 4s ease-in-out infinite;
   will-change: transform;
@@ -55,6 +65,7 @@
 
 :root {
   color-scheme: dark;
+
   --ink: #070a14;
   --panel: #111625;
   --line: #20283a;
@@ -171,16 +182,6 @@ a {
   transform: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-  }
-}
-
 /* ---------- Dashboard ---------- */
 .dash-shell {
   color-scheme: light;
@@ -241,6 +242,7 @@ a {
   transform: none;
 }
 
+/* ---------- Scrollbars ---------- */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -291,7 +293,16 @@ a {
   overflow-wrap: break-word;
 }
 
+/* ---------- Reduced Motion ---------- */
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+
   .skip-link {
     transition: none;
   }

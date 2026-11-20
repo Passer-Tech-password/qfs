@@ -260,52 +260,53 @@ export default function HomePage() {
       </section>
 
 {/* ===================== SOVEREIGN ASSET LEDGER ===================== */}
-<section className="px-4 pb-14 sm:px-6">
+<section className="px-4 pb-14">
   <div className="mx-auto max-w-[1080px]">
-    <div className="overflow-hidden rounded-3xl border border-[#232938] bg-[#111522] shadow-2xl animate-ledger-pulse">
+    <div className="overflow-hidden rounded-3xl border border-[#222a3b] bg-[#101626] shadow-2xl animate-ledger-live">
+
       {/* Ledger header */}
-      <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+      <div className="flex flex-row items-center justify-between gap-4 p-7">
         <div className="flex items-center gap-4">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#20c7e8] to-[#3875f5] text-white shadow-lg shadow-cyan-500/15">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#2876f5] to-[#20c4e9] text-white shadow-lg shadow-blue-500/20">
             <Shield size={22} />
           </span>
 
           <div>
-            <h2 className="text-[17px] font-bold text-white sm:text-[19px]">
+            <h2 className="text-[19px] font-bold text-[#e5eaf5]">
               QFS Sovereign Asset Ledger
             </h2>
 
-            <p className="mt-0.5 text-[12px] text-slate-400">
-              <span className="font-semibold text-slate-500">Node ID:</span>{" "}
-              <span className="font-mono text-cyan-300">QFS-NODE-7849</span>{" "}
-              <span className="mx-1.5 text-slate-600">•</span>{" "}
-              <span className="font-semibold text-slate-500">Status:</span>{" "}
-              <span className="font-semibold text-emerald-400">Verified Online</span>
+            <p className="mt-0.5 whitespace-nowrap text-[12px] text-[#8994aa]">
+              <span className="font-semibold text-[#8490a5]">Node ID:</span>{" "}
+              <span className="font-mono text-[#67d7e8]">QFS-NODE-7849</span>{" "}
+              <span className="mx-1.5 text-[#465166]">•</span>{" "}
+              <span className="font-semibold text-[#8490a5]">Status:</span>{" "}
+              <span className="font-semibold text-[#39d5a0]">Verified Online</span>
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-bold text-emerald-400">
+        <div className="flex flex-row items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[#087b60]/40 bg-[#06352e]/50 px-3 py-1.5 text-[11px] font-bold text-[#36c89c]">
             <Lock size={12} /> 256-Bit Quantum Encrypted
           </span>
 
-          <span className="inline-flex items-center rounded-full border border-violet-500/25 bg-violet-500/10 px-3 py-1.5 text-[11px] font-bold text-violet-300">
+          <span className="inline-flex items-center whitespace-nowrap rounded-full border border-[#6535a0]/50 bg-[#26153d]/60 px-3 py-1.5 text-[11px] font-bold text-[#b58aff]">
             ISO 20022
           </span>
         </div>
       </div>
 
-      <div className="border-t border-[#222b40]" />
+      <div className="border-t border-[#202941]" />
 
       {/* Asset grid */}
-      <div className="grid gap-4 p-6 sm:grid-cols-2 sm:p-7 lg:grid-cols-4">
+      <div className="grid grid-cols-4 gap-4 p-7">
         {ledgerAssets.map((asset) => (
           <div
             key={asset.name}
-            className="rounded-2xl border border-[#282e3b] bg-[#1a202e] p-5 text-center transition hover:border-[#343d50]"
+            className="rounded-2xl border border-[#252c3b] bg-[#1b2231] p-5 text-center transition-colors hover:border-[#343e53]"
           >
-            <p className="text-[13px] font-semibold text-slate-400">
+            <p className="text-[13px] font-semibold text-[#929bad]">
               {asset.name}
             </p>
 
@@ -313,7 +314,7 @@ export default function HomePage() {
               {asset.value}
             </p>
 
-            <p className="mt-1 text-[11px] text-slate-500">
+            <p className="mt-1 text-[11px] text-[#727e94]">
               {asset.sub}
             </p>
           </div>
@@ -322,20 +323,20 @@ export default function HomePage() {
     </div>
 
     {/* Stats */}
-    <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="mt-12 grid grid-cols-4 gap-6">
       {stats.map((s) => (
         <div key={s.label} className="text-center">
-          <p className="text-[34px] font-black tracking-tight text-white sm:text-[42px]">
-            <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
+          <p className="text-[42px] font-black tracking-tight text-white">
+            <span className="bg-gradient-to-r from-[#4dd8f4] to-[#a78bfa] bg-clip-text text-transparent">
               {s.value}
             </span>
           </p>
 
-          <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
+          <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#727e94]">
             {s.label}
           </p>
         </div>
-    )}
+      ))}
     </div>
   </div>
 </section>
