@@ -204,18 +204,18 @@ export default function WhitepaperPage() {
                 </ul>
 
                 <div className="mt-7 flex gap-3 border-t border-[#1f2738] pt-6">
-                  <button
-                    type="button"
+                  <Link
+                    href="/register"
                     className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl border bg-[#0c111d] px-4 py-3 text-[12.5px] font-bold transition ${doc.readTone}`}
                   >
                     <Eye size={15} /> Read Specs
-                  </button>
-                  <button
-                    type="button"
+                  </Link>
+                  <Link
+                    href="/register"
                     className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r ${doc.pdfGradient} px-4 py-3 text-[12.5px] font-bold text-white shadow-lg transition hover:brightness-110`}
                   >
                     <Download size={15} /> Download PDF
-                  </button>
+                  </Link>
                 </div>
               </article>
             );

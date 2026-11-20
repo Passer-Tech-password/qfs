@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -68,10 +71,86 @@ const infraFeatures = [
 ];
 
 const cardTiers = [
-  { badge: "24K", title: "QFS 24KT Gold Card", sub: "Sovereign luxury bullion tier", limit: "$100k/day" },
-  { badge: "VISA", title: "Visa Infinite Vault", sub: "Global ATM & POS acceptance", limit: "$25k/day" },
-  { badge: "MC", title: "World Elite Mastercard", sub: "Zero FX surcharge & multi-asset", limit: "$50k/day" },
-  { badge: "AMEX", title: "American Express VIP", sub: "Travel privileges & concierge", limit: "$40k/day" },
+  {
+    tab: "24K Gold",
+    badge: "24K",
+    title: "QFS 24KT Gold Card",
+    sub: "Sovereign luxury bullion tier",
+    limit: "$100k/day",
+    preview: {
+      gradient: "from-[#facc15] via-[#d97706] to-[#92400e]",
+      glow: "shadow-amber-900/30",
+      ink: "text-amber-950",
+      badge: "bg-black/70 text-amber-200",
+      topLabel: "24K • 999.9 FINE GOLD",
+      chip: "from-yellow-200 to-amber-400",
+      chipCell: "bg-amber-700/40",
+      number: "9 9 9 9 •••• •••• 8 8 2 1",
+      network: "24KT GOLD",
+      expires: "12/28",
+      dailyLimit: "$100,000",
+    },
+  },
+  {
+    tab: "Visa",
+    badge: "VISA",
+    title: "Visa Infinite Vault",
+    sub: "Global ATM & POS acceptance",
+    limit: "$25k/day",
+    preview: {
+      gradient: "from-[#1e40af] via-[#1d4ed8] to-[#0b1220]",
+      glow: "shadow-blue-900/40",
+      ink: "text-blue-50",
+      badge: "bg-black/70 text-blue-200",
+      topLabel: "VISA INFINITE • SIGNATURE",
+      chip: "from-slate-200 to-blue-300",
+      chipCell: "bg-blue-900/40",
+      number: "4 1 0 0 •••• •••• 2 5 0 9",
+      network: "VISA",
+      expires: "09/29",
+      dailyLimit: "$25,000",
+    },
+  },
+  {
+    tab: "Mastercard",
+    badge: "MC",
+    title: "World Elite Mastercard",
+    sub: "Zero FX surcharge & multi-asset",
+    limit: "$50k/day",
+    preview: {
+      gradient: "from-[#b91c1c] via-[#dc2626] to-[#450a0a]",
+      glow: "shadow-red-900/40",
+      ink: "text-red-50",
+      badge: "bg-black/70 text-red-200",
+      topLabel: "WORLD ELITE • MULTI-ASSET",
+      chip: "from-amber-200 to-yellow-400",
+      chipCell: "bg-red-900/40",
+      number: "5 4 2 1 •••• •••• 7 3 4 0",
+      network: "MASTERCARD",
+      expires: "03/30",
+      dailyLimit: "$50,000",
+    },
+  },
+  {
+    tab: "Amex",
+    badge: "AMEX",
+    title: "American Express VIP",
+    sub: "Travel privileges & concierge",
+    limit: "$40k/day",
+    preview: {
+      gradient: "from-[#0f766e] via-[#0d9488] to-[#042f2e]",
+      glow: "shadow-teal-900/40",
+      ink: "text-teal-50",
+      badge: "bg-black/70 text-teal-200",
+      topLabel: "AMEX VIP • TRAVEL EDITION",
+      chip: "from-slate-200 to-teal-300",
+      chipCell: "bg-teal-900/40",
+      number: "3 7 8 2 •••• •••• 9 1 6 5",
+      network: "AMEX",
+      expires: "06/30",
+      dailyLimit: "$40,000",
+    },
+  },
 ];
 
 const cardFeatures = [
@@ -90,6 +169,7 @@ const smartCardPills = [
 const newsCards = [
   {
     tag: "QFS PROTOCOL",
+    category: "qfs",
     tagColor: "bg-purple-500/15 text-purple-300",
     time: "15 mins ago",
     title: "Quantum Ledger v4.8 Mainnet Settlement Engine Fully Synchronized",
@@ -101,6 +181,7 @@ const newsCards = [
   },
   {
     tag: "ISO 20022",
+    category: "iso",
     tagColor: "bg-violet-500/15 text-violet-300",
     time: "2 hours ago",
     title: "Global Interbank pacs.008 Messaging Architecture Standard Enforced",
@@ -112,6 +193,7 @@ const newsCards = [
   },
   {
     tag: "MARKET INSIGHT",
+    category: "market",
     tagColor: "bg-emerald-500/15 text-emerald-300",
     time: "5 hours ago",
     title: "Institutional Vault Reserves Cross $3.84 Billion in Total Assets",
@@ -123,7 +205,16 @@ const newsCards = [
   },
 ];
 
+type NewsFilter = "all" | "qfs" | "iso" | "market";
+
 export default function HomePage() {
+  const [cardTier, setCardTier] = useState(0);
+  const [newsFilter, setNewsFilter] = useState<NewsFilter>("all");
+  const tier = cardTiers[cardTier];
+  const visibleNews = newsCards.filter(
+    (n) => newsFilter === "all" || n.category === newsFilter,
+  );
+
   return (
     <main className="bg-[#040711] text-slate-200">
       <SiteHeader />
@@ -323,50 +414,53 @@ export default function HomePage() {
             {/* Left: card preview */}
             <div>
               <div className="flex flex-wrap gap-2">
-                {["24K Gold", "Visa", "Mastercard", "Amex"].map((t, i) => (
+                {cardTiers.map((t, i) => (
                   <button
-                    key={t}
+                    key={t.tab}
+                    type="button"
+                    onClick={() => setCardTier(i)}
+                    aria-pressed={cardTier === i}
                     className={`rounded-full px-4 py-2 text-[12px] font-bold transition ${
-                      i === 0
+                      cardTier === i
                         ? "bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/30"
                         : "bg-white/5 text-slate-400 hover:text-slate-200"
                     }`}
                   >
-                    {i === 0 && <Sparkles size={12} className="mr-1 inline" />}
-                    {t}
+                    {cardTier === i && <Sparkles size={12} className="mr-1 inline" />}
+                    {t.tab}
                   </button>
                 ))}
               </div>
 
-              <div className="relative mt-6 aspect-[1.6/1] w-full max-w-[460px] overflow-hidden rounded-3xl bg-gradient-to-br from-[#facc15] via-[#d97706] to-[#92400e] p-6 shadow-2xl shadow-amber-900/30">
+              <div className={`relative mt-6 aspect-[1.6/1] w-full max-w-[460px] overflow-hidden rounded-3xl bg-gradient-to-br ${tier.preview.gradient} p-6 shadow-2xl ${tier.preview.glow}`}>
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-amber-950/70">
+                    <p className={`text-[10px] font-bold uppercase tracking-[0.15em] ${tier.preview.ink} opacity-70`}>
                       Quantum Financial System
                     </p>
-                    <p className="mt-1 text-[11px] font-bold text-amber-950/60">
-                      24K • 999.9 FINE GOLD
+                    <p className={`mt-1 text-[11px] font-bold ${tier.preview.ink} opacity-60`}>
+                      {tier.preview.topLabel}
                     </p>
                   </div>
-                  <span className="rounded-md bg-black/70 px-2.5 py-1 text-[10px] font-extrabold text-amber-200">
-                    24KT GOLD
+                  <span className={`rounded-md px-2.5 py-1 text-[10px] font-extrabold ${tier.preview.badge}`}>
+                    {tier.preview.network}
                   </span>
                 </div>
 
                 <div className="mt-7 flex items-center gap-3">
-                  <div className="grid h-8 w-11 grid-cols-3 grid-rows-3 gap-0.5 rounded-md bg-gradient-to-br from-yellow-200 to-amber-400 p-1">
+                  <div className={`grid h-8 w-11 grid-cols-3 grid-rows-3 gap-0.5 rounded-md bg-gradient-to-br ${tier.preview.chip} p-1`}>
                     {Array.from({ length: 9 }).map((_, i) => (
-                      <div key={i} className="rounded-[1px] bg-amber-700/40" />
+                      <div key={i} className={`rounded-[1px] ${tier.preview.chipCell}`} />
                     ))}
                   </div>
-                  <span className="text-amber-950/70">))</span>
+                  <span className={`${tier.preview.ink} opacity-70`}>))</span>
                 </div>
 
-                <p className="mt-5 text-[20px] font-black tracking-[0.15em] text-amber-950">
-                  9 9 9 9 •••• •••• 8 8 2 1
+                <p className={`mt-5 text-[20px] font-black tracking-[0.15em] ${tier.preview.ink}`}>
+                  {tier.preview.number}
                 </p>
 
-                <div className="mt-6 flex items-end justify-between text-amber-950">
+                <div className={`mt-6 flex items-end justify-between ${tier.preview.ink}`}>
                   <div>
                     <p className="text-[8px] font-bold uppercase tracking-wider opacity-70">
                       Card Holder
@@ -377,13 +471,13 @@ export default function HomePage() {
                     <p className="text-[8px] font-bold uppercase tracking-wider opacity-70">
                       Expires
                     </p>
-                    <p className="text-[12px] font-bold">12/28</p>
+                    <p className="text-[12px] font-bold">{tier.preview.expires}</p>
                   </div>
                   <div>
                     <p className="text-[8px] font-bold uppercase tracking-wider opacity-70">
                       Daily Limit
                     </p>
-                    <p className="text-[12px] font-bold">$100,000</p>
+                    <p className="text-[12px] font-bold">{tier.preview.dailyLimit}</p>
                   </div>
                 </div>
               </div>
@@ -476,25 +570,33 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {["All Intelligence", "QFS Protocols", "ISO 20022", "Market Insights"].map(
-                (t, i) => (
-                  <button
-                    key={t}
-                    className={`rounded-full px-4 py-2 text-[12px] font-bold transition ${
-                      i === 0
-                        ? "bg-cyan-500/15 text-cyan-300 ring-1 ring-cyan-500/30"
-                        : "bg-white/5 text-slate-400 hover:text-slate-200"
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ),
-              )}
+              {(
+                [
+                  { id: "all", label: "All Intelligence" },
+                  { id: "qfs", label: "QFS Protocols" },
+                  { id: "iso", label: "ISO 20022" },
+                  { id: "market", label: "Market Insights" },
+                ] as { id: NewsFilter; label: string }[]
+              ).map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setNewsFilter(f.id)}
+                  aria-pressed={newsFilter === f.id}
+                  className={`rounded-full px-4 py-2 text-[12px] font-bold transition ${
+                    newsFilter === f.id
+                      ? "bg-cyan-500/15 text-cyan-300 ring-1 ring-cyan-500/30"
+                      : "bg-white/5 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {newsCards.map((n) => (
+            {visibleNews.map((n) => (
               <article
                 key={n.title}
                 className="group flex flex-col rounded-3xl border border-white/10 bg-[#0c1120] p-6 transition hover:border-white/20"
@@ -518,9 +620,9 @@ export default function HomePage() {
                     </span>
                     <span className="text-[12px] font-medium text-slate-300">{n.author}</span>
                   </div>
-                  <button className={`inline-flex items-center gap-1.5 text-[12px] font-bold transition ${n.linkColor}`}>
+                  <Link href="/whitepaper" className={`inline-flex items-center gap-1.5 text-[12px] font-bold transition ${n.linkColor}`}>
                     Read Bulletin <ArrowRight size={13} />
-                  </button>
+                  </Link>
                 </div>
               </article>
             ))}
