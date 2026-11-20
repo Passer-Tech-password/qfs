@@ -3,6 +3,7 @@
 @theme {
   --animate-marquee: marquee 35s linear infinite;
   --animate-shake: shake 6s ease-in-out infinite;
+  --animate-ledger-pulse: ledger-live-pulse 4s ease-in-out infinite;
 }
 
 @keyframes marquee {
@@ -33,6 +34,23 @@
   98% {
     transform: rotate(0deg);
   }
+}
+
+/* ---------- Sovereign Asset Ledger Live Animation ---------- */
+@keyframes ledger-live-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.008);
+  }
+}
+
+.animate-ledger-pulse {
+  transform-origin: center;
+  animation: ledger-live-pulse 4s ease-in-out infinite;
+  will-change: transform;
 }
 
 :root {
@@ -227,6 +245,7 @@ a {
   width: 6px;
   height: 6px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgb(255 255 255 / 18%);
   border-radius: 999px;
