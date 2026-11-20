@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   DollarSign,
   Bitcoin,
@@ -165,9 +166,12 @@ export function DepositAssets() {
               </p>
 
               <div className="mt-3 flex items-center justify-between border-t border-black/5 pt-2.5">
-                <button className="text-[12px] font-semibold text-indigo-600 hover:text-indigo-700">
+                <Link
+                  href="/dashboard/deposit/new"
+                  className="text-[12px] font-semibold text-indigo-600 hover:text-indigo-700"
+                >
                   Click to Deposit
-                </button>
+                </Link>
                 <LayoutGrid size={15} className="text-slate-400" />
               </div>
             </div>

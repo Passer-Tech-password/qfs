@@ -10,6 +10,8 @@ const TITLES: Record<string, string> = {
   "/admin": "Dashboard Overview",
   "/admin/users": "User Management",
   "/admin/activities": "Activity Monitor",
+  "/admin/requests": "Money Requests",
+  "/admin/deposit-addresses": "Deposit Receiving Addresses",
   "/admin/content": "Site Content & Events",
   "/admin/announcements": "Announcements",
   "/admin/security": "Security Log",

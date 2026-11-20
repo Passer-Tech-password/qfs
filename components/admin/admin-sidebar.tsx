@@ -11,6 +11,8 @@ import {
   ShieldAlert,
   Bell,
   Settings,
+  Wallet,
+  ArrowLeftRight,
   X,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
@@ -19,6 +21,8 @@ const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/activities", label: "Activities", icon: Activity },
+  { href: "/admin/requests", label: "Money Requests", icon: ArrowLeftRight },
+  { href: "/admin/deposit-addresses", label: "Deposit Addresses", icon: Wallet },
   { href: "/admin/content", label: "Site Content", icon: FileEdit },
   { href: "/admin/announcements", label: "Announcements", icon: Bell },
   { href: "/admin/security", label: "Security Log", icon: ShieldAlert },

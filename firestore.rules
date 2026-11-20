@@ -2,8 +2,17 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // An operator is any signed-in user whose profile carries role == 'admin'.
+    // `get()` performs a direct document lookup that is not itself subject to
+    // these rules, so this works even though `users/{userId}` is owner-read.
+    function isAdmin() {
+      return request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow create: if request.auth != null
         && request.auth.uid == userId
         && request.resource.data.keys().hasOnly([
@@ -20,28 +29,38 @@ service cloud.firestore {
         && request.resource.data.phoneNumber is string
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.createdAt == request.time;
-      allow update: if request.auth != null
-        && request.auth.uid == userId
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'firstName',
-          'lastName',
-          'username',
-          'phoneNumber'
-        ]);
+      // An owner may only edit their own profile fields; an admin may update
+      // any profile (e.g. role or account status) from the admin console.
+      allow update: if isAdmin()
+        || (request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'firstName',
+            'lastName',
+            'username',
+            'phoneNumber'
+          ]));
       allow delete: if false;
     }
 
     // Per-user money-flow records: deposits, transfers, swaps, fixedDeposits,
     // payouts, disputes and escrows. A signed-in owner may only create a
-    // `pending` request; settlement is done by privileged tooling, so client
-    // updates and deletes are always denied.
+    // `pending` request; settlement (approve / reject) is performed by an
+    // admin, and owners cannot modify or remove their submitted records.
     match /users/{userId}/{collection}/{docId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow create: if request.auth != null
         && request.auth.uid == userId
         && request.resource.data.status == 'pending'
         && request.resource.data.createdAt == request.time;
-      allow update, delete: if false;
+      allow update, delete: if isAdmin();
+    }
+
+    // Platform deposit receiving addresses, managed by admins and read by
+    // signed-in members so they can copy the correct wallet / crypto address.
+    match /deposit_addresses/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
     }
   }
 }
