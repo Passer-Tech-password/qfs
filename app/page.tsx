@@ -224,9 +224,17 @@ export default function HomePage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(88,28,135,0.35),transparent_60%)]" />
         <div className="relative mx-auto max-w-[1000px] text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-[11px] font-extrabold tracking-[0.08em] text-cyan-300">
-            <CircleDot size={12} className="text-cyan-300" />
+
+            <CircleDot
+              size={12}
+              className="animate-quantum-blink text-cyan-300"
+            />
+
             QUANTUM FINANCIAL SYSTEM • ISO 20022 COMPLIANT
+
           </span>
+
+
 
           <h1 className="mx-auto mt-7 max-w-[920px] text-[40px] font-black leading-[1.06] tracking-[-0.03em] text-white sm:text-[58px] md:text-[70px]">
             Quantum Financial{" "}
@@ -259,36 +267,141 @@ export default function HomePage() {
         </div>
       </section>
 
+
+
+
 {/* ===================== SOVEREIGN ASSET LEDGER ===================== */}
-<section className="pb-14">
+<section className="w-full overflow-hidden bg-[#070B16] px-3 pb-14 sm:px-5 lg:px-8">
+
   <div className="mx-auto w-full max-w-[1080px]">
-    <div className="overflow-hidden rounded-3xl border border-[#222a3b] bg-[#101626] shadow-2xl animate-ledger-live">
 
-      {/* Ledger header */}
-      <div className="flex flex-row items-center justify-between gap-4 p-7">
+    {/* ================= LEDGER CONTAINER ================= */}
+    <div className="w-full overflow-hidden rounded-[24px] border border-[#29345F] bg-[#101626] shadow-[0_0_30px_rgba(59,72,180,0.10)] animate-ledger-live sm:rounded-[26px]">
 
-        {/* Keep your existing header content here */}
+      {/* ================= LEDGER HEADER ================= */}
+      <div className="flex flex-col gap-4 p-4 sm:gap-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:p-7">
 
+        {/* Logo and Ledger Information */}
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#2876f5] to-[#20c4e9] text-white shadow-lg shadow-blue-500/20 sm:h-12 sm:w-12">
+            <Shield size={22} />
+          </span>
+
+          <div className="min-w-0 flex-1">
+
+            <h2 className="break-words text-[15px] font-bold leading-tight text-[#e5eaf5] sm:text-[18px] lg:text-[19px]">
+              QFS Sovereign Asset Ledger
+            </h2>
+
+            <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[9px] leading-relaxed sm:text-[11px] lg:text-[12px]">
+
+              <span className="font-semibold text-[#8490a5]">
+                Node ID:
+              </span>
+
+              <span className="font-mono text-[#67d7e8]">
+                QFS-NODE-7849
+              </span>
+
+              <span className="text-[#465166]">•</span>
+
+              <span className="font-semibold text-[#8490a5]">
+                Status:
+              </span>
+
+              <span className="font-semibold text-[#39d5a0]">
+                Verified Online
+              </span>
+
+            </p>
+          </div>
+        </div>
+
+        {/* ================= SECURITY BADGES ================= */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 lg:justify-end">
+
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[#087b60]/40 bg-[#06352e]/50 px-2.5 py-1.5 text-[9px] font-bold text-[#36c89c] sm:px-3 sm:text-[11px]">
+            <Lock size={11} />
+            256-Bit Quantum Encrypted
+          </span>
+
+          <span className="inline-flex items-center whitespace-nowrap rounded-full border border-[#6535a0]/50 bg-[#26153d]/60 px-3 py-1.5 text-[9px] font-bold text-[#b58aff] sm:text-[11px]">
+            ISO 20022
+          </span>
+
+        </div>
       </div>
 
-      <div className="border-t border-[#202941]" />
+      {/* ================= DIVIDER ================= */}
+      <div className="mx-4 border-t border-[#202941] sm:mx-6 lg:mx-7" />
 
-      {/* Asset grid */}
-      <div className="grid grid-cols-4 gap-4 p-7">
+      {/* ================= ASSET GRID ================= */}
+      <div className="grid grid-cols-2 gap-3 p-4 sm:gap-4 sm:p-6 lg:grid-cols-4 lg:p-7">
 
-        {/* Keep your existing ledgerAssets.map() here */}
+        {ledgerAssets.map((asset) => (
+          <div
+            key={asset.name}
+            className="flex min-w-0 min-h-[120px] flex-col items-center justify-center rounded-2xl border border-[#2A3142] bg-[#1B2232] px-2 py-4 text-center transition-all duration-300 hover:border-[#46547A] hover:bg-[#202A3D] sm:min-h-[125px] sm:px-4 sm:py-5 lg:min-h-[140px]"
+          >
+
+            <p className="break-words text-[11px] font-semibold text-[#929bad] sm:text-[12px] lg:text-[13px]">
+              {asset.name}
+            </p>
+
+            <p className={`mt-2 break-words text-[16px] font-black sm:text-[19px] lg:text-[20px] ${asset.color}`}>
+              {asset.value}
+            </p>
+
+            <p className="mt-1 break-words text-[9px] text-[#727e94] sm:text-[10px] lg:text-[11px]">
+              {asset.sub}
+            </p>
+
+          </div>
+        ))}
 
       </div>
     </div>
 
-    {/* Stats */}
-    <div className="mt-12 grid grid-cols-4 gap-6">
+    {/* ================= LEDGER STATISTICS ================= */}
+    <div className="mt-8 grid grid-cols-2 gap-x-2 gap-y-7 sm:mt-10 sm:gap-x-6 sm:gap-y-8 lg:mt-12 lg:grid-cols-4 lg:gap-6">
 
-      {/* Keep your existing stats.map() here */}
+      {stats.map((s, index) => (
+        <div
+          key={s.label}
+          className="flex min-w-0 flex-col items-center justify-center text-center"
+        >
+
+          {/* Statistics Value */}
+          <p
+            className={`break-words text-[27px] font-black leading-tight tracking-tight sm:text-[34px] lg:text-[42px] ${
+              index === 0
+                ? "text-white"
+                : index === 1
+                ? "text-[#22D3EE]"
+                : index === 2
+                ? "text-[#818CF8]"
+                : "text-[#C084FC]"
+            }`}
+          >
+            {s.value}
+          </p>
+
+          {/* Statistics Label */}
+          <p className="mt-1 max-w-full text-[9px] font-bold uppercase leading-relaxed tracking-wide text-[#9CA3AF] sm:mt-2 sm:text-[10px] lg:text-[11px] lg:tracking-[0.12em]">
+            {s.label}
+          </p>
+
+        </div>
+      ))}
 
     </div>
+
   </div>
 </section>
+
+
+
 
       {/* ===================== NEXT-GEN INFRASTRUCTURE ===================== */}
       <section id="ecosystem" className="border-t border-white/5 px-4 py-20 sm:px-6">
