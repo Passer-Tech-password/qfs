@@ -7,22 +7,76 @@ import {
   AlertTriangle,
   ChevronDown,
   ShieldCheck,
+  LoaderCircle,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
+import { createTransfer } from "@/lib/firebase/money";
 
 const assets = [
-  { label: "BNB (BNB) — Bal: 0.0000 BNB (~$0.00 USD)", symbol: "BNB", price: 580, network: "BNB Smart Chain (BEP20)" },
-  { label: "Tether USD (USDT) — Bal: 0.00 USDT (~$0.00 USD)", symbol: "USDT", price: 1, network: "Tron (TRC20)" },
-  { label: "Bitcoin (BTC) — Bal: 0.000000 BTC (~$0.00 USD)", symbol: "BTC", price: 0, network: "Bitcoin Network" },
+  { label: "BNB (BNB) — Bal: 0.0000 BNB (~$0.00 USD)", symbol: "BNB", price: 580, balanceUsd: 0, network: "BNB Smart Chain (BEP20)" },
+  { label: "Tether USD (USDT) — Bal: 0.00 USDT (~$0.00 USD)", symbol: "USDT", price: 1, balanceUsd: 0, network: "Tron (TRC20)" },
+  { label: "Bitcoin (BTC) — Bal: 0.000000 BTC (~$0.00 USD)", symbol: "BTC", price: 0, balanceUsd: 0, network: "Bitcoin Network" },
 ];
 
 export default function SendMoneyPage() {
   const [assetIndex, setAssetIndex] = useState(0);
   const [recipient, setRecipient] = useState("");
   const [usdAmount, setUsdAmount] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const asset = assets[assetIndex];
   const amount = parseFloat(usdAmount) || 0;
   const equivalentCoin = asset.price > 0 ? (amount / asset.price).toFixed(4) : "0.0000";
+
+  function handleMax() {
+    setUsdAmount(asset.balanceUsd.toFixed(2));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (submitting) return;
+
+    if (!recipient.trim()) {
+      setSuccess(null);
+      setError("Enter a recipient username, email or wallet address.");
+      return;
+    }
+    if (amount <= 0) {
+      setSuccess(null);
+      setError("Enter a transfer amount greater than zero.");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+    setSubmitting(true);
+    try {
+      await createTransfer({
+        asset: asset.label,
+        symbol: asset.symbol,
+        network: asset.network,
+        recipient: recipient.trim(),
+        usdAmount: amount,
+        coinAmount: parseFloat(equivalentCoin) || 0,
+      });
+      setSuccess(
+        "Transfer request submitted. It now appears in your transfer records as pending review.",
+      );
+      setRecipient("");
+      setUsdAmount("");
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Could not submit your transfer. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[680px]">
@@ -53,7 +107,7 @@ export default function SendMoneyPage() {
       </div>
 
       {/* Transfer form */}
-      <div className="dash-card mt-5 p-7">
+      <form onSubmit={handleSubmit} className="dash-card mt-5 p-7">
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
             <Send size={20} />
@@ -137,6 +191,7 @@ export default function SendMoneyPage() {
               />
               <button
                 type="button"
+                onClick={handleMax}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-600 transition hover:bg-indigo-100"
               >
                 MAX
@@ -152,6 +207,7 @@ export default function SendMoneyPage() {
             <div className="relative">
               <select
                 disabled
+                key={asset.network}
                 className="dash-input w-full appearance-none py-3 pl-4 pr-10 text-[13.5px] font-medium text-slate-500"
                 defaultValue={asset.network}
               >
@@ -189,15 +245,38 @@ export default function SendMoneyPage() {
           </div>
         </div>
 
+        {error && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+            <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+            <p className="text-[12.5px] text-rose-700">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" />
+            <p className="text-[12.5px] text-emerald-700">{success}</p>
+          </div>
+        )}
+
         <button
-          type="button"
-          className="dash-submit mt-6 w-full rounded-xl py-3.5 text-[14px] font-bold"
+          type="submit"
+          disabled={submitting}
+          className="dash-submit mt-6 w-full rounded-xl py-3.5 text-[14px] font-bold disabled:cursor-not-allowed disabled:opacity-60"
         >
           <span className="inline-flex items-center gap-2">
-            <Send size={16} /> Review & Send Funds
+            {submitting ? (
+              <>
+                <LoaderCircle size={16} className="animate-spin" /> Submitting…
+              </>
+            ) : (
+              <>
+                <Send size={16} /> Review & Send Funds
+              </>
+            )}
           </span>
         </button>
-      </div>
+      </form>
 
       <footer className="mt-10 pb-4 text-center text-[11.5px] text-slate-400">
         © 2026 Quantum Finance. All rights reserved.

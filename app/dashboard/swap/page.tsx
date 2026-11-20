@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Zap,
   ChevronDown,
@@ -19,7 +20,11 @@ import {
   Plus,
   Bitcoin,
   Rocket,
+  LoaderCircle,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
+import { createSwap } from "@/lib/firebase/money";
 
 const payAssets = [
   { symbol: "BTC", label: "Bitcoin", icon: Bitcoin, balance: "0.000000" },
@@ -33,19 +38,38 @@ const receiveAssets = [
   { symbol: "SOL", label: "Solana", icon: Rocket, balance: "0.0000" },
 ];
 
+// Indicative USD reference prices used for the on-screen estimate only.
+const usdPrices: Record<string, number> = {
+  BTC: 97000,
+  ETH: 3400,
+  USDT: 1,
+  XLM: 0.2489,
+  BNB: 580,
+  SOL: 180,
+};
+
+const assetBalances: Record<string, number> = {
+  BTC: 0,
+  ETH: 0,
+  USDT: 0,
+  XLM: 0,
+  BNB: 0,
+  SOL: 0,
+};
+
 const quickActions = [
-  { label: "Home", icon: Home, bg: "bg-purple-100", color: "text-purple-600" },
-  { label: "Deposit", icon: Banknote, bg: "bg-amber-100", color: "text-amber-600" },
-  { label: "Swap", icon: Repeat, bg: "bg-indigo-100", color: "text-indigo-600", active: true },
-  { label: "Send", icon: Send, bg: "bg-emerald-100", color: "text-emerald-600" },
-  { label: "Card", icon: CreditCard, bg: "bg-amber-100", color: "text-amber-600" },
-  { label: "Invest", icon: PiggyBank, bg: "bg-indigo-100", color: "text-indigo-600" },
-  { label: "Dispute", icon: Flag, bg: "bg-orange-100", color: "text-orange-600" },
-  { label: "Payout", icon: Wallet, bg: "bg-sky-100", color: "text-sky-600" },
-  { label: "Ticket", icon: Ticket, bg: "bg-purple-100", color: "text-purple-600" },
-  { label: "History", icon: TrendingUp, bg: "bg-amber-100", color: "text-amber-600" },
-  { label: "Settings", icon: Settings, bg: "bg-indigo-100", color: "text-indigo-600" },
-  { label: "More", icon: Plus, bg: "bg-slate-100", color: "text-slate-600" },
+  { label: "Home", icon: Home, bg: "bg-purple-100", color: "text-purple-600", href: "/dashboard" },
+  { label: "Deposit", icon: Banknote, bg: "bg-amber-100", color: "text-amber-600", href: "/dashboard/deposit/new" },
+  { label: "Swap", icon: Repeat, bg: "bg-indigo-100", color: "text-indigo-600", href: "/dashboard/swap", active: true },
+  { label: "Send", icon: Send, bg: "bg-emerald-100", color: "text-emerald-600", href: "/dashboard/send" },
+  { label: "Card", icon: CreditCard, bg: "bg-amber-100", color: "text-amber-600", href: "/dashboard/qfs-card" },
+  { label: "Invest", icon: PiggyBank, bg: "bg-indigo-100", color: "text-indigo-600", href: "/dashboard/fixed-deposit/new" },
+  { label: "Dispute", icon: Flag, bg: "bg-orange-100", color: "text-orange-600", href: "/dashboard/dispute" },
+  { label: "Payout", icon: Wallet, bg: "bg-sky-100", color: "text-sky-600", href: "/dashboard/payout/request" },
+  { label: "Ticket", icon: Ticket, bg: "bg-purple-100", color: "text-purple-600", href: "/dashboard/tickets" },
+  { label: "History", icon: TrendingUp, bg: "bg-amber-100", color: "text-amber-600", href: "/dashboard/transfers" },
+  { label: "Settings", icon: Settings, bg: "bg-indigo-100", color: "text-indigo-600", href: "/dashboard/profile" },
+  { label: "More", icon: Plus, bg: "bg-slate-100", color: "text-slate-600", href: "/dashboard/kyc" },
 ];
 
 export default function SwapPage() {
@@ -53,11 +77,71 @@ export default function SwapPage() {
   const [receiveIndex, setReceiveIndex] = useState(0);
   const [payAmount, setPayAmount] = useState("0");
   const [quickSelected, setQuickSelected] = useState<string>("MAX");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const payAsset = payAssets[payIndex];
   const receiveAsset = receiveAssets[receiveIndex];
-  const PayIcon = payAsset.icon;
   const ReceiveIcon = receiveAsset.icon;
+
+  const payPrice = usdPrices[payAsset.symbol] ?? 0;
+  const receivePrice = usdPrices[receiveAsset.symbol] ?? 0;
+  const rate = receivePrice > 0 ? payPrice / receivePrice : 0;
+  const payValue = parseFloat(payAmount) || 0;
+  const receiveValue = payValue * rate;
+  const rateLabel = `1 ${payAsset.symbol} = ${rate.toLocaleString(undefined, {
+    maximumFractionDigits: 4,
+  })} ${receiveAsset.symbol}`;
+
+  function handleFlip() {
+    setPayIndex(receiveIndex);
+    setReceiveIndex(payIndex);
+    setQuickSelected("");
+  }
+
+  function applyQuick(q: string) {
+    setQuickSelected(q);
+    const balance = assetBalances[payAsset.symbol] ?? 0;
+    const factor = q === "MAX" ? 1 : Number.parseInt(q, 10) / 100;
+    setPayAmount((balance * factor).toFixed(6));
+  }
+
+  async function handleSubmit() {
+    if (submitting) return;
+
+    if (payValue <= 0) {
+      setSuccess(null);
+      setError("Enter an amount greater than zero to swap.");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+    setSubmitting(true);
+    try {
+      await createSwap({
+        paySymbol: payAsset.symbol,
+        receiveSymbol: receiveAsset.symbol,
+        payAmount: payValue,
+        receiveAmount: Number(receiveValue.toFixed(6)),
+        rate: rateLabel,
+      });
+      setSuccess(
+        "Swap request submitted. It now appears in your exchange history as pending review.",
+      );
+      setPayAmount("0");
+      setQuickSelected("");
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Could not submit your swap. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[1100px]">
@@ -124,7 +208,7 @@ export default function SwapPage() {
               <button
                 key={q}
                 type="button"
-                onClick={() => setQuickSelected(q)}
+                onClick={() => applyQuick(q)}
                 className={`rounded-md px-2.5 py-1 text-[11px] font-bold transition ${
                   quickSelected === q
                     ? "bg-amber-400 text-amber-900"
@@ -141,6 +225,7 @@ export default function SwapPage() {
         <div className="relative z-10 my-1 flex justify-center">
           <button
             type="button"
+            onClick={handleFlip}
             aria-label="Swap assets"
             className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-indigo-600 shadow-lg transition hover:scale-105"
           >
@@ -182,7 +267,7 @@ export default function SwapPage() {
             </div>
             <input
               type="text"
-              value="0.000000"
+              value={receiveValue.toFixed(6)}
               readOnly
               className="w-32 bg-transparent text-right text-[26px] font-black text-white outline-none sm:w-40"
             />
@@ -193,20 +278,44 @@ export default function SwapPage() {
         <div className="mt-5 space-y-1.5">
           <div className="flex items-center justify-between text-[13px]">
             <span className="text-indigo-100">Exchange Rate</span>
-            <span className="font-bold text-white">1 BTC = 389,688.2494 XLM</span>
+            <span className="font-bold text-white">{rateLabel}</span>
           </div>
           <div className="flex items-center justify-between text-[13px]">
             <span className="text-indigo-100">Network Settlement Fee</span>
-            <span className="font-bold text-emerald-300">0.000000 BTC (0% Fee)</span>
+            <span className="font-bold text-emerald-300">
+              0.000000 {payAsset.symbol} (0% Fee)
+            </span>
           </div>
         </div>
+
+        {error && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-300/40 bg-rose-500/15 px-4 py-3">
+            <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-200" />
+            <p className="text-[12.5px] text-rose-50">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-300/40 bg-emerald-500/15 px-4 py-3">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-200" />
+            <p className="text-[12.5px] text-emerald-50">{success}</p>
+          </div>
+        )}
 
         {/* Confirm button */}
         <button
           type="button"
-          className="mt-6 w-full rounded-2xl bg-white py-4 text-[15px] font-bold text-indigo-600 shadow-lg transition hover:bg-indigo-50"
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-4 text-[15px] font-bold text-indigo-600 shadow-lg transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Confirm Instant Swap
+          {submitting ? (
+            <>
+              <LoaderCircle size={16} className="animate-spin" /> Submitting…
+            </>
+          ) : (
+            "Confirm Instant Swap"
+          )}
         </button>
       </div>
 
@@ -217,9 +326,10 @@ export default function SwapPage() {
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
-              <button
+              <Link
                 key={action.label}
-                type="button"
+                href={action.href}
+                aria-current={action.active ? "page" : undefined}
                 className={`flex flex-col items-center gap-2 rounded-2xl p-4 transition hover:scale-[1.03] ${
                   action.active
                     ? "border-2 border-indigo-200 bg-indigo-50/60"
@@ -234,7 +344,7 @@ export default function SwapPage() {
                 <span className="text-[12px] font-semibold text-slate-700">
                   {action.label}
                 </span>
-              </button>
+              </Link>
             );
           })}
         </div>

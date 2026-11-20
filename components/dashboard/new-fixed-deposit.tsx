@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { Wallet, CreditCard, Banknote, DollarSign, LoaderCircle } from "lucide-react";
+import {
+  Wallet,
+  CreditCard,
+  Banknote,
+  DollarSign,
+  LoaderCircle,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+import { createFixedDeposit } from "@/lib/firebase/money";
+import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
 export type InvestmentPlan = {
   id: string;
@@ -126,9 +136,12 @@ export function FixedDepositStats() {
 }
 
 export function NewFixedDepositForm({ plan }: { plan: InvestmentPlan }) {
+  const { profile } = useUserProfile();
   const [amount, setAmount] = useState("");
   const [terms, setTerms] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const numeric = parseFloat(amount) || 0;
   const inRange = numeric >= plan.min && numeric <= plan.max;
@@ -136,12 +149,36 @@ export function NewFixedDepositForm({ plan }: { plan: InvestmentPlan }) {
   const totalReturn = inRange ? numeric + dailyProfit * plan.days : 0;
   const canSubmit = inRange && terms && !submitting;
 
-  function handleSubmit(e: React.FormEvent) {
+  const username = profile?.username || "—";
+  const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(" ") || "—";
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+
+    setError(null);
+    setSuccess(null);
     setSubmitting(true);
-    // Fixed deposit creation will be wired to a secure backend in the next stage.
-    setTimeout(() => setSubmitting(false), 1200);
+    try {
+      await createFixedDeposit({
+        planId: plan.id,
+        planName: plan.name,
+        amount: numeric,
+        dailyRate: plan.dailyRate,
+        days: plan.days,
+        dailyProfit,
+        totalReturn,
+      });
+      setSuccess("Fixed deposit request submitted. It will appear under My Fixed Deposits once confirmed.");
+      setAmount("");
+      setTerms(false);
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : "Could not create your fixed deposit.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -151,15 +188,15 @@ export function NewFixedDepositForm({ plan }: { plan: InvestmentPlan }) {
       <div className="mt-5 grid grid-cols-2 gap-4 border-b border-slate-100 pb-5 sm:grid-cols-4">
         <div>
           <p className="text-[11px] text-slate-500">Username</p>
-          <p className="mt-0.5 text-[13.5px] font-bold text-slate-900">Cristiana456</p>
+          <p className="mt-0.5 text-[13.5px] font-bold text-slate-900">{username}</p>
         </div>
         <div>
           <p className="text-[11px] text-slate-500">Full Name</p>
-          <p className="mt-0.5 text-[13.5px] font-bold text-slate-900">Cristiana456</p>
+          <p className="mt-0.5 text-[13.5px] font-bold text-slate-900">{fullName}</p>
         </div>
         <div>
           <p className="text-[11px] text-slate-500">Selected Plan</p>
-          <p className="mt-0.5 text-[13.5px] font-bold text-indigo-600">Starter Plan</p>
+          <p className="mt-0.5 text-[13.5px] font-bold text-indigo-600">{plan.name}</p>
         </div>
         <div>
           <p className="text-[11px] text-slate-500">Available Balance</p>
@@ -214,10 +251,24 @@ export function NewFixedDepositForm({ plan }: { plan: InvestmentPlan }) {
         I agree to the fixed deposit terms and daily yield lock schedule.
       </label>
 
+      {error && (
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+          <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+          <p className="text-[12.5px] text-rose-700">{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" />
+          <p className="text-[12.5px] text-emerald-700">{success}</p>
+        </div>
+      )}
+
       <button
         type="submit"
         disabled={!canSubmit}
-        className="dash-submit mt-5 w-full rounded-xl py-3.5 text-[14px] font-bold"
+        className="dash-submit mt-5 w-full rounded-xl py-3.5 text-[14px] font-bold disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitting ? (
           <span className="inline-flex items-center gap-2">

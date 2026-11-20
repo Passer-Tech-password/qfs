@@ -1,19 +1,79 @@
 "use client";
 
 import { useState } from "react";
-import { Flag, ChevronDown, ShieldCheck } from "lucide-react";
+import {
+  Flag,
+  ChevronDown,
+  ShieldCheck,
+  LoaderCircle,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+import { createDispute } from "@/lib/firebase/money";
+import { useUserCollection } from "@/lib/hooks/use-user-collection";
+import { RecordStatusBadge, formatRecordDate } from "@/components/dashboard/record-status";
+import { RecordTable, RecordTableMessage } from "@/components/dashboard/record-table";
+
+type DisputeRecord = {
+  id: string;
+  reference?: string;
+  subject?: string;
+  priority?: string;
+  details?: string;
+  status?: string;
+  createdAt?: unknown;
+};
 
 export default function DisputePage() {
   const [ref, setRef] = useState("");
   const [subject, setSubject] = useState("");
   const [priority, setPriority] = useState("Medium");
   const [details, setDetails] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const { records, loading, error: loadError } = useUserCollection<DisputeRecord>("disputes");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (submitting) return;
+
+    if (!subject.trim() || !details.trim()) {
+      setSuccess(null);
+      setError("Enter a dispute subject and details before submitting.");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+    setSubmitting(true);
+    try {
+      await createDispute({
+        reference: ref.trim(),
+        subject: subject.trim(),
+        priority,
+        details: details.trim(),
+      });
+      setSuccess("Dispute claim submitted. It now appears in your dispute history.");
+      setRef("");
+      setSubject("");
+      setDetails("");
+      setPriority("Medium");
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : "Could not submit your dispute. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[1180px]">
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[420px_1fr]">
         {/* File a Dispute */}
-        <div className="dash-card p-6">
+        <form onSubmit={handleSubmit} className="dash-card p-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100">
             <Flag size={22} className="text-orange-500" />
           </div>
@@ -88,28 +148,77 @@ export default function DisputePage() {
             />
           </div>
 
+          {error && (
+            <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+              <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+              <p className="text-[12.5px] text-rose-700">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" />
+              <p className="text-[12.5px] text-emerald-700">{success}</p>
+            </div>
+          )}
+
           <button
-            type="button"
-            className="mt-6 w-full rounded-xl bg-gradient-to-r from-orange-500 to-red-500 py-3.5 text-[14px] font-bold text-white shadow-lg shadow-orange-500/25 transition hover:brightness-105"
+            type="submit"
+            disabled={submitting}
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 py-3.5 text-[14px] font-bold text-white shadow-lg shadow-orange-500/25 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Submit Dispute Claim
+            {submitting ? (
+              <>
+                <LoaderCircle size={16} className="animate-spin" /> Submitting…
+              </>
+            ) : (
+              "Submit Dispute Claim"
+            )}
           </button>
-        </div>
+        </form>
 
         {/* Dispute History */}
         <div className="dash-card p-6">
           <h3 className="text-[20px] font-bold text-slate-900">Dispute History</h3>
 
-          <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-16 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-              <ShieldCheck size={26} className="text-slate-400" />
+          {loading ? (
+            <RecordTableMessage>Loading your disputes…</RecordTableMessage>
+          ) : loadError ? (
+            <RecordTableMessage tone="error">{loadError}</RecordTableMessage>
+          ) : records.length === 0 ? (
+            <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-16 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
+                <ShieldCheck size={26} className="text-slate-400" />
+              </div>
+              <p className="mt-4 text-[15px] font-bold text-slate-700">No Open Disputes</p>
+              <p className="mt-1.5 max-w-[360px] text-[12.5px] text-slate-500">
+                All your transactions are clear. If you ever experience issues with a transfer or
+                trade, file a claim here.
+              </p>
             </div>
-            <p className="mt-4 text-[15px] font-bold text-slate-700">No Open Disputes</p>
-            <p className="mt-1.5 max-w-[360px] text-[12.5px] text-slate-500">
-              All your transactions are clear. If you ever experience issues with a transfer or
-              trade, file a claim here.
-            </p>
-          </div>
+          ) : (
+            <div className="mt-4">
+              <RecordTable
+                rows={records}
+                columns={[
+                  {
+                    header: "Subject",
+                    render: (row) => (
+                      <span className="font-semibold text-slate-800">{row.subject || "—"}</span>
+                    ),
+                  },
+                  { header: "Priority", render: (row) => row.priority || "—" },
+                  { header: "Reference", render: (row) => row.reference || "—" },
+                  { header: "Filed", render: (row) => formatRecordDate(row.createdAt) },
+                  {
+                    header: "Status",
+                    align: "right",
+                    render: (row) => <RecordStatusBadge status={row.status} />,
+                  },
+                ]}
+              />
+            </div>
+          )}
         </div>
       </div>
 

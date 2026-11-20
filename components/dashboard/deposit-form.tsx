@@ -9,20 +9,28 @@ import {
   Paperclip,
   QrCode,
   ChevronDown,
+  LoaderCircle,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
+import { createDeposit } from "@/lib/firebase/money";
 
 const currencies = [
-  { label: "Tether USD (USDT)", network: "TRC20", address: "TSwpncZejzNKU7VTyqZz8RT676henUsTnY", rate: "1 USDT = $1.00 USD" },
-  { label: "Bitcoin (BTC)", network: "BTC", address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh", rate: "1 BTC = $0.00 USD" },
-  { label: "Ethereum (ETH)", network: "ERC20", address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0", rate: "1 ETH = $0.00 USD" },
+  { label: "Tether USD (USDT)", symbol: "USDT", network: "TRC20", address: "TSwpncZejzNKU7VTyqZz8RT676henUsTnY", rate: "1 USDT = $1.00 USD" },
+  { label: "Bitcoin (BTC)", symbol: "BTC", network: "BTC", address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh", rate: "1 BTC = $0.00 USD" },
+  { label: "Ethereum (ETH)", symbol: "ETH", network: "ERC20", address: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0", rate: "1 ETH = $0.00 USD" },
 ];
 
 export function DepositForm() {
   const [currencyIndex, setCurrencyIndex] = useState(0);
   const [usdAmount, setUsdAmount] = useState("");
   const [cryptoAmount, setCryptoAmount] = useState("");
+  const [txHash, setTxHash] = useState("");
   const [copied, setCopied] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const currency = currencies[currencyIndex];
 
@@ -48,8 +56,48 @@ export function DepositForm() {
     setFileName(e.target.files?.[0]?.name ?? null);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting) return;
+
+    const numericUsd = parseFloat(usdAmount) || 0;
+    const numericCrypto = parseFloat(cryptoAmount) || 0;
+    if (numericUsd <= 0 || numericCrypto <= 0) {
+      setSuccess(null);
+      setError("Enter a deposit amount greater than zero.");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+    setSubmitting(true);
+    try {
+      await createDeposit({
+        asset: currency.label,
+        symbol: currency.symbol,
+        network: currency.network,
+        address: currency.address,
+        usdAmount: numericUsd,
+        cryptoAmount: numericCrypto,
+        txHash: txHash.trim(),
+        fileName,
+      });
+      setSuccess(
+        "Deposit request submitted. It now appears in your deposit history as pending review.",
+      );
+      setUsdAmount("");
+      setCryptoAmount("");
+      setTxHash("");
+      setFileName(null);
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Could not submit your deposit. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -171,6 +219,8 @@ export function DepositForm() {
           </label>
           <input
             type="text"
+            value={txHash}
+            onChange={(e) => setTxHash(e.target.value)}
             placeholder="0x... or TXID"
             className="dash-input w-full py-3 px-4 text-[13.5px]"
           />
@@ -198,12 +248,35 @@ export function DepositForm() {
         </div>
       </div>
 
+      {error && (
+        <div className="mt-6 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+          <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+          <p className="text-[12.5px] text-rose-700">{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="mt-6 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" />
+          <p className="text-[12.5px] text-emerald-700">{success}</p>
+        </div>
+      )}
+
       <button
         type="submit"
-        className="dash-submit mt-7 w-full rounded-xl py-3.5 text-[14px] font-bold"
+        disabled={submitting}
+        className="dash-submit mt-7 w-full rounded-xl py-3.5 text-[14px] font-bold disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className="inline-flex items-center gap-2">
-          <Send size={16} /> Submit Deposit
+          {submitting ? (
+            <>
+              <LoaderCircle size={16} className="animate-spin" /> Submitting…
+            </>
+          ) : (
+            <>
+              <Send size={16} /> Submit Deposit
+            </>
+          )}
         </span>
       </button>
     </form>

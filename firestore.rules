@@ -30,5 +30,18 @@ service cloud.firestore {
         ]);
       allow delete: if false;
     }
+
+    // Per-user money-flow records: deposits, transfers, swaps, fixedDeposits,
+    // payouts, disputes and escrows. A signed-in owner may only create a
+    // `pending` request; settlement is done by privileged tooling, so client
+    // updates and deletes are always denied.
+    match /users/{userId}/{collection}/{docId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
   }
 }

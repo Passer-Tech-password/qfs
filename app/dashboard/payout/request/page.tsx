@@ -1,7 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { DollarSign, Bitcoin, Rocket, Send, ChevronDown } from "lucide-react";
+import {
+  DollarSign,
+  Bitcoin,
+  Rocket,
+  Send,
+  ChevronDown,
+  LoaderCircle,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+import { createPayout } from "@/lib/firebase/money";
 
 const balances = [
   {
@@ -38,6 +48,51 @@ export default function RequestPayoutPage() {
   const [method, setMethod] = useState("Direct Crypto Blockchain Wallet");
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (submitting) return;
+
+    const numeric = parseFloat(amount) || 0;
+    if (!address.trim()) {
+      setSuccess(null);
+      setError("Enter a destination wallet address or IBAN.");
+      return;
+    }
+    if (numeric <= 0) {
+      setSuccess(null);
+      setError("Enter a payout amount greater than zero.");
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+    setSubmitting(true);
+    try {
+      await createPayout({
+        asset: asset.split(" - ")[0].trim(),
+        method,
+        address: address.trim(),
+        amount: numeric,
+      });
+      setSuccess(
+        "Payout request submitted. It now appears in your payout history as pending review.",
+      );
+      setAddress("");
+      setAmount("");
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Could not submit your payout request. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[980px]">
@@ -68,7 +123,7 @@ export default function RequestPayoutPage() {
       </section>
 
       {/* Request Withdrawal / Payout Form */}
-      <div className="dash-card mt-6 p-7">
+      <form onSubmit={handleSubmit} className="dash-card mt-6 p-7">
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50">
           <Send size={20} className="text-indigo-600" />
         </div>
@@ -153,13 +208,36 @@ export default function RequestPayoutPage() {
           </div>
         </div>
 
+        {error && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+            <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+            <p className="text-[12.5px] text-rose-700">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" />
+            <p className="text-[12.5px] text-emerald-700">{success}</p>
+          </div>
+        )}
+
         <button
-          type="button"
-          className="dash-submit mt-7 w-full rounded-2xl py-3.5 text-[14px] font-bold"
+          type="submit"
+          disabled={submitting}
+          className="dash-submit mt-7 w-full rounded-2xl py-3.5 text-[14px] font-bold disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Submit Payout Request
+          <span className="inline-flex items-center gap-2">
+            {submitting ? (
+              <>
+                <LoaderCircle size={16} className="animate-spin" /> Submitting…
+              </>
+            ) : (
+              "Submit Payout Request"
+            )}
+          </span>
         </button>
-      </div>
+      </form>
     </div>
   );
 }
