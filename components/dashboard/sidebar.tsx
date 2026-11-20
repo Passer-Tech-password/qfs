@@ -249,8 +249,11 @@ export function Sidebar({
         </div>
       </nav>
 
-      <div className="pointer-events-none fixed bottom-3 left-3 w-[228px] max-w-[calc(85vw-1.5rem)]">
-        <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur">
+      <Link
+        href="/dashboard/tickets"
+        className="fixed bottom-3 left-3 block w-[228px] max-w-[calc(85vw-1.5rem)]"
+      >
+        <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur transition hover:bg-white/10">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500/30">
             <HelpCircle size={16} className="text-indigo-200" />
           </div>
@@ -259,7 +262,7 @@ export function Sidebar({
             <p className="text-[10.5px] text-slate-400">Contact our support team</p>
           </div>
         </div>
-      </div>
+      </Link>
     </aside>
   );
 }

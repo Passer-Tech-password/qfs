@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Bell, Settings, Power, Wallet, Menu } from "lucide-react";
 import { ConnectWalletModal } from "@/components/dashboard/connect-wallet-modal";
 
@@ -41,13 +42,13 @@ export function TopBar({
           <Wallet size={15} />
           <span className="hidden sm:inline">Connect Wallet</span>
         </button>
-        <button aria-label="Notifications" className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50">
+        <Link href="/dashboard/notifications" aria-label="Notifications" className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50">
           <Bell size={17} />
           <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-rose-500" />
-        </button>
-        <button aria-label="Settings" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50">
+        </Link>
+        <Link href="/dashboard/profile" aria-label="Settings" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50">
           <Settings size={17} />
-        </button>
+        </Link>
         <button onClick={onOpenSignOut} aria-label="Sign out" className="flex h-9 w-9 items-center justify-center rounded-full border border-rose-200 text-rose-500 transition hover:bg-rose-50">
           <Power size={17} />
         </button>

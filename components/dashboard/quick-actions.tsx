@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Home, DollarSign, Repeat, Send, CreditCard, TrendingUp,
   Flag, Wallet, Ticket, Clock, Settings, Plus,
@@ -5,38 +6,42 @@ import {
 
 type Action = {
   label: string;
+  href: string;
   icon: typeof Home;
   bg: string;
   color: string;
 };
 
 const row1: Action[] = [
-  { label: "Home", icon: Home, bg: "bg-violet-100", color: "text-violet-600" },
-  { label: "Deposit", icon: DollarSign, bg: "bg-amber-100", color: "text-amber-600" },
-  { label: "Swap", icon: Repeat, bg: "bg-sky-100", color: "text-sky-600" },
-  { label: "Send", icon: Send, bg: "bg-emerald-100", color: "text-emerald-600" },
-  { label: "Card", icon: CreditCard, bg: "bg-amber-100", color: "text-amber-600" },
-  { label: "Invest", icon: TrendingUp, bg: "bg-pink-100", color: "text-pink-600" },
+  { label: "Home", href: "/dashboard", icon: Home, bg: "bg-violet-100", color: "text-violet-600" },
+  { label: "Deposit", href: "/dashboard/deposit/new", icon: DollarSign, bg: "bg-amber-100", color: "text-amber-600" },
+  { label: "Swap", href: "/dashboard/swap", icon: Repeat, bg: "bg-sky-100", color: "text-sky-600" },
+  { label: "Send", href: "/dashboard/send", icon: Send, bg: "bg-emerald-100", color: "text-emerald-600" },
+  { label: "Card", href: "/dashboard/qfs-card", icon: CreditCard, bg: "bg-amber-100", color: "text-amber-600" },
+  { label: "Invest", href: "/dashboard/fixed-deposit/new", icon: TrendingUp, bg: "bg-pink-100", color: "text-pink-600" },
 ];
 
 const row2: Action[] = [
-  { label: "Dispute", icon: Flag, bg: "bg-amber-100", color: "text-amber-600" },
-  { label: "Payout", icon: Wallet, bg: "bg-sky-100", color: "text-sky-600" },
-  { label: "Ticket", icon: Ticket, bg: "bg-indigo-100", color: "text-indigo-600" },
-  { label: "History", icon: Clock, bg: "bg-amber-100", color: "text-amber-600" },
-  { label: "Settings", icon: Settings, bg: "bg-pink-100", color: "text-pink-600" },
-  { label: "More", icon: Plus, bg: "bg-slate-100", color: "text-slate-600" },
+  { label: "Dispute", href: "/dashboard/dispute", icon: Flag, bg: "bg-amber-100", color: "text-amber-600" },
+  { label: "Payout", href: "/dashboard/payout/request", icon: Wallet, bg: "bg-sky-100", color: "text-sky-600" },
+  { label: "Ticket", href: "/dashboard/tickets", icon: Ticket, bg: "bg-indigo-100", color: "text-indigo-600" },
+  { label: "History", href: "/dashboard/transfers", icon: Clock, bg: "bg-amber-100", color: "text-amber-600" },
+  { label: "Settings", href: "/dashboard/profile", icon: Settings, bg: "bg-pink-100", color: "text-pink-600" },
+  { label: "More", href: "/dashboard/kyc", icon: Plus, bg: "bg-slate-100", color: "text-slate-600" },
 ];
 
 function ActionTile({ action }: { action: Action }) {
   const Icon = action.icon;
   return (
-    <button className="flex flex-col items-center gap-2 rounded-xl py-3 transition hover:bg-slate-50">
+    <Link
+      href={action.href}
+      className="flex flex-col items-center gap-2 rounded-xl py-3 transition hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+    >
       <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${action.bg}`}>
         <Icon size={20} className={action.color} />
       </span>
       <span className="text-[12px] font-semibold text-slate-700">{action.label}</span>
-    </button>
+    </Link>
   );
 }
 

@@ -1,6 +1,13 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import { Wallet, Plus, ArrowUpRight, QrCode, Sparkles } from "lucide-react";
+import { ConnectWalletModal } from "@/components/dashboard/connect-wallet-modal";
 
 export function VaultHero() {
+  const [walletOpen, setWalletOpen] = useState(false);
+
   return (
     <section className="dash-hero relative overflow-hidden rounded-[24px] p-7 text-white">
       <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
@@ -23,18 +30,31 @@ export function VaultHero() {
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2.5">
-            <button className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-[12.5px] font-bold text-indigo-700 transition hover:bg-indigo-50">
+            <button
+              type="button"
+              onClick={() => setWalletOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-[12.5px] font-bold text-indigo-700 transition hover:bg-indigo-50"
+            >
               <Wallet size={15} /> Connect Wallet
             </button>
-            <button className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-[12.5px] font-bold text-white transition hover:bg-white/20">
+            <Link
+              href="/dashboard/deposit/new"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-[12.5px] font-bold text-white transition hover:bg-white/20"
+            >
               <Plus size={15} /> Deposit
-            </button>
-            <button className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-[12.5px] font-bold text-white transition hover:bg-white/20">
+            </Link>
+            <Link
+              href="/dashboard/payout/request"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-[12.5px] font-bold text-white transition hover:bg-white/20"
+            >
               <ArrowUpRight size={15} /> Withdraw
-            </button>
-            <button className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-[12.5px] font-bold text-white transition hover:bg-white/20">
+            </Link>
+            <Link
+              href="/dashboard/qr-payment"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-[12.5px] font-bold text-white transition hover:bg-white/20"
+            >
               <QrCode size={15} /> QR Pay
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -58,14 +78,20 @@ export function VaultHero() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center rounded-2xl bg-white p-5 text-slate-800 shadow-lg">
+        <Link
+          href="/dashboard/qr-payment"
+          aria-label="Open QR payment"
+          className="flex flex-col items-center rounded-2xl bg-white p-5 text-slate-800 shadow-lg transition hover:shadow-xl"
+        >
           <p className="text-[12px] font-bold uppercase tracking-wide text-slate-500">Scan to Pay</p>
           <div className="mt-3 flex h-[140px] w-[140px] items-center justify-center rounded-xl border border-slate-100 bg-white">
             <QrCode size={110} className="text-slate-900" strokeWidth={1.4} />
           </div>
-          <p className="mt-3 text-center text-[10.5px] text-slate-400">Click QR to open / download</p>
-        </div>
+          <p className="mt-3 text-center text-[10.5px] text-slate-400">Tap to open QR payment</p>
+        </Link>
       </div>
+
+      <ConnectWalletModal open={walletOpen} onClose={() => setWalletOpen(false)} />
     </section>
   );
 }

@@ -6,7 +6,7 @@ export function RunningInvestments() {
     <div className="dash-card flex flex-col p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-[17px] font-bold text-slate-900">Running Investments</h3>
-        <button className="text-[13px] font-semibold text-indigo-600 hover:text-indigo-700">View All</button>
+        <Link href="/dashboard/fixed-deposits" className="text-[13px] font-semibold text-indigo-600 hover:text-indigo-700">View All</Link>
       </div>
 
       <div className="mt-4 flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-10 text-center">
@@ -33,9 +33,9 @@ export function RecentTransactions() {
     <div className="dash-card p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-[17px] font-bold text-slate-900">Recent Transactions</h3>
-        <button className="inline-flex items-center gap-1 text-[13px] font-semibold text-indigo-600 hover:text-indigo-700">
+        <Link href="/dashboard/transfers" className="inline-flex items-center gap-1 text-[13px] font-semibold text-indigo-600 hover:text-indigo-700">
           Full History <ArrowUpRight size={14} />
-        </button>
+        </Link>
       </div>
 
       <div className="mt-5 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-12 text-center">

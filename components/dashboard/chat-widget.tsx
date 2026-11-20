@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 
 export function ChatWidget() {
@@ -9,13 +10,14 @@ export function ChatWidget() {
         <MessageCircle size={13} />
         Live support
       </div>
-      <button
-        aria-label="Open support chat"
+      <Link
+        href="/dashboard/tickets"
+        aria-label="Open support tickets"
         className="relative flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 text-white shadow-xl transition hover:scale-105 hover:bg-indigo-700"
       >
         <MessageCircle size={20} />
         <span className="absolute right-0 top-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" />
-      </button>
+      </Link>
     </div>
   );
 }

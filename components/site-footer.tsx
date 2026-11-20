@@ -64,7 +64,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/account-recovery" className="inline-flex items-center gap-1.5 text-slate-400 transition hover:text-white">
+                <Link href="/login" className="inline-flex items-center gap-1.5 text-slate-400 transition hover:text-white">
                   <ChevronRight size={13} className="text-slate-600" /> Recover Account PIN
                 </Link>
               </li>
