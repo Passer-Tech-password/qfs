@@ -13,29 +13,27 @@ import {
   Zap,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-
-const walletCurrencies = [
-  {
-    label: "Tether USD (USDT) - TRC20",
-    network: "TRC20",
-    unit: "USDT",
-    address: "TSwpncZejzMKU7VTyqZz8RT676henUsTnY",
-  },
-  {
-    label: "Bitcoin (BTC) - Bitcoin",
-    network: "BTC",
-    unit: "BTC",
-    address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-  },
-];
+import { useDepositAddresses } from "@/lib/firebase/deposit-addresses";
 
 const payCurrencies = [
+  { label: "XRP (Ripple)", symbol: "XRP" },
+  { label: "XLM (Stellar)", symbol: "XLM" },
   { label: "USDT (Tether USD)", symbol: "USDT" },
   { label: "BTC (Bitcoin)", symbol: "BTC" },
   { label: "ETH (Ethereum)", symbol: "ETH" },
 ];
 
 export default function QrPaymentPage() {
+  const { addresses, loading: addressesLoading, error: addressesError } = useDepositAddresses();
+  const walletCurrencies = [...addresses].sort((a, b) => {
+    const priority = (symbol: string) => {
+      const normalized = symbol.toUpperCase();
+      if (normalized === "XRP") return 0;
+      if (normalized === "XLM") return 1;
+      return 2;
+    };
+    return priority(a.symbol) - priority(b.symbol) || (a.order ?? 0) - (b.order ?? 0);
+  });
   const [walletIndex, setWalletIndex] = useState(0);
   const [merchant, setMerchant] = useState("");
   const [qrString, setQrString] = useState("");
@@ -47,6 +45,7 @@ export default function QrPaymentPage() {
   const pay = payCurrencies[payCurrency];
 
   function handleCopy() {
+    if (!wallet) return;
     navigator.clipboard?.writeText(wallet.address).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
@@ -79,11 +78,12 @@ export default function QrPaymentPage() {
               <select
                 value={walletIndex}
                 onChange={(e) => setWalletIndex(Number(e.target.value))}
+                disabled={addressesLoading || walletCurrencies.length === 0}
                 className="dash-input w-full appearance-none py-3 pl-4 pr-10 text-[13.5px] font-medium text-slate-800"
               >
                 {walletCurrencies.map((c, i) => (
-                  <option key={c.network} value={i}>
-                    {c.label}
+                  <option key={c.id} value={i}>
+                    {c.asset} ({c.symbol}) - {c.network}
                   </option>
                 ))}
               </select>
@@ -96,21 +96,31 @@ export default function QrPaymentPage() {
 
           {/* QR Code */}
           <div className="mt-6 flex flex-col items-center rounded-2xl bg-slate-50 p-6">
-            <div className="flex h-[180px] w-[180px] items-center justify-center rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
-              <QRCodeSVG
-                bgColor="#ffffff"
-                fgColor="#0f172a"
-                level="M"
-                size={156}
-                value={wallet.address}
-              />
-            </div>
-            <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Network: {wallet.network} ({wallet.unit})
-            </p>
-            <p className="mt-1 text-[11px] text-slate-400">
-              Click below to download or copy address
-            </p>
+            {wallet ? (
+              <>
+                <div className="flex h-[180px] w-[180px] items-center justify-center rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
+                  <QRCodeSVG
+                    bgColor="#ffffff"
+                    fgColor="#0f172a"
+                    level="M"
+                    size={156}
+                    value={wallet.address}
+                  />
+                </div>
+                <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Network: {wallet.network} ({wallet.symbol})
+                </p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Click below to download or copy address
+                </p>
+              </>
+            ) : (
+              <p className="py-10 text-center text-[12px] text-slate-500">
+                {addressesLoading
+                  ? "Loading wallet addresses..."
+                  : addressesError ?? "No wallet addresses are currently available."}
+              </p>
+            )}
           </div>
 
           {/* Wallet Address */}
@@ -120,11 +130,12 @@ export default function QrPaymentPage() {
             </label>
             <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5">
               <span className="flex-1 truncate text-[12.5px] font-medium text-slate-700">
-                {wallet.address}
+                {wallet?.address ?? "Wallet address unavailable"}
               </span>
               <button
                 type="button"
                 onClick={handleCopy}
+                disabled={!wallet}
                 className="inline-flex items-center gap-1.5 rounded-md bg-indigo-50 px-3 py-1.5 text-[12px] font-semibold text-indigo-600 transition hover:bg-indigo-100"
               >
                 {copied ? <Check size={13} /> : <Copy size={13} />}

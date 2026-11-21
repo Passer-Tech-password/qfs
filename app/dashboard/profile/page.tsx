@@ -3,11 +3,15 @@
 import { useState } from "react";
 import { Camera, ArrowLeft, LogOut, Check, Shield } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { getFirebaseClients } from "@/lib/firebase/client";
 
 const darkField =
   "w-full rounded-xl border border-slate-700 bg-[#1e2235] px-4 py-3 text-[13.5px] text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder:text-slate-500";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [username] = useState("Cristiana456");
   const [email] = useState("Cristianalaww456@gmail.com");
   const [fullName, setFullName] = useState("");
@@ -16,6 +20,24 @@ export default function ProfilePage() {
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [street, setStreet] = useState("");
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+
+  async function handleSignOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    setSignOutError(null);
+    try {
+      const { auth } = getFirebaseClients();
+      await signOut(auth);
+      router.replace("/login");
+    } catch (error) {
+      setSignOutError(
+        error instanceof Error ? error.message : "Unable to sign out. Please try again.",
+      );
+      setSigningOut(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[760px]">
@@ -67,12 +89,19 @@ export default function ProfilePage() {
           </div>
           <button
             type="button"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-3.5 py-2 text-[12px] font-bold text-rose-600 transition hover:bg-rose-100"
+            onClick={handleSignOut}
+            disabled={signingOut}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-3.5 py-2 text-[12px] font-bold text-rose-600 transition hover:bg-rose-100 disabled:cursor-wait disabled:opacity-70"
           >
             <LogOut size={14} />
-            Sign Out
+            {signingOut ? "Signing Out..." : "Sign Out"}
           </button>
         </div>
+        {signOutError && (
+          <p role="alert" className="mt-3 text-[12px] font-medium text-rose-600">
+            {signOutError}
+          </p>
+        )}
 
         {/* Personal Information */}
         <h3 className="mt-7 text-[15px] font-bold text-slate-900">Personal Information</h3>
