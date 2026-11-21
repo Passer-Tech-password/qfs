@@ -19,7 +19,7 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
 import { getFirebaseClients } from "@/lib/firebase/client";
 import { Brand } from "@/components/brand";
 
@@ -98,17 +98,36 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const email = String(form.get("email") ?? "").trim().toLowerCase();
-    const password = String(form.get("password") ?? "");
+    const identifier = String(form.get("identifier") ?? "").trim();
 
     try {
       const { auth, db } = getFirebaseClients();
 
       if (!isRegister) {
-        await signInWithEmailAndPassword(auth, email, password);
+        const password = String(form.get("password") ?? "");
+        // Accept either an email address or a username. If the input looks like
+        // an email we use it directly; otherwise we resolve the username to its
+        // account email via a single-result Firestore lookup.
+        let accountEmail = identifier.toLowerCase();
+        if (!identifier.includes("@")) {
+          const lookup = query(
+            collection(db, "users"),
+            where("username", "==", identifier),
+            limit(1),
+          );
+          const snap = await getDocs(lookup);
+          if (snap.empty) {
+            setMessage({ type: "error", text: "No account was found for this username." });
+            return;
+          }
+          accountEmail = String(snap.docs[0].data().email ?? "");
+        }
+        await signInWithEmailAndPassword(auth, accountEmail, password);
         router.push("/dashboard");
         return;
       }
 
+      const password = String(form.get("password") ?? "");
       const firstName = String(form.get("firstName") ?? "").trim();
       const lastName = String(form.get("lastName") ?? "").trim();
       const username = String(form.get("username") ?? "").trim();
@@ -208,8 +227,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
       {!isRegister && (
         <>
-          <Field id="loginEmail" label="EMAIL ADDRESS" icon={<UserRound size={14} />}>
-            <input autoComplete="username" className={inputClass} id="loginEmail" name="email" placeholder="user@example.com" required type="email" />
+          <Field id="loginIdentifier" label="USERNAME OR EMAIL" icon={<UserRound size={14} />}>
+            <input autoComplete="username" className={inputClass} id="loginIdentifier" name="identifier" placeholder="Enter your username or email" required type="text" />
           </Field>
           <Field id="loginPassword" label="PASSWORD" icon={<LockKeyhole size={14} />}>
             <input autoComplete="current-password" className={inputClass} id="loginPassword" name="password" placeholder="Enter your password" required type="password" />
@@ -248,9 +267,17 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         </p>
       )}
 
-      <button className="auth-submit inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg px-4 text-[11px] font-extrabold disabled:opacity-70" disabled={pending} type="submit">
+      <button
+        className={isRegister
+          ? "auth-submit inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg px-4 text-[11px] font-extrabold disabled:opacity-70"
+          : "inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-500 px-4 text-[11px] font-extrabold text-white shadow-lg shadow-violet-600/30 transition hover:brightness-110 disabled:cursor-wait disabled:opacity-70"
+        }
+        disabled={pending}
+        type="submit"
+      >
         {pending ? <LoaderCircle aria-hidden="true" className="animate-spin" size={15} /> : null}
-        {pending ? "Please wait..." : isRegister ? "Create a QFS Account" : "Sign In to Account"}
+        {pending ? "Please wait..." : isRegister ? "Create a QFS Account" : "Sign In"}
+        {!pending && !isRegister ? <span aria-hidden="true">→</span> : null}
         {!pending && isRegister ? <span aria-hidden="true">→</span> : null}
       </button>
 

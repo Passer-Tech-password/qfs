@@ -195,7 +195,7 @@ export function Sidebar({
     <aside
       id="app-sidebar"
       aria-label="Dashboard navigation"
-      className={`dash-sidebar scrollbar-thin fixed inset-y-0 left-0 z-50 flex w-[248px] max-w-[85vw] flex-col overflow-y-auto pb-24 pt-4 transition-transform duration-200 lg:translate-x-0 ${
+      className={`dash-sidebar scrollbar-thin fixed inset-y-0 left-0 z-50 flex w-[248px] max-w-[85vw] flex-col overflow-y-auto pt-4 transition-transform duration-200 lg:translate-x-0 ${
         open ? "translate-x-0" : "-translate-x-full"
       }`}
     >
@@ -251,7 +251,7 @@ export function Sidebar({
 
       <Link
         href="/dashboard/tickets"
-        className="fixed bottom-3 left-3 block w-[228px] max-w-[calc(85vw-1.5rem)]"
+        className="mt-auto block px-3 pb-4 pt-4"
       >
         <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 backdrop-blur transition hover:bg-white/10">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500/30">
