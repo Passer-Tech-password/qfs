@@ -9,7 +9,7 @@ export function SiteFooter() {
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
           {/* Brand */}
           <div>
-            <Link href="/" aria-label="Quantum Finance home">
+            <Link href="/" aria-label="Qfs Tier-4B home">
               <Brand compact />
             </Link>
             <p className="mt-4 max-w-[340px] text-[13px] leading-relaxed text-slate-500">
@@ -29,11 +29,6 @@ export function SiteFooter() {
               <ChevronRight size={14} className="text-cyan-400" /> Navigation
             </h4>
             <ul className="mt-4 space-y-3 text-[13px]">
-              <li>
-                <Link href="/" className="inline-flex items-center gap-1.5 text-slate-400 transition hover:text-white">
-                  <ChevronRight size={13} className="text-slate-600" /> Home Platform
-                </Link>
-              </li>
               <li>
                 <Link href="/about" className="inline-flex items-center gap-1.5 text-slate-400 transition hover:text-white">
                   <ChevronRight size={13} className="text-slate-600" /> About QFS Vault
@@ -64,7 +59,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="inline-flex items-center gap-1.5 text-slate-400 transition hover:text-white">
+                <Link href="/login?next=%2Fdashboard%2Fsecurity" className="inline-flex items-center gap-1.5 text-slate-400 transition hover:text-white">
                   <ChevronRight size={13} className="text-slate-600" /> Recover Account PIN
                 </Link>
               </li>
@@ -80,7 +75,7 @@ export function SiteFooter() {
         {/* Bottom bar */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#1b2232] pt-6 sm:flex-row">
           <p className="text-[12px] text-slate-600">
-            © 2026 <span className="font-semibold text-slate-400">Quantum Finance</span>. All
+            © 2026 <span className="font-semibold text-slate-400">Qfs Tier-4B</span>. All
             rights reserved. Sovereign Digital Custody.
           </p>
           <div className="flex items-center gap-4 text-[12px] font-semibold">

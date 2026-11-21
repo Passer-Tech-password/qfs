@@ -42,13 +42,13 @@ export default function AdminSettingsPage() {
               <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide text-slate-600">
                 Platform Name
               </label>
-              <input defaultValue="Quantum Finance" className="dash-input h-11 w-full px-4 text-[13px]" />
+              <input defaultValue="Qfs Tier-4B" className="dash-input h-11 w-full px-4 text-[13px]" />
             </div>
             <div>
               <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide text-slate-600">
                 Support Email
               </label>
-              <input defaultValue="support@quantumfinance.com" className="dash-input h-11 w-full px-4 text-[13px]" />
+              <input defaultValue="support@example.com" className="dash-input h-11 w-full px-4 text-[13px]" />
             </div>
             <div>
               <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide text-slate-600">

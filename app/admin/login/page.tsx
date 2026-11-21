@@ -122,7 +122,7 @@ export default function AdminLoginPage() {
                 className="auth-input min-h-11 w-full rounded-lg pl-10 pr-3 text-[12px]"
                 id="admin-email"
                 name="email"
-                placeholder="admin@quantumfinance.com"
+                placeholder="admin@example.com"
                 required
                 type="email"
               />

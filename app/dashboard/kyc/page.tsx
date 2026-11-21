@@ -173,7 +173,7 @@ export default function KycPage() {
             className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
           />
           <span className="text-[12px] text-slate-600">
-            I confirm that all information provided is accurate and I authorize Quantum Finance
+            I confirm that all information provided is accurate and I authorize Qfs Tier-4B
             to verify my identity.
           </span>
         </label>

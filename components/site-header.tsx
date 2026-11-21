@@ -57,7 +57,7 @@ export function SiteHeader() {
 
       {/* Main nav */}
       <div className="mx-auto flex min-h-[66px] max-w-[1180px] items-center justify-between gap-3 px-4 sm:px-5">
-        <Link aria-label="Quantum Finance home" href="/">
+        <Link aria-label="Qfs Tier-4B home" href="/">
           <Brand compact />
         </Link>
 

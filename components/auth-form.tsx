@@ -81,11 +81,11 @@ function Field({
   );
 }
 
-const inputClass =
-  "auth-input min-h-10 w-full rounded-lg pl-9 pr-3 text-[11px] sm:text-[12px]";
-
 export function AuthForm({ mode }: { mode: AuthMode }) {
   const isRegister = mode === "register";
+  const inputClass = isRegister
+    ? "auth-input min-h-12 w-full rounded-xl pl-11 pr-4 text-[14px]"
+    : "auth-input min-h-10 w-full rounded-lg pl-9 pr-3 text-[11px] sm:text-[12px]";
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
@@ -123,7 +123,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           accountEmail = String(snap.docs[0].data().email ?? "");
         }
         await signInWithEmailAndPassword(auth, accountEmail, password);
-        router.push("/dashboard");
+        const next = new URLSearchParams(window.location.search).get("next");
+        router.push(next === "/dashboard/security" ? next : "/dashboard");
         return;
       }
 
@@ -182,9 +183,9 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   }
 
   return (
-    <form className={isRegister ? "mt-5 space-y-3.5" : "mt-5 space-y-3.5"} onSubmit={handleSubmit}>
+    <form className={isRegister ? "auth-register-form mt-7 space-y-5" : "mt-5 space-y-3.5"} onSubmit={handleSubmit}>
       {isRegister && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
           <Field id="firstName" label="FIRST NAME" icon={<UserRound size={13} />}>
             <input autoComplete="given-name" className={inputClass} id="firstName" maxLength={60} name="firstName" placeholder="Enter first name" required />
           </Field>
@@ -193,11 +194,11 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           </Field>
           <Field id="username" label="USERNAME" icon={<AtSign size={13} />}>
             <input autoComplete="username" className={inputClass} id="username" maxLength={30} minLength={3} name="username" pattern="[A-Za-z0-9_]{3,30}" placeholder="Choose a username" required />
-            <span className="mt-1 block text-[8px] text-slate-400">3–30 letters, numbers, or underscores</span>
+            <span className="mt-1.5 block text-[10px] font-medium leading-relaxed text-slate-400">3–30 letters, numbers, or underscores</span>
           </Field>
           <Field id="securityPin" label="4-DIGIT SECURITY PIN" icon={<KeyRound size={13} />}>
             <input aria-describedby="pin-help" className={`${inputClass} cursor-not-allowed opacity-70`} disabled id="securityPin" inputMode="numeric" placeholder="Set up after account creation" />
-            <span className="mt-1 block text-[8px] text-slate-400" id="pin-help">
+            <span className="mt-1.5 block text-[10px] font-medium leading-relaxed text-slate-400" id="pin-help">
               Transaction PIN setup requires a secure service and is not enabled yet.
             </span>
           </Field>
@@ -217,7 +218,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             >
               {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
-            <span className="mt-1 block text-[8px] text-slate-400">Use at least 8 characters.</span>
+            <span className="mt-1.5 block text-[10px] font-medium leading-relaxed text-slate-400">Use at least 8 characters.</span>
           </Field>
           <Field id="confirmPassword" label="CONFIRM PASSWORD" icon={<LockKeyhole size={13} />} className="sm:col-span-2">
             <input autoComplete="new-password" className={`${inputClass} pr-10`} id="confirmPassword" minLength={8} name="confirmPassword" placeholder="Re-enter your password" required type={showPassword ? "text" : "password"} />
@@ -237,7 +238,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       )}
 
       {isRegister && (
-        <label className="flex cursor-pointer items-start gap-2 text-[9px] leading-relaxed text-slate-300">
+        <label className="flex cursor-pointer items-start gap-3 text-[12px] font-semibold leading-relaxed text-slate-300">
           <input className="mt-0.5 accent-cyan-400" defaultChecked name="terms" required type="checkbox" />
           <span>
             I agree to the{" "}
@@ -269,7 +270,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
       <button
         className={isRegister
-          ? "auth-submit inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg px-4 text-[11px] font-extrabold disabled:opacity-70"
+          ? "auth-submit inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-5 text-[14px] font-extrabold disabled:opacity-70"
           : "inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-500 px-4 text-[11px] font-extrabold text-white shadow-lg shadow-violet-600/30 transition hover:brightness-110 disabled:cursor-wait disabled:opacity-70"
         }
         disabled={pending}
@@ -281,9 +282,9 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         {!pending && isRegister ? <span aria-hidden="true">→</span> : null}
       </button>
 
-      <p className="text-center text-[10px] text-slate-300">
+      <p className={isRegister ? "text-center text-[12px] font-semibold text-slate-300" : "text-center text-[10px] text-slate-300"}>
         {isRegister ? "Already have an account? " : "Don't have an account? "}
-        <Link className={isRegister ? "bg-gradient-to-r from-[#05dce9] to-[#43a8ff] bg-clip-text font-bold text-transparent" : "font-bold text-cyan-300 hover:text-cyan-200"} href={isRegister ? "/login" : "/register"}>
+        <Link className="bg-gradient-to-r from-[#05dce9] to-[#43a8ff] bg-clip-text font-extrabold text-transparent" href={isRegister ? "/login" : "/register"}>
           {isRegister ? "Sign in here" : "Create Account"}
         </Link>
       </p>
@@ -295,12 +296,17 @@ export function AuthCard({ mode }: { mode: AuthMode }) {
   const isRegister = mode === "register";
 
   return (
-    <main className="auth-page flex min-h-screen flex-col px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto flex w-full max-w-[980px] items-center justify-between text-[10px] text-slate-500">
-        <Link className="transition hover:text-slate-800" href="/">← &nbsp;Back to Home</Link>
-        <span>
+    <main className={`auth-page flex min-h-screen flex-col px-4 py-6 sm:px-6 sm:py-8 ${isRegister ? "auth-register-page" : ""}`}>
+      <div className={`mx-auto flex w-full max-w-[980px] items-center justify-between gap-4 text-[11px] sm:text-[12px] ${isRegister ? "text-slate-400" : "text-slate-500"}`}>
+        <Link className={isRegister ? "shrink-0 font-bold text-slate-300 transition hover:text-white" : "shrink-0 font-semibold transition hover:text-slate-800"} href="/">← &nbsp;Back to Home</Link>
+        <span className={`text-right font-semibold ${isRegister ? "text-slate-300" : ""}`}>
           {isRegister ? "Already registered? " : "New to QFS? "}
-          <Link className="font-bold text-sky-700 hover:text-sky-900" href={isRegister ? "/login" : "/register"}>
+          <Link
+            className={isRegister
+              ? "bg-gradient-to-r from-cyan-300 to-violet-300 bg-clip-text font-extrabold text-transparent"
+              : "bg-gradient-to-r from-[#05dce9] to-[#43a8ff] bg-clip-text font-extrabold text-transparent"}
+            href={isRegister ? "/login" : "/register"}
+          >
             {isRegister ? "Sign in →" : "Create account →"}
           </Link>
         </span>
@@ -308,25 +314,27 @@ export function AuthCard({ mode }: { mode: AuthMode }) {
 
       <section
         aria-labelledby="auth-title"
-        className={`auth-card mx-auto my-auto w-full rounded-[20px] px-6 py-7 sm:px-9 ${
-          isRegister ? "max-w-[680px]" : "max-w-[440px] sm:px-8 sm:py-8"
+        className={`${isRegister ? "auth-register-card" : "auth-card"} mx-auto my-auto w-full ${
+          isRegister
+            ? "max-w-[720px] rounded-2xl px-5 py-6 sm:rounded-3xl sm:px-9 sm:py-9"
+            : "max-w-[440px] rounded-[20px] px-6 py-7 sm:px-8 sm:py-8"
         }`}
       >
         <div className="flex justify-center">
           <Brand />
         </div>
-        <h1 className={`mt-5 text-center text-[21px] font-extrabold tracking-tight text-white sm:text-[24px] ${isRegister ? "sm:text-[22px]" : ""}`} id="auth-title">
-          {isRegister ? "Create Account" : "Sign In to Quantum Finance"}
+        <h1 className={`mt-5 text-center font-black tracking-tight text-white ${isRegister ? "text-[28px] sm:text-[32px]" : "text-[21px] sm:text-[24px]"}`} id="auth-title">
+          {isRegister ? "Create Account" : "Sign In to Qfs Tier-4B"}
         </h1>
-        <p className="mt-1 text-center text-[10px] text-slate-300 sm:text-[11px]">
+        <p className={`mt-2 text-center ${isRegister ? "text-[13px] font-medium leading-relaxed text-slate-300 sm:text-[14px]" : "text-[10px] text-slate-300 sm:text-[11px]"}`}>
           {isRegister
-            ? "Join Quantum Finance and explore the digital asset experience."
-            : "Sign in to your Quantum Finance account to continue."}
+            ? "Join Qfs Tier-4B and explore the digital asset experience."
+            : "Sign in to your Qfs Tier-4B account to continue."}
         </p>
         <AuthForm mode={mode} />
       </section>
 
-      <p className="mx-auto mt-6 max-w-[600px] text-center text-[9px] leading-relaxed text-slate-500">
+      <p className={`mx-auto mt-6 max-w-[600px] text-center leading-relaxed ${isRegister ? "text-[10px] font-medium text-slate-400 sm:text-[11px]" : "text-[9px] text-slate-500"}`}>
         {isRegister
           ? "Asset custody, transaction PINs, and payment services are not active on this preview."
           : "Wallet connections and transfers are not active on this preview."}

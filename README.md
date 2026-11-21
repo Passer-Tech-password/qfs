@@ -1,4 +1,4 @@
-# QFS Website
+# Qfs Tier-4B
 
 Responsive public landing, sign-in, and registration pages built with Next.js, TypeScript, Tailwind CSS, and Firebase.
 

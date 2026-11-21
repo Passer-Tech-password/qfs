@@ -19,7 +19,7 @@ const pillars = [
     bg: "bg-violet-500/20",
     ring: "ring-violet-500/30",
     title: "Quantum-Secure Architecture",
-    text: "Quantum Finance employs zero-trust frameworks, biometric passkeys, and post-quantum cryptographic primitives to protect every transaction and API endpoint from brute-force threats.",
+    text: "Qfs Tier-4B employs zero-trust frameworks, biometric passkeys, and post-quantum cryptographic primitives to protect every transaction and API endpoint from brute-force threats.",
   },
   {
     icon: Globe2,
@@ -88,14 +88,14 @@ export default function AboutPage() {
         <div className="mx-auto max-w-[820px] text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-4 py-1.5 text-[10px] font-extrabold tracking-[0.08em] text-cyan-300">
             <Shield size={11} />
-            ABOUT QUANTUM FINANCE
+            ABOUT QFS TIER-4B
           </span>
           <h1 className="mt-6 text-[40px] font-black leading-[1.08] tracking-[-0.04em] text-white sm:text-[56px]">
             Sovereign Digital Wealth,{" "}
             <span className="gradient-text">Reinvented</span>
           </h1>
           <p className="mx-auto mt-5 max-w-[680px] text-[14px] leading-[1.7] text-slate-300 sm:text-[15.5px]">
-            Quantum Finance is built on the foundational pillars of NESARA/GESARA and powered by
+            Qfs Tier-4B is built on the foundational pillars of NESARA/GESARA and powered by
             the Quantum Financial System — the secure gateway providing unassailable asset
             protection, ISO 20022 compliance, and direct individual ledger access.
           </p>
@@ -187,7 +187,7 @@ export default function AboutPage() {
               Security, Sovereignty, and Standards
             </h2>
             <p className="mt-4 text-[14px] leading-[1.7] text-slate-400">
-              Every layer of Quantum Finance is engineered to protect individual sovereignty while
+              Every layer of Qfs Tier-4B is engineered to protect individual sovereignty while
               meeting the highest international financial standards. From biometric enrollment to
               sub-second cross-border settlement, your wealth remains in your control.
             </p>
@@ -238,12 +238,12 @@ export default function AboutPage() {
           <div className="grid gap-10 md:grid-cols-3">
             {/* Brand */}
             <div>
-              <Link href="/" className="inline-flex items-center gap-3" aria-label="Quantum Finance home">
+              <Link href="/" className="inline-flex items-center gap-3" aria-label="Qfs Tier-4B home">
                 <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-[18px] font-black text-white shadow-lg shadow-violet-600/30">
                   Q
                 </span>
                 <span className="text-[18px] font-black tracking-tight text-white">
-                  Quantum Finance
+                  Qfs Tier-4B
                 </span>
               </Link>
               <p className="mt-5 max-w-[380px] text-[13px] leading-[1.7] text-slate-400">
@@ -300,7 +300,7 @@ export default function AboutPage() {
           </div>
 
           <div className="mt-10 border-t border-white/5 pt-6 text-center text-[12px] text-slate-500">
-            © 2026 Quantum Finance. All rights reserved.
+            © 2026 Qfs Tier-4B. All rights reserved.
           </div>
         </div>
       </footer>
