@@ -11,7 +11,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 
 const pillars = [
   {
@@ -234,7 +233,77 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <SiteFooter />
+      <footer className="border-t border-white/5 bg-[#070a12] px-5 py-14 sm:px-6">
+        <div className="mx-auto max-w-[1180px]">
+          <div className="grid gap-10 md:grid-cols-3">
+            {/* Brand */}
+            <div>
+              <Link href="/" className="inline-flex items-center gap-3" aria-label="Quantum Finance home">
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-[18px] font-black text-white shadow-lg shadow-violet-600/30">
+                  Q
+                </span>
+                <span className="text-[18px] font-black tracking-tight text-white">
+                  Quantum Finance
+                </span>
+              </Link>
+              <p className="mt-5 max-w-[380px] text-[13px] leading-[1.7] text-slate-400">
+                Institutional digital asset custody platform compliant with ISO 20022 messaging
+                standards and multi-sig security protocols.
+              </p>
+            </div>
+
+            {/* Quick Navigation */}
+            <div>
+              <h4 className="text-[13px] font-extrabold uppercase tracking-[0.12em] text-white">
+                Quick Navigation
+              </h4>
+              <ul className="mt-5 space-y-3.5 text-[13px]">
+                <li>
+                  <Link href="/" className="text-slate-400 transition hover:text-white">
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/about" className="text-slate-400 transition hover:text-white">
+                    About QFS
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/whitepaper" className="text-slate-400 transition hover:text-white">
+                    ISO Whitepaper
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Security & Legal */}
+            <div>
+              <h4 className="text-[13px] font-extrabold uppercase tracking-[0.12em] text-white">
+                Security &amp; Legal
+              </h4>
+              <ul className="mt-5 space-y-3.5 text-[13px]">
+                <li>
+                  <Link href="/login" className="text-slate-400 transition hover:text-white">
+                    Member Login
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/register" className="text-slate-400 transition hover:text-white">
+                    Register Account
+                  </Link>
+                </li>
+              </ul>
+              <span className="mt-5 inline-flex items-center gap-2 text-[13px] font-bold text-emerald-400">
+                <Shield size={16} /> ISO 20022 Verified
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-10 border-t border-white/5 pt-6 text-center text-[12px] text-slate-500">
+            © 2026 Quantum Finance. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
