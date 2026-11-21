@@ -34,13 +34,15 @@ export function TopBar({
         <h1 className="truncate text-[17px] font-bold tracking-tight text-[#161829] sm:text-[20px]">{title}</h1>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
         <button
           onClick={() => setWalletOpen(true)}
-          className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-2 text-[12.5px] font-semibold text-indigo-700 transition hover:bg-indigo-100 sm:px-4"
+          aria-label="Connect Wallet"
+          aria-haspopup="dialog"
+          className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 text-[12.5px] font-semibold text-indigo-700 transition hover:bg-indigo-100 sm:px-4"
         >
-          <Wallet size={15} />
-          <span className="hidden sm:inline">Connect Wallet</span>
+          <Wallet size={16} />
+          <span className="hidden whitespace-nowrap sm:inline">Connect Wallet</span>
         </button>
         <Link href="/dashboard/notifications" aria-label="Notifications" className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50">
           <Bell size={17} />

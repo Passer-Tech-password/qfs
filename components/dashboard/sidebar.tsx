@@ -195,7 +195,7 @@ export function Sidebar({
     <aside
       id="app-sidebar"
       aria-label="Dashboard navigation"
-      className={`dash-sidebar scrollbar-thin fixed inset-y-0 left-0 z-50 flex w-[248px] max-w-[85vw] flex-col overflow-y-auto pt-4 transition-transform duration-200 lg:translate-x-0 ${
+      className={`dash-sidebar scrollbar-thin fixed inset-y-0 left-0 z-50 flex h-[100dvh] w-[248px] max-w-[85vw] flex-col overflow-y-auto overflow-x-hidden overscroll-contain pt-4 pb-[env(safe-area-inset-bottom)] shadow-2xl transition-transform duration-200 ease-out lg:translate-x-0 lg:shadow-none ${
         open ? "translate-x-0" : "-translate-x-full"
       }`}
     >

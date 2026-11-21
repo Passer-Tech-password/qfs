@@ -72,6 +72,27 @@ export default function DashboardLayout({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // Prevent the page behind the mobile drawer from scrolling while it is open.
+  useEffect(() => {
+    if (!navOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [navOpen]);
+
+  // Reset the drawer as soon as the viewport reaches the desktop breakpoint.
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1024px)");
+    function onChange() {
+      if (query.matches) setNavOpen(false);
+    }
+    onChange();
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
   async function confirmSignOut() {
     try {
       const { auth } = getFirebaseClients();

@@ -10,11 +10,12 @@ type Activity = {
 };
 
 const activities: Activity[] = [
-  { name: "Alexander Schmidt", country: "Germany", amount: "$24,000,000 USD" },
-  { name: "Zhang Wei", country: "Singapore", amount: "$45,000,000 USD" },
-  { name: "Emma van Dijk", country: "Netherlands", amount: "$19,600,000 USD" },
-  { name: "James Okafor", country: "Nigeria", amount: "$8,250,000 USD" },
-  { name: "Sofia Rossi", country: "Italy", amount: "$31,400,000 USD" },
+  { name: "Alexander Schmidt", country: "Germany", amount: "$200,000 USD" },
+  { name: "Zhang Wei", country: "Singapore", amount: "$96,750 USD" },
+  { name: "Emma van Dijk", country: "Netherlands", amount: "$52,300 USD" },
+  { name: "Sofia Rossi", country: "Italy", amount: "$148,900 USD" },
+  { name: "Olivia Bennett", country: "United Kingdom", amount: "$74,500 USD" },
+  { name: "Hiroshi Tanaka", country: "Japan", amount: "$163,200 USD" },
 ];
 
 export function ActivityToast() {
