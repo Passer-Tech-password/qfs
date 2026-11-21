@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ShieldCheck, FileText, Menu, X } from "lucide-react";
+import { Home, ShieldCheck, FileText, Menu, X, ChartNoAxesCombined } from "lucide-react";
 import { Brand } from "@/components/brand";
 
 const navLinks = [
@@ -56,9 +56,24 @@ export function SiteHeader() {
       </div>
 
       {/* Main nav */}
-      <div className="mx-auto flex min-h-[66px] max-w-[1180px] items-center justify-between gap-3 px-4 sm:px-5">
-        <Link aria-label="Qfs Tier-4B home" href="/">
+      <div className="mx-auto flex min-h-[60px] max-w-[1180px] items-center justify-between gap-2 px-3 min-[360px]:px-4 sm:min-h-[66px] sm:px-5">
+        <Link aria-label="Qfs Tier-4B home" href="/" className="hidden shrink-0 md:inline-flex">
           <Brand compact />
+        </Link>
+        <Link
+          aria-label="Quantum Finance home"
+          href="/"
+          className="inline-flex shrink-0 items-center gap-1.5 md:hidden"
+        >
+          <ChartNoAxesCombined
+            aria-hidden="true"
+            className="h-8 w-8 text-white"
+            strokeWidth={2.8}
+          />
+          <span className="flex flex-col text-left text-[13px] font-black leading-[0.92] tracking-[-0.045em] text-white">
+            <span>Quantum</span>
+            <span>Finance</span>
+          </span>
         </Link>
 
         <nav aria-label="Main navigation" className="hidden items-center gap-8 md:flex">
@@ -85,18 +100,22 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
           <Link
-            className="hidden text-[12px] font-bold text-slate-200 transition hover:text-white sm:inline-flex"
+            className="inline-flex whitespace-nowrap px-1.5 text-[12px] font-medium text-slate-200 transition hover:text-white focus-visible:text-white max-[359px]:hidden sm:px-0"
             href="/login"
           >
             Sign In
           </Link>
           <Link
-            className="gradient-button inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[12px] font-bold text-white sm:px-5"
+            className="gradient-button relative isolate inline-flex h-10 items-center justify-center whitespace-nowrap overflow-hidden rounded-[14px] px-4 text-[12px] font-bold text-white active:scale-[0.98] sm:h-auto sm:px-5 sm:py-2.5"
             href="/register"
           >
-            Open Vault
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 -z-10 rounded-[14px] bg-[linear-gradient(105deg,#6939ef_0%,#9639e8_52%,#17bfd1_100%)] md:hidden"
+            />
+            <span className="relative">Open Vault</span>
           </Link>
           <button
             type="button"
@@ -104,7 +123,7 @@ export function SiteHeader() {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-menu"
-            className="grid h-10 w-10 place-items-center rounded-xl border border-[#1f2740] text-slate-200 transition hover:bg-white/5 md:hidden"
+            className="grid h-10 w-10 place-items-center rounded-[14px] border border-[#252b3b] bg-[#111625] text-slate-200 transition hover:bg-white/10 active:scale-[0.97] focus-visible:outline-offset-2 md:hidden"
           >
             {open ? <X size={18} /> : <Menu size={18} />}
           </button>
