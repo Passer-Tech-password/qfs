@@ -27,6 +27,7 @@ import {
   Sparkles,
   CheckCircle2,
   Globe2,
+  X,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -178,6 +179,18 @@ const newsCards = [
     author: "QFS Reserve Board",
     authorColor: "bg-cyan-500/20 text-cyan-300",
     linkColor: "text-cyan-300 hover:text-cyan-200",
+    bulletinBadge: "QFS PROTOCOL MILESTONE",
+    bulletinByline: "Published by QFS Global Reserve Board",
+    bulletinBody: [
+      "GENEVA & ZURICH — The Quantum Financial System (QFS) architectural core committee has officially certified the completion and activation of the v4.8 Mainnet Settlement Engine.",
+      "This deployment establishes native, quantum-resistant communication across sovereign multi-asset ledgers, enabling instant cross-border transfers for Stellar (XLM), Ripple (XRP), Bitcoin, Ethereum, and Tether (USDT).",
+    ],
+    bulletinBulletsTitle: "Key Technical Enhancements in v4.8:",
+    bulletinBullets: [
+      "Zero-latency atomic swaps with 100% cryptographic reserve validation.",
+      "FIDO2/WebAuthn hardware key biometric settlement triggers.",
+      "Direct compatibility with the ISO 20022 pacs.008 customer credit transfer schema.",
+    ],
   },
   {
     tag: "ISO 20022",
@@ -190,6 +203,14 @@ const newsCards = [
     author: "Standards Committee",
     authorColor: "bg-violet-500/20 text-violet-300",
     linkColor: "text-violet-300 hover:text-violet-200",
+    bulletinBadge: "ISO 20022 COMPLIANCE",
+    bulletinByline: "Published by ISO Financial Standards Committee",
+    bulletinBody: [
+      "BRUSSELS — The global transition to ISO 20022 financial messaging has reached unified enforcement for institutional credit transfers.",
+      "Our digital asset custody platform has integrated end-to-end XML validation for pacs.008, pacs.009, and camt.053 audit feeds, ensuring full compliance for sovereign and institutional transfers worldwide.",
+    ],
+    bulletinBulletsTitle: null,
+    bulletinBullets: [],
   },
   {
     tag: "MARKET INSIGHT",
@@ -201,7 +222,15 @@ const newsCards = [
     authorInitial: "M",
     author: "Global Markets Desk",
     authorColor: "bg-emerald-500/20 text-emerald-300",
-    linkColor: "text-cyan-300 hover:text-cyan-200",
+    linkColor: "text-emerald-300 hover:text-emerald-200",
+    bulletinBadge: "MARKET INTELLIGENCE",
+    bulletinByline: "Published by Global Markets Desk",
+    bulletinBody: [
+      "NEW YORK & SINGAPORE — Institutional digital asset reserves locked in verified sovereign vaults have surpassed $3.84 Billion USD in cumulative value.",
+      "The record inflow is attributed to institutional demand for zero-trust custody, hardware passkey security, and instant spending capabilities via the QFS 24KT Gold and institutional metal card issuance programs.",
+    ],
+    bulletinBulletsTitle: null,
+    bulletinBullets: [],
   },
 ];
 
@@ -210,10 +239,12 @@ type NewsFilter = "all" | "qfs" | "iso" | "market";
 export default function HomePage() {
   const [cardTier, setCardTier] = useState(0);
   const [newsFilter, setNewsFilter] = useState<NewsFilter>("all");
+  const [activeBulletin, setActiveBulletin] = useState<number | null>(null);
   const tier = cardTiers[cardTier];
   const visibleNews = newsCards.filter(
     (n) => newsFilter === "all" || n.category === newsFilter,
   );
+  const bulletin = activeBulletin !== null ? newsCards[activeBulletin] : null;
 
   return (
     <main className="bg-[#040711] text-slate-200">
@@ -473,8 +504,8 @@ export default function HomePage() {
     <div className="mt-12 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
 
       {/* Left: card preview */}
-      <div>
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col items-center sm:block">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
           {cardTiers.map((t, i) => (
             <button
               key={t.tab}
@@ -493,7 +524,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div className={`relative mt-6 aspect-[1.6/1] w-full max-w-[460px] overflow-hidden rounded-3xl bg-gradient-to-br ${tier.preview.gradient} p-6 shadow-2xl ${tier.preview.glow}`}>
+        <div className={`relative mx-auto mt-6 aspect-[1.6/1] w-full max-w-[460px] overflow-hidden rounded-3xl bg-gradient-to-br ${tier.preview.gradient} p-6 shadow-2xl ${tier.preview.glow}`}>
           <div className="flex items-start justify-between">
             <div>
               <p className={`text-[10px] font-bold uppercase tracking-[0.15em] ${tier.preview.ink} opacity-70`}>
@@ -546,7 +577,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-3 text-[12px] font-semibold text-amber-400">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-[12px] font-semibold text-amber-400 sm:justify-start">
           <span className="inline-flex items-center gap-1.5">
             <CheckCircle2 size={14} /> Instant Virtual Issuance
           </span>
@@ -564,10 +595,6 @@ export default function HomePage() {
             <CreditCard size={18} className="text-cyan-400" />
             SUPPORTED CARD NETWORKS &amp; TIERS
           </h3>
-
-          <span className="text-[11px] text-slate-500">
-            Click any tier to preview
-          </span>
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -688,7 +715,7 @@ export default function HomePage() {
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5 text-[11px] font-extrabold tracking-[0.08em] text-cyan-300">
-                <span className="h-2 w-2 rounded-full bg-cyan-400" />
+                <span className="h-2 w-2 rounded-full bg-cyan-400 animate-quantum-blink" />
                 LIVE NETWORK INTELLIGENCE
               </span>
               <h2 className="mt-5 text-[30px] font-black leading-[1.1] tracking-tight text-white sm:text-[40px]">
@@ -727,36 +754,43 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {visibleNews.map((n) => (
-              <article
-                key={n.title}
-                className="group flex flex-col rounded-3xl border border-white/10 bg-[#0c1120] p-6 transition hover:border-white/20"
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider ${n.tagColor}`}
-                  >
-                    {n.tag}
-                  </span>
-                  <span className="text-[11px] text-slate-500">{n.time}</span>
-                </div>
-                <h3 className="mt-4 text-[17px] font-bold leading-snug text-white">
-                  {n.title}
-                </h3>
-                <p className="mt-3 flex-1 text-[12.5px] leading-[1.7] text-slate-400">{n.text}</p>
-                <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4">
-                  <div className="flex items-center gap-2">
-                    <span className={`grid h-7 w-7 place-items-center rounded-full text-[10px] font-extrabold ${n.authorColor}`}>
-                      {n.authorInitial}
+            {visibleNews.map((n) => {
+              const realIndex = newsCards.indexOf(n);
+              return (
+                <article
+                  key={n.title}
+                  className="group flex flex-col rounded-3xl border border-white/10 bg-[#0c1120] p-6 transition hover:border-white/20"
+                >
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider ${n.tagColor}`}
+                    >
+                      {n.tag}
                     </span>
-                    <span className="text-[12px] font-medium text-slate-300">{n.author}</span>
+                    <span className="text-[11px] text-slate-500">{n.time}</span>
                   </div>
-                  <Link href="/whitepaper" className={`inline-flex items-center gap-1.5 text-[12px] font-bold transition ${n.linkColor}`}>
-                    Read Bulletin <ArrowRight size={13} />
-                  </Link>
-                </div>
-              </article>
-            ))}
+                  <h3 className="mt-4 text-[17px] font-bold leading-snug text-white">
+                    {n.title}
+                  </h3>
+                  <p className="mt-3 flex-1 text-[12.5px] leading-[1.7] text-slate-400">{n.text}</p>
+                  <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4">
+                    <div className="flex items-center gap-2">
+                      <span className={`grid h-7 w-7 place-items-center rounded-full text-[10px] font-extrabold ${n.authorColor}`}>
+                        {n.authorInitial}
+                      </span>
+                      <span className="text-[12px] font-medium text-slate-300">{n.author}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveBulletin(realIndex)}
+                      className={`inline-flex items-center gap-1.5 text-[12px] font-bold transition ${n.linkColor}`}
+                    >
+                      Read Bulletin <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -790,6 +824,79 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Bulletin Modal */}
+      {bulletin && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="bulletin-title"
+        >
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setActiveBulletin(null)}
+          />
+          <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[640px] flex-col overflow-y-auto rounded-3xl border border-cyan-500/25 bg-[#0a1020] p-7 shadow-2xl sm:p-8">
+            <button
+              type="button"
+              onClick={() => setActiveBulletin(null)}
+              aria-label="Close bulletin"
+              className="absolute right-5 top-5 text-slate-400 transition hover:text-white"
+            >
+              <X size={22} />
+            </button>
+
+            <span
+              className={`inline-flex w-fit rounded-full px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-wider ${bulletin.tagColor}`}
+            >
+              {bulletin.bulletinBadge}
+            </span>
+
+            <h2
+              id="bulletin-title"
+              className="mt-5 text-[24px] font-black leading-tight tracking-tight text-white sm:text-[28px]"
+            >
+              {bulletin.title}
+            </h2>
+
+            <p className="mt-3 text-[12.5px] font-medium text-slate-400">
+              {bulletin.bulletinByline} &bull; {bulletin.time}
+            </p>
+
+            <div className="my-6 h-px w-full bg-white/10" />
+
+            <div className="space-y-4 text-[14px] leading-[1.75] text-slate-300">
+              {bulletin.bulletinBody.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+
+              {bulletin.bulletinBulletsTitle && (
+                <p className="font-semibold text-white">{bulletin.bulletinBulletsTitle}</p>
+              )}
+
+              {bulletin.bulletinBullets.length > 0 && (
+                <ul className="ml-1 space-y-2">
+                  {bulletin.bulletinBullets.map((b, i) => (
+                    <li key={i} className="flex items-start gap-2.5">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveBulletin(null)}
+              className="mt-8 w-full rounded-2xl bg-white/10 py-3.5 text-[14px] font-bold text-white transition hover:bg-white/15"
+            >
+              Close Bulletin
+            </button>
+          </div>
+        </div>
+      )}
 
       <SiteFooter />
     </main>

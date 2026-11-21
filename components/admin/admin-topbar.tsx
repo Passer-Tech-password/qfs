@@ -52,7 +52,7 @@ export function AdminTopBar({
           className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50"
         >
           <Bell size={17} />
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-rose-500" />
+          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-rose-500 animate-quantum-blink" />
         </button>
         <button
           onClick={handleLogout}

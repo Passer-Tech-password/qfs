@@ -12,6 +12,7 @@ import {
   Lock,
   Zap,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 
 const walletCurrencies = [
   {
@@ -95,8 +96,14 @@ export default function QrPaymentPage() {
 
           {/* QR Code */}
           <div className="mt-6 flex flex-col items-center rounded-2xl bg-slate-50 p-6">
-            <div className="flex h-[180px] w-[180px] items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
-              <QrCode size={140} className="text-slate-900" strokeWidth={1.2} />
+            <div className="flex h-[180px] w-[180px] items-center justify-center rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
+              <QRCodeSVG
+                bgColor="#ffffff"
+                fgColor="#0f172a"
+                level="M"
+                size={156}
+                value={wallet.address}
+              />
             </div>
             <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Network: {wallet.network} ({wallet.unit})

@@ -64,7 +64,7 @@ export function VaultHero() {
           <div className="flex items-center justify-between">
             <p className="text-[12.5px] font-semibold text-indigo-100">Live Yield &amp; Market Velocity</p>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-1 text-[10px] font-bold text-emerald-200">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300" /> LIVE 24H
+              <span className="h-1.5 w-1.5 animate-quantum-blink rounded-full bg-emerald-300" /> LIVE 24H
             </span>
           </div>
           <div className="mt-5 flex h-28 items-end gap-1.5">

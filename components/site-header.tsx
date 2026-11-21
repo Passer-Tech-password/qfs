@@ -39,14 +39,14 @@ export function SiteHeader() {
       <div className="bg-[#040711] border-b border-indigo-500/10 py-2 overflow-hidden z-50 text-[11px] font-semibold text-gray-400">
         <div className="animate-marquee flex items-center space-x-8 whitespace-nowrap">
           <div className="flex items-center space-x-8">
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <strong className="text-white">QFS Mainnet:</strong> <span className="text-emerald-400">100% Operational</span></span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-quantum-blink"></span> <strong className="text-white">QFS Mainnet:</strong> <span className="text-emerald-400">100% Operational</span></span>
             <span className="flex items-center gap-1.5"><strong className="text-white">XLM (Stellar):</strong> <span className="ticker-xlm-price text-purple-300 font-bold">$0.1418</span> <span className="ticker-xlm-change text-emerald-400 font-bold">+3.50%</span> <span className="text-slate-500">(indicative)</span></span>
             <span className="flex items-center gap-1.5"><strong className="text-white">XRP (Ripple):</strong> <span className="ticker-xrp-price text-cyan-300 font-bold">$1.0016</span> <span className="ticker-xrp-change text-emerald-400 font-bold">+4.71%</span> <span className="text-slate-500">(indicative)</span></span>
             <span className="flex items-center gap-1.5"><strong className="text-white">ISO 20022 Status:</strong> <span className="text-cyan-300 font-bold">Synchronized</span></span>
             <span className="flex items-center gap-1.5"><strong className="text-white">Settlement Protocol:</strong> <span className="text-emerald-400">Instant Finality</span></span>
           </div>
           <div className="flex items-center space-x-8">
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <strong className="text-white">QFS Mainnet:</strong> <span className="text-emerald-400">100% Operational</span></span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-quantum-blink"></span> <strong className="text-white">QFS Mainnet:</strong> <span className="text-emerald-400">100% Operational</span></span>
             <span className="flex items-center gap-1.5"><strong className="text-white">XLM (Stellar):</strong> <span className="ticker-xlm-price text-purple-300 font-bold">$0.1418</span> <span className="ticker-xlm-change text-emerald-400 font-bold">+3.50%</span> <span className="text-slate-500">(indicative)</span></span>
             <span className="flex items-center gap-1.5"><strong className="text-white">XRP (Ripple):</strong> <span className="ticker-xrp-price text-cyan-300 font-bold">$1.0016</span> <span className="ticker-xrp-change text-emerald-400 font-bold">+4.71%</span> <span className="text-slate-500">(indicative)</span></span>
             <span className="flex items-center gap-1.5"><strong className="text-white">ISO 20022 Status:</strong> <span className="text-cyan-300 font-bold">Synchronized</span></span>

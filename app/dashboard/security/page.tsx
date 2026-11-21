@@ -10,7 +10,9 @@ import {
   Lock,
   AlertTriangle,
   Check,
+  LoaderCircle,
 } from "lucide-react";
+import { saveSecurityPin } from "@/lib/firebase/account-security";
 
 // Deterministic pseudo-QR pattern (visual placeholder only)
 const QR_SIZE = 17;
@@ -53,6 +55,26 @@ export default function SecurityPage() {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [code, setCode] = useState("123456");
+  const [saving, setSaving] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pinSaved, setPinSaved] = useState(false);
+
+  async function handleSavePin() {
+    if (saving) return;
+    setPinError(null);
+    setPinSaved(false);
+    setSaving(true);
+    try {
+      await saveSecurityPin(pin);
+      setPinSaved(true);
+    } catch (err) {
+      setPinError(
+        err instanceof Error ? err.message : "Could not save your PIN. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[1180px]">
@@ -179,12 +201,32 @@ export default function SecurityPage() {
               </div>
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-[13.5px] font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-105"
+                onClick={handleSavePin}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-[13.5px] font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-105 disabled:opacity-70"
               >
-                <Check size={16} />
-                Save PIN
+                {saving ? (
+                  <>
+                    <LoaderCircle className="animate-spin" size={16} />
+                    Saving…
+                  </>
+                ) : (
+                  <>
+                    <Check size={16} />
+                    Save PIN
+                  </>
+                )}
               </button>
             </div>
+
+            {pinError && (
+              <p className="mt-3 text-[12px] font-medium text-rose-600">{pinError}</p>
+            )}
+            {pinSaved && (
+              <p className="mt-3 text-[12px] font-medium text-emerald-600">
+                Your 4-digit security PIN has been saved.
+              </p>
+            )}
           </div>
         </div>
 

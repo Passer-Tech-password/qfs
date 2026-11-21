@@ -219,8 +219,18 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
       {isRegister && (
         <label className="flex cursor-pointer items-start gap-2 text-[9px] leading-relaxed text-slate-300">
-          <input className="mt-0.5 accent-cyan-400" name="terms" required type="checkbox" />
-          <span>I agree to the Terms of Service and Privacy Policy.</span>
+          <input className="mt-0.5 accent-cyan-400" defaultChecked name="terms" required type="checkbox" />
+          <span>
+            I agree to the{" "}
+            <span className="bg-gradient-to-r from-[#05dce9] to-[#43a8ff] bg-clip-text font-semibold text-transparent">
+              Terms of Service
+            </span>{" "}
+            and{" "}
+            <span className="bg-gradient-to-r from-[#05dce9] to-[#43a8ff] bg-clip-text font-semibold text-transparent">
+              Privacy Policy
+            </span>
+            .
+          </span>
         </label>
       )}
 
@@ -246,7 +256,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
       <p className="text-center text-[10px] text-slate-300">
         {isRegister ? "Already have an account? " : "Don't have an account? "}
-        <Link className="font-bold text-cyan-300 hover:text-cyan-200" href={isRegister ? "/login" : "/register"}>
+        <Link className={isRegister ? "bg-gradient-to-r from-[#05dce9] to-[#43a8ff] bg-clip-text font-bold text-transparent" : "font-bold text-cyan-300 hover:text-cyan-200"} href={isRegister ? "/login" : "/register"}>
           {isRegister ? "Sign in here" : "Create Account"}
         </Link>
       </p>

@@ -1,7 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, CreditCard, IdCard, BadgeCheck, Camera, AlertCircle } from "lucide-react";
+import {
+  FileText,
+  CreditCard,
+  IdCard,
+  BadgeCheck,
+  Camera,
+  AlertCircle,
+  CheckCircle2,
+  LoaderCircle,
+} from "lucide-react";
+import { submitKycRequest } from "@/lib/firebase/account-security";
 
 const idTypes = [
   { id: "passport", label: "Passport", icon: FileText },
@@ -14,6 +24,42 @@ export default function KycPage() {
   const [selectedId, setSelectedId] = useState("permit");
   const [idNumber, setIdNumber] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const [frontFileName, setFrontFileName] = useState<string | null>(null);
+  const [backFileName, setBackFileName] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  async function handleSubmit() {
+    if (submitting) return;
+    const trimmed = idNumber.trim();
+    if (!trimmed) {
+      setError("Enter the number printed on your ID.");
+      return;
+    }
+    if (!confirmed) {
+      setError("Please tick the confirmation box before submitting.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      await submitKycRequest({
+        idType: selectedId,
+        idNumber: trimmed,
+        frontFileName,
+        backFileName,
+      });
+      setSuccess(true);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Submission failed. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[560px]">
@@ -88,7 +134,12 @@ export default function KycPage() {
               Click to upload ID front photo
             </p>
             <p className="mt-0.5 text-[11px] text-slate-400">JPG, PNG, max 5MB</p>
-            <input type="file" accept="image/*" className="hidden" />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setFrontFileName(e.target.files?.[0]?.name ?? null)}
+            />
           </label>
         </div>
 
@@ -104,7 +155,12 @@ export default function KycPage() {
               Click to upload ID back photo
             </p>
             <p className="mt-0.5 text-[11px] text-slate-400">Leave empty if not applicable</p>
-            <input type="file" accept="image/*" className="hidden" />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setBackFileName(e.target.files?.[0]?.name ?? null)}
+            />
           </label>
         </div>
 
@@ -122,12 +178,35 @@ export default function KycPage() {
           </span>
         </label>
 
+        {error && (
+          <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+            <AlertCircle size={18} className="mt-0.5 shrink-0 text-rose-500" />
+            <p className="text-[12.5px] font-medium text-rose-700">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-600" />
+            <p className="text-[12.5px] font-medium text-emerald-700">
+              Verification submitted. Our compliance desk will review your documents shortly.
+            </p>
+          </div>
+        )}
+
         <button
           type="button"
-          disabled={!confirmed}
-          className="dash-submit mt-6 w-full rounded-2xl py-3.5 text-[14px] font-bold"
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="dash-submit mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[14px] font-bold disabled:opacity-70"
         >
-          Submit for Review
+          {submitting ? (
+            <>
+              <LoaderCircle className="animate-spin" size={16} /> Submitting…
+            </>
+          ) : (
+            "Submit for Review"
+          )}
         </button>
       </div>
     </div>

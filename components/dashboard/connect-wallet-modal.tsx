@@ -83,7 +83,7 @@ export function ConnectWalletModal({
                 </span>
               </div>
               <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-slate-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-quantum-blink" />
                 Multi-Chain Decentralized Protocol &amp; Node Sync
               </div>
             </div>
@@ -127,7 +127,7 @@ export function ConnectWalletModal({
                     onClick={() => handleSelect(w)}
                     className="flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3.5 text-left transition hover:border-indigo-300 hover:bg-indigo-50/40"
                   >
-                    <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" />
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500 animate-quantum-blink" />
                     <span
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[15px] font-bold text-white ${w.color}`}
                     >
@@ -232,7 +232,7 @@ export function ConnectWalletModal({
                 Your wallet has been verified successfully.
               </p>
               <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-[13px] font-bold text-emerald-700 ring-1 ring-emerald-200">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-quantum-blink" />
                 STATUS: 1 CONNECTED
               </div>
               <button

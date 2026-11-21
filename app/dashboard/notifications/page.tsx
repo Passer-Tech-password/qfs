@@ -15,8 +15,10 @@ import {
   ChevronRight,
   KeyRound,
   Check,
+  LoaderCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { saveSecurityPin } from "@/lib/firebase/account-security";
 
 function Toggle({ on }: { on: boolean }) {
   return (
@@ -66,6 +68,26 @@ export default function SettingsPage() {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [notifs, setNotifs] = useState(notifCards.map((c) => c.active));
+  const [saving, setSaving] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pinSaved, setPinSaved] = useState(false);
+
+  async function handleSavePin() {
+    if (saving) return;
+    setPinError(null);
+    setPinSaved(false);
+    setSaving(true);
+    try {
+      await saveSecurityPin(pin);
+      setPinSaved(true);
+    } catch (err) {
+      setPinError(
+        err instanceof Error ? err.message : "Could not save your PIN. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-[1080px]">
@@ -257,11 +279,29 @@ export default function SettingsPage() {
               </div>
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-[12.5px] font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-105"
+                onClick={handleSavePin}
+                disabled={saving}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-[12.5px] font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-105 disabled:opacity-70"
               >
-                Save PIN
+                {saving ? (
+                  <>
+                    <LoaderCircle className="animate-spin" size={15} />
+                    Saving…
+                  </>
+                ) : (
+                  "Save PIN"
+                )}
               </button>
             </div>
+
+            {pinError && (
+              <p className="mt-2.5 text-[11.5px] font-medium text-rose-600">{pinError}</p>
+            )}
+            {pinSaved && (
+              <p className="mt-2.5 text-[11.5px] font-medium text-emerald-600">
+                Your 4-digit security PIN has been saved.
+              </p>
+            )}
           </div>
 
           {/* Google 2FA & Security link */}

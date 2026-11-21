@@ -194,16 +194,16 @@ export default function ProfilePage() {
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-x-8 gap-y-2">
             <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-700">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-quantum-blink" />
               Account: Active
             </span>
             <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-700">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-quantum-blink" />
               KYC Status:{" "}
               <span className="text-amber-600">Pending</span>
             </span>
             <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-700">
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-400" />
+              <span className="h-2.5 w-2.5 rounded-full bg-slate-400 animate-quantum-blink" />
               Joined: Nov 15, 2026
             </span>
           </div>

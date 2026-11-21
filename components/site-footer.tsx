@@ -18,7 +18,7 @@ export function SiteFooter() {
               multi-signature cold vaults.
             </p>
             <span className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-bold text-emerald-400">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-quantum-blink" />
               QFS Mainnet 100% Operational
             </span>
           </div>

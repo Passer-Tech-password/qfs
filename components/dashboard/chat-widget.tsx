@@ -16,7 +16,7 @@ export function ChatWidget() {
         className="relative flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 text-white shadow-xl transition hover:scale-105 hover:bg-indigo-700"
       >
         <MessageCircle size={20} />
-        <span className="absolute right-0 top-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" />
+        <span className="absolute right-0 top-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-400 animate-quantum-blink" />
       </Link>
     </div>
   );

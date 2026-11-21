@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { FileText, FileCode, Scale, ShieldCheck, Eye, Download } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 
 type Doc = {
   id: string;
@@ -123,7 +122,7 @@ export default function WhitepaperPage() {
       <section className="px-5 pb-12 pt-14 sm:pt-20">
         <div className="mx-auto max-w-[900px] text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/40 bg-violet-500/10 px-4 py-1.5 text-[10px] font-extrabold tracking-[0.08em] text-cyan-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
+            <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-quantum-blink" />
             OFFICIAL TECHNICAL SPECIFICATIONS &amp; WHITE PAPERS
           </span>
           <h1 className="mx-auto mt-6 max-w-[820px] text-[38px] font-black leading-[1.1] tracking-[-0.04em] text-white sm:text-[52px]">
@@ -232,8 +231,6 @@ export default function WhitepaperPage() {
           systems.
         </p>
       </section>
-
-      <SiteFooter />
     </main>
   );
 }
