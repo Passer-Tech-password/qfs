@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   DollarSign,
   Bitcoin,
@@ -126,7 +125,11 @@ const depositAssets: DepositAsset[] = [
   },
 ];
 
-export function DepositAssets() {
+export function DepositAssets({
+  onSelectAsset,
+}: {
+  onSelectAsset: (symbol: string) => void;
+}) {
   return (
     <section className="mt-1">
       <div className="flex items-end justify-between">
@@ -166,12 +169,14 @@ export function DepositAssets() {
               </p>
 
               <div className="mt-3 flex items-center justify-between border-t border-black/5 pt-2.5">
-                <Link
-                  href="/dashboard/deposit/new"
-                  className="text-[12px] font-semibold text-indigo-600 hover:text-indigo-700"
+                <button
+                  type="button"
+                  onClick={() => onSelectAsset(asset.unit)}
+                  aria-label={`Deposit ${asset.name}`}
+                  className="text-[12px] font-semibold text-indigo-600 hover:text-indigo-700 focus-visible:outline-indigo-600"
                 >
                   Click to Deposit
-                </Link>
+                </button>
                 <LayoutGrid size={15} className="text-slate-400" />
               </div>
             </div>

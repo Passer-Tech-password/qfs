@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Send,
   Copy,
@@ -16,7 +16,13 @@ import {
 import { createDeposit } from "@/lib/firebase/money";
 import { useDepositAddresses } from "@/lib/firebase/deposit-addresses";
 
-export function DepositForm() {
+export function DepositForm({
+  selectedSymbol,
+  selectionVersion,
+}: {
+  selectedSymbol: string | null;
+  selectionVersion: number;
+}) {
   const { addresses, loading, error: loadError } = useDepositAddresses();
   const [currencyIndex, setCurrencyIndex] = useState(0);
   const [usdAmount, setUsdAmount] = useState("");
@@ -27,6 +33,27 @@ export function DepositForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedSymbol || loading) return;
+
+    const selectedIndex = addresses.findIndex(
+      (address) => address.symbol.toUpperCase() === selectedSymbol.toUpperCase(),
+    );
+    if (selectedIndex < 0) {
+      setSelectionError(
+        `No active receiving address is configured for ${selectedSymbol}. Choose a configured currency below.`,
+      );
+      setError(null);
+      return;
+    }
+
+    setCurrencyIndex(selectedIndex);
+    setSelectionError(null);
+    setError(null);
+    setSuccess(null);
+  }, [addresses, loading, selectedSymbol, selectionVersion]);
 
   // Clamp the selection so a stale index never points past the live list.
   const activeIndex = addresses.length > 0 ? Math.min(currencyIndex, addresses.length - 1) : 0;
@@ -58,6 +85,12 @@ export function DepositForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submitting) return;
+
+    if (selectionError) {
+      setSuccess(null);
+      setError(selectionError);
+      return;
+    }
 
     if (!currency) {
       setSuccess(null);
@@ -106,7 +139,11 @@ export function DepositForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="dash-card mt-6 p-7">
+    <form
+      id="deposit-funds"
+      onSubmit={handleSubmit}
+      className="dash-card mt-6 scroll-mt-24 p-7"
+    >
       <h3 className="text-[19px] font-bold text-slate-900">Deposit Funds</h3>
       <p className="mt-1 text-[12.5px] text-slate-500">
         Select currency, scan the QR or copy the address, then enter payment details below.
@@ -135,7 +172,11 @@ export function DepositForm() {
             <div className="relative">
               <select
                 value={activeIndex}
-                onChange={(e) => setCurrencyIndex(Number(e.target.value))}
+                onChange={(e) => {
+                  setCurrencyIndex(Number(e.target.value));
+                  setSelectionError(null);
+                  setError(null);
+                }}
                 className="dash-input w-full appearance-none py-3 pl-4 pr-10 text-[13.5px] font-medium text-slate-800"
               >
                 {addresses.map((c, i) => (
@@ -275,6 +316,13 @@ export function DepositForm() {
         </>
       )}
 
+      {selectionError && (
+        <div className="mt-6 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-500" />
+          <p className="text-[12.5px] text-amber-800">{selectionError}</p>
+        </div>
+      )}
+
       {error && (
         <div className="mt-6 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
           <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
@@ -291,7 +339,7 @@ export function DepositForm() {
 
       <button
         type="submit"
-        disabled={submitting || !currency}
+        disabled={submitting || !currency || Boolean(selectionError)}
         className="dash-submit mt-7 w-full rounded-xl py-3.5 text-[14px] font-bold disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className="inline-flex items-center gap-2">
