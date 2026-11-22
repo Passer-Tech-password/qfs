@@ -11,17 +11,84 @@ type WalletItem = {
   name: string;
   color: string;
   glyph: string;
+  icon: string;
+  networks: string[];
+  connectionMethod: string;
 };
 
 const wallets: WalletItem[] = [
-  { id: "metamask", name: "Metamask", color: "bg-orange-500", glyph: "🦊" },
-  { id: "trust", name: "Trust", color: "bg-blue-500", glyph: "🛡" },
-  { id: "coinbase", name: "Coinbase", color: "bg-blue-600", glyph: "C" },
-  { id: "xumm", name: "Xumm", color: "bg-blue-500", glyph: "✕" },
-  { id: "cardano", name: "Cardano", color: "bg-blue-700", glyph: "✦" },
-  { id: "daedalus", name: "Daedalus", color: "bg-slate-700", glyph: "🐂" },
-  { id: "yoroi", name: "Yoroi", color: "bg-blue-500", glyph: "⬢" },
-  { id: "ccvault", name: "CCVault", color: "bg-purple-600", glyph: "◆" },
+  {
+    id: "metamask",
+    name: "Metamask",
+    color: "bg-orange-500",
+    glyph: "🦊",
+    icon: "/wallets/metamask.svg",
+    networks: ["Ethereum", "BNB Chain", "Polygon", "Arbitrum"],
+    connectionMethod: "Browser extension",
+  },
+  {
+    id: "trust",
+    name: "Trust",
+    color: "bg-blue-500",
+    glyph: "🛡",
+    icon: "/wallets/trust.svg",
+    networks: ["Ethereum", "BNB Chain", "Polygon", "Bitcoin"],
+    connectionMethod: "Mobile app · QR",
+  },
+  {
+    id: "coinbase",
+    name: "Coinbase",
+    color: "bg-blue-600",
+    glyph: "C",
+    icon: "/wallets/coinbase.svg",
+    networks: ["Ethereum", "Base", "Polygon", "Solana"],
+    connectionMethod: "Browser extension · Mobile app",
+  },
+  {
+    id: "xumm",
+    name: "Xumm",
+    color: "bg-blue-500",
+    glyph: "✕",
+    icon: "/wallets/xumm.svg",
+    networks: ["XRP Ledger"],
+    connectionMethod: "Mobile app · QR",
+  },
+  {
+    id: "cardano",
+    name: "Cardano",
+    color: "bg-blue-700",
+    glyph: "✦",
+    icon: "/wallets/cardano.svg",
+    networks: ["Cardano"],
+    connectionMethod: "Browser extension",
+  },
+  {
+    id: "daedalus",
+    name: "Daedalus",
+    color: "bg-slate-700",
+    glyph: "🐂",
+    icon: "/wallets/daedalus.svg",
+    networks: ["Cardano"],
+    connectionMethod: "Desktop app",
+  },
+  {
+    id: "yoroi",
+    name: "Yoroi",
+    color: "bg-blue-500",
+    glyph: "⬢",
+    icon: "/wallets/yoroi.svg",
+    networks: ["Cardano", "Ergo"],
+    connectionMethod: "Browser extension · Mobile app",
+  },
+  {
+    id: "ccvault",
+    name: "CCVault",
+    color: "bg-purple-600",
+    glyph: "◆",
+    icon: "/wallets/ccvault.svg",
+    networks: ["Cardano"],
+    connectionMethod: "Browser extension",
+  },
 ];
 
 export function ConnectWalletModal({
@@ -140,13 +207,23 @@ export function ConnectWalletModal({
                     className="flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3.5 text-left transition hover:border-indigo-300 hover:bg-indigo-50/40"
                   >
                     <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500 animate-quantum-blink" />
-                    <span
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[15px] font-bold text-white ${w.color}`}
-                    >
-                      {w.glyph}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-semibold text-slate-800">
+                        {w.name}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[11.5px] text-slate-500">
+                        {w.networks.join(" · ")}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[10.5px] text-slate-400">
+                        {w.connectionMethod}
+                      </span>
                     </span>
-                    <span className="flex-1 text-[15px] font-semibold text-slate-800">
-                      {w.name}
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-slate-200">
+                      <img
+                        src={w.icon}
+                        alt={`${w.name} logo`}
+                        className="h-full w-full object-contain"
+                      />
                     </span>
                   </button>
                 ))}

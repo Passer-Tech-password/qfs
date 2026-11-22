@@ -13,17 +13,13 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      // Login flow: resolve a username to its account email. The query must be
-      // filtered by username and limited to a single result to prevent
-      // enumeration of the member directory.
-      allow list: if request.query.limit <= 1
-        && request.query.where.username is string;
       allow create: if request.auth != null
         && request.auth.uid == userId
         && request.resource.data.keys().hasOnly([
           'firstName',
           'lastName',
           'username',
+          'usernameLowercase',
           'phoneNumber',
           'email',
           'createdAt'
@@ -31,6 +27,8 @@ service cloud.firestore {
         && request.resource.data.firstName is string
         && request.resource.data.lastName is string
         && request.resource.data.username is string
+        && request.resource.data.usernameLowercase is string
+        && request.resource.data.usernameLowercase == request.resource.data.username.lower()
         && request.resource.data.phoneNumber is string
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.createdAt == request.time;

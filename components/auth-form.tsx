@@ -16,10 +16,11 @@ import {
 } from "lucide-react";
 import {
   createUserWithEmailAndPassword,
+  signInWithCustomToken,
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { doc, serverTimestamp, setDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { getFirebaseClients } from "@/lib/firebase/client";
 import { Brand } from "@/components/brand";
 
@@ -105,24 +106,36 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
       if (!isRegister) {
         const password = String(form.get("password") ?? "");
-        // Accept either an email address or a username. If the input looks like
-        // an email we use it directly; otherwise we resolve the username to its
-        // account email via a single-result Firestore lookup.
-        let accountEmail = identifier.toLowerCase();
-        if (!identifier.includes("@")) {
-          const lookup = query(
-            collection(db, "users"),
-            where("username", "==", identifier),
-            limit(1),
-          );
-          const snap = await getDocs(lookup);
-          if (snap.empty) {
-            setMessage({ type: "error", text: "No account was found for this username." });
+        if (identifier.includes("@")) {
+          await signInWithEmailAndPassword(auth, identifier.toLowerCase(), password);
+        } else {
+          if (!/^[A-Za-z0-9_]{3,30}$/.test(identifier)) {
+            setMessage({
+              type: "error",
+              text: "Enter a valid username (3–30 letters, numbers, or underscores) or email address.",
+            });
             return;
           }
-          accountEmail = String(snap.docs[0].data().email ?? "");
+
+          const response = await fetch("/api/auth/username-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ identifier, password }),
+          });
+          const result = (await response.json().catch(() => null)) as
+            | { customToken?: string; error?: string }
+            | null;
+
+          if (!response.ok || !result?.customToken) {
+            setMessage({
+              type: "error",
+              text: result?.error ?? "The username or password is incorrect. Please try again.",
+            });
+            return;
+          }
+
+          await signInWithCustomToken(auth, result.customToken);
         }
-        await signInWithEmailAndPassword(auth, accountEmail, password);
         const next = new URLSearchParams(window.location.search).get("next");
         router.push(next === "/dashboard/security" ? next : "/dashboard");
         return;
@@ -148,6 +161,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           firstName,
           lastName,
           username,
+          usernameLowercase: username.toLowerCase(),
           phoneNumber,
           email,
           createdAt: serverTimestamp(),
