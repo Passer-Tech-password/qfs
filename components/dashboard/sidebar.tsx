@@ -200,7 +200,7 @@ export function Sidebar({
       }`}
     >
       <div className="flex items-center justify-between px-5 pb-5">
-        <Link href="/dashboard" aria-label="Qfs Tier-4B dashboard">
+        <Link href="/dashboard" aria-label="Quantum Finance dashboard">
           <Brand compact />
         </Link>
         <button

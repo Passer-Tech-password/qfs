@@ -219,7 +219,7 @@ export default function CreateVoucherPage() {
       </div>
 
       <footer className="mt-10 pb-4 text-center text-[11.5px] text-slate-400">
-        © 2026 Qfs Tier-4B. All rights reserved.
+        © 2026 Quantum Finance. All rights reserved.
       </footer>
     </div>
   );

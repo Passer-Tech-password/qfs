@@ -225,7 +225,7 @@ export default function WhitepaperPage() {
       {/* Disclaimer */}
       <section className="border-t border-[#1a2030] bg-[#090d19] px-5 py-8">
         <p className="mx-auto max-w-[900px] text-center text-[12px] leading-relaxed text-slate-500">
-          Qfs Tier-4B is a sovereign digital authentication and quantum asset ledger
+          Quantum Finance is a sovereign digital authentication and quantum asset ledger
           access-control platform providing 512-bit encrypted identity verification, biometric
           multi-factor authentication, and ISO 20022 compliance protocols for global digital asset
           systems.

@@ -268,7 +268,7 @@ export default function HomePage() {
 
 
           <h1 className="mx-auto mt-7 max-w-[920px] text-[40px] font-black leading-[1.06] tracking-[-0.03em] text-white sm:text-[58px] md:text-[70px]">
-            Qfs Tier-4B{" "}
+            Quantum Finance{" "}
             <span className="bg-gradient-to-r from-cyan-300 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
               Backup
             </span>{" "}
@@ -528,7 +528,7 @@ export default function HomePage() {
           <div className="flex items-start justify-between">
             <div>
               <p className={`text-[10px] font-bold uppercase tracking-[0.15em] ${tier.preview.ink} opacity-70`}>
-                Qfs Tier-4B
+                Quantum Finance
               </p>
               <p className={`mt-1 text-[11px] font-bold ${tier.preview.ink} opacity-60`}>
                 {tier.preview.topLabel}

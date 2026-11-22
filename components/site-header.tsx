@@ -57,7 +57,7 @@ export function SiteHeader() {
 
       {/* Main nav */}
       <div className="mx-auto flex min-h-[60px] max-w-[1180px] items-center justify-between gap-2 px-3 min-[360px]:px-4 sm:min-h-[66px] sm:px-5">
-        <Link aria-label="Qfs Tier-4B home" href="/" className="hidden shrink-0 md:inline-flex">
+        <Link aria-label="Quantum Finance home" href="/" className="hidden shrink-0 md:inline-flex">
           <Brand compact />
         </Link>
         <Link
