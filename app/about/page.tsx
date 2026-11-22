@@ -224,10 +224,10 @@ export default function AboutPage() {
               Create Account Now <ArrowRight size={16} />
             </Link>
             <Link
-              href="/whitepaper"
+              href="/login"
               className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-7 text-[14px] font-bold text-white transition hover:bg-white/10 sm:w-auto"
             >
-              Read Whitepaper
+              Member Sign In
             </Link>
           </div>
         </div>
