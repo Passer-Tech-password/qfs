@@ -46,7 +46,7 @@ export default function VoucherListPage() {
       </div>
 
       <footer className="mt-10 pb-4 text-center text-[11.5px] text-slate-400">
-        © 2026 Quantum Finance. All rights reserved.
+        © 2026 Qfsiter-4bwallet. All rights reserved.
       </footer>
     </div>
   );

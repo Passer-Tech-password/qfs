@@ -57,11 +57,11 @@ export function SiteHeader() {
 
       {/* Main nav */}
       <div className="mx-auto flex min-h-[60px] max-w-[1180px] items-center justify-between gap-2 px-3 min-[360px]:px-4 sm:min-h-[66px] sm:px-5">
-        <Link aria-label="Quantum Finance home" href="/" className="hidden shrink-0 md:inline-flex">
+        <Link aria-label="Qfsiter-4bwallet home" href="/" className="hidden shrink-0 md:inline-flex">
           <Brand compact />
         </Link>
         <Link
-          aria-label="Quantum Finance home"
+          aria-label="Qfsiter-4bwallet home"
           href="/"
           className="inline-flex shrink-0 items-center gap-1.5 md:hidden"
         >
@@ -71,8 +71,7 @@ export function SiteHeader() {
             strokeWidth={2.8}
           />
           <span className="flex flex-col text-left text-[13px] font-black leading-[0.92] tracking-[-0.045em] text-white">
-            <span>Quantum</span>
-            <span>Finance</span>
+            <span>Qfsiter-4bwallet</span>
           </span>
         </Link>
 

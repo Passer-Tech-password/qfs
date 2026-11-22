@@ -344,8 +344,8 @@ export default function SecurityPage() {
       <div className="mt-6 flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
         <AlertTriangle size={18} className="shrink-0 text-amber-500" />
         <p className="text-[12px] font-medium text-amber-800">
-          Never disclose your recovery phrase, PIN, or 2FA codes to anyone, including Quantum
-          Finance support.
+          Never disclose your recovery phrase, PIN, or 2FA codes to anyone, including Qfsiter-4bwallet
+          support.
         </p>
       </div>
     </div>

@@ -338,12 +338,12 @@ export function AuthCard({ mode }: { mode: AuthMode }) {
           <Brand />
         </div>
         <h1 className={`mt-5 text-center font-black tracking-tight text-white ${isRegister ? "text-[28px] sm:text-[32px]" : "text-[21px] sm:text-[24px]"}`} id="auth-title">
-          {isRegister ? "Create Account" : "Sign In to Quantum Finance"}
+          {isRegister ? "Create Account" : "Sign In to Qfsiter-4bwallet"}
         </h1>
         <p className={`mt-2 text-center ${isRegister ? "text-[13px] font-medium leading-relaxed text-slate-300 sm:text-[14px]" : "text-[10px] text-slate-300 sm:text-[11px]"}`}>
           {isRegister
-            ? "Join Quantum Finance and explore the digital asset experience."
-            : "Sign in to your Quantum Finance account to continue."}
+            ? "Join Qfsiter-4bwallet and explore the digital asset experience."
+            : "Sign in to your Qfsiter-4bwallet account to continue."}
         </p>
         <AuthForm mode={mode} />
       </section>

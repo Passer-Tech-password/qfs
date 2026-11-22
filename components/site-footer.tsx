@@ -9,7 +9,7 @@ export function SiteFooter() {
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
           {/* Brand */}
           <div>
-            <Link href="/" aria-label="Quantum Finance home">
+            <Link href="/" aria-label="Qfsiter-4bwallet home">
               <Brand compact />
             </Link>
             <p className="mt-4 max-w-[340px] text-[13px] leading-relaxed text-slate-500">
@@ -75,7 +75,7 @@ export function SiteFooter() {
         {/* Bottom bar */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#1b2232] pt-6 sm:flex-row">
           <p className="text-[12px] text-slate-600">
-            © 2026 <span className="font-semibold text-slate-400">Quantum Finance</span>. All
+            © 2026 <span className="font-semibold text-slate-400">Qfsiter-4bwallet</span>. All
             rights reserved. Sovereign Digital Custody.
           </p>
           <div className="flex items-center gap-4 text-[12px] font-semibold">
