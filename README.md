@@ -1,4 +1,4 @@
-# Qfsiter-4bwallet
+# Qfstier-4bwallet
 
 Responsive public landing, sign-in, and registration pages built with Next.js, TypeScript, Tailwind CSS, and Firebase.
 

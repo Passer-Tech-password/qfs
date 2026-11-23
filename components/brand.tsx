@@ -9,7 +9,7 @@ export function Brand({ compact = false }: { compact?: boolean }) {
         strokeWidth={2.8}
       />
       <span className="flex flex-col text-left font-black leading-[0.88] tracking-[-0.06em] text-white">
-        <span className={compact ? "text-[13px]" : "text-[16px]"}>Qfsiter-4bwallet</span>
+        <span className={compact ? "text-[13px]" : "text-[16px]"}>Qfstier-4bwallet</span>
       </span>
     </span>
   );

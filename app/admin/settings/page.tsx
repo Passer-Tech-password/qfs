@@ -42,7 +42,7 @@ export default function AdminSettingsPage() {
               <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide text-slate-600">
                 Platform Name
               </label>
-              <input defaultValue="Qfsiter-4bwallet" className="dash-input h-11 w-full px-4 text-[13px]" />
+              <input defaultValue="Qfstier-4bwallet" className="dash-input h-11 w-full px-4 text-[13px]" />
             </div>
             <div>
               <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wide text-slate-600">

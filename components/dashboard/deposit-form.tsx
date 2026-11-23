@@ -1,20 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Send,
   Copy,
   Check,
   Info,
   Paperclip,
-  QrCode,
   ChevronDown,
   LoaderCircle,
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { createDeposit } from "@/lib/firebase/money";
 import { useDepositAddresses } from "@/lib/firebase/deposit-addresses";
+
+/**
+ * Currencies the platform supports for deposits. The Deposit Funds dropdown
+ * always lists every supported currency; each one is mapped to its enabled
+ * receiving address from the `deposit_addresses` Firestore collection when one
+ * is configured.
+ */
+const SUPPORTED_CURRENCIES = [
+  { asset: "Tether", symbol: "USDT" },
+  { asset: "Bitcoin", symbol: "BTC" },
+  { asset: "Stellar", symbol: "XLM" },
+  { asset: "Ripple", symbol: "XRP" },
+] as const;
 
 export function DepositForm({
   selectedSymbol,
@@ -35,11 +48,54 @@ export function DepositForm({
   const [success, setSuccess] = useState<string | null>(null);
   const [selectionError, setSelectionError] = useState<string | null>(null);
 
+  // Merge every enabled Firestore receiving address with any supported
+  // currencies that do not yet have a configured address, so the dropdown
+  // always lists the full supported set.
+  const currencyItems = useMemo(() => {
+    const configured = addresses.map((address) => ({
+      asset: address.asset,
+      symbol: address.symbol,
+      network: address.network,
+      address,
+      available: true,
+    }));
+    const configuredSymbols = new Set(
+      addresses.map((a) => a.symbol.toUpperCase()),
+    );
+    const missing = SUPPORTED_CURRENCIES.filter(
+      (c) => !configuredSymbols.has(c.symbol.toUpperCase()),
+    ).map((c) => ({
+      asset: c.asset,
+      symbol: c.symbol,
+      network: "Receiving address not configured",
+      address: null,
+      available: false,
+    }));
+    return [...configured, ...missing];
+  }, [addresses]);
+
+  const selectedItem =
+    currencyItems.length > 0
+      ? currencyItems[Math.min(currencyIndex, currencyItems.length - 1)]
+      : null;
+  const currency = selectedItem?.address ?? null;
+
+  // Value encoded into the deposit QR. XRP deposits require a destination tag,
+  // so the memo is appended using the standard xrpl URI format.
+  const qrValue = useMemo(() => {
+    if (!currency) return "";
+    const memo = currency.memo?.trim();
+    if (currency.symbol.toUpperCase() === "XRP" && memo) {
+      return `xrpl:${currency.address}?dt=${encodeURIComponent(memo)}`;
+    }
+    return currency.address;
+  }, [currency]);
+
   useEffect(() => {
     if (!selectedSymbol || loading) return;
 
-    const selectedIndex = addresses.findIndex(
-      (address) => address.symbol.toUpperCase() === selectedSymbol.toUpperCase(),
+    const selectedIndex = currencyItems.findIndex(
+      (item) => item.symbol.toUpperCase() === selectedSymbol.toUpperCase(),
     );
     if (selectedIndex < 0) {
       setSelectionError(
@@ -53,11 +109,7 @@ export function DepositForm({
     setSelectionError(null);
     setError(null);
     setSuccess(null);
-  }, [addresses, loading, selectedSymbol, selectionVersion]);
-
-  // Clamp the selection so a stale index never points past the live list.
-  const activeIndex = addresses.length > 0 ? Math.min(currencyIndex, addresses.length - 1) : 0;
-  const currency = addresses[activeIndex];
+  }, [currencyItems, loading, selectedSymbol, selectionVersion]);
 
   function handleUsdChange(value: string) {
     setUsdAmount(value);
@@ -159,7 +211,9 @@ export function DepositForm({
           <p className="text-[12.5px] text-amber-800">
             {loadError
               ? `Receiving addresses could not be loaded: ${loadError}`
-              : "Receiving addresses are not configured yet. Please check back shortly or contact support."}
+              : selectedItem
+                ? `The receiving address for ${selectedItem.symbol} is being configured. Please select another supported currency or check back shortly.`
+                : "Receiving addresses are not configured yet. Please check back shortly or contact support."}
           </p>
         </div>
       ) : (
@@ -171,7 +225,7 @@ export function DepositForm({
             </label>
             <div className="relative">
               <select
-                value={activeIndex}
+                value={currencyItems.length > 0 ? Math.min(currencyIndex, currencyItems.length - 1) : 0}
                 onChange={(e) => {
                   setCurrencyIndex(Number(e.target.value));
                   setSelectionError(null);
@@ -179,9 +233,9 @@ export function DepositForm({
                 }}
                 className="dash-input w-full appearance-none py-3 pl-4 pr-10 text-[13.5px] font-medium text-slate-800"
               >
-                {addresses.map((c, i) => (
-                  <option key={c.id} value={i}>
-                    {c.asset} ({c.symbol}) — {c.network}
+                {currencyItems.map((item, i) => (
+                  <option key={`${item.symbol}-${i}`} value={i} disabled={!item.available}>
+                    {item.asset} ({item.symbol}) — {item.network}
                   </option>
                 ))}
               </select>
@@ -194,8 +248,15 @@ export function DepositForm({
 
           {/* QR + Address */}
           <div className="mt-5 flex flex-col items-center rounded-2xl bg-slate-50 p-6">
-            <div className="flex h-[150px] w-[150px] items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
-              <QrCode size={120} className="text-slate-900" strokeWidth={1.2} />
+            <div className="flex h-[150px] w-[150px] items-center justify-center rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
+              <QRCodeSVG
+                bgColor="#ffffff"
+                fgColor="#0f172a"
+                includeMargin
+                level="M"
+                size={120}
+                value={qrValue}
+              />
             </div>
             <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Network: {currency.network}

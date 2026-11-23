@@ -113,7 +113,7 @@ export default function QfsCardPage() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-300">
-                  Qfsiter-4bwallet
+                  Qfstier-4bwallet
                 </p>
                 <p className="mt-1 text-[18px] font-bold">Visa Card</p>
               </div>
@@ -220,7 +220,7 @@ export default function QfsCardPage() {
       </div>
 
       <footer className="mt-10 pb-4 text-center text-[11.5px] text-slate-400">
-        © 2026 Qfsiter-4bwallet. All rights reserved.
+        © 2026 Qfstier-4bwallet. All rights reserved.
       </footer>
     </div>
   );
