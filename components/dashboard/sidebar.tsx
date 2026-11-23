@@ -165,7 +165,7 @@ function NavLink({ item, onLogout }: { item: NavItem; onLogout?: () => void }) {
                 className={`block rounded-md px-3 py-2 text-[12.5px] font-medium transition ${
                   active
                     ? "bg-white/10 text-white"
-                    : "text-slate-400 hover:text-white"
+                    : "text-slate-300 hover:text-white"
                 }`}
               >
                 {child.label}
@@ -176,7 +176,7 @@ function NavLink({ item, onLogout }: { item: NavItem; onLogout?: () => void }) {
       )}
 
       {hasChildren && open && item.children!.length === 0 && (
-        <p className="mt-1 pl-9 text-[11px] text-slate-500">Coming soon</p>
+        <p className="mt-1 pl-9 text-[11px] text-slate-400">Coming soon</p>
       )}
     </div>
   );
@@ -215,7 +215,7 @@ export function Sidebar({
 
       <nav aria-label="Dashboard sections" className="flex-1 space-y-5 px-3">
         <div>
-          <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Dashboard
           </p>
           <div className="space-y-0.5">
@@ -226,7 +226,7 @@ export function Sidebar({
         </div>
 
         <div>
-          <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Manage Content
           </p>
           <div className="space-y-0.5">
