@@ -9,6 +9,8 @@ import {
   ChevronDown,
   Mail,
   Ticket,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 
 type BalanceCard = {
@@ -77,6 +79,22 @@ export default function CreateVoucherPage() {
   const [currency, setCurrency] = useState(0);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  function handleSubmit() {
+    setSuccess(false);
+    const amt = parseFloat(amount);
+    if (!amount.trim() || isNaN(amt) || amt <= 0) {
+      setError("Please enter a valid voucher amount greater than zero.");
+      return;
+    }
+    setError(null);
+    setSuccess(true);
+    setAmount("");
+    setNote("");
+    setEmail("");
+  }
 
   return (
     <div className="mx-auto max-w-[1000px]">
@@ -209,12 +227,28 @@ export default function CreateVoucherPage() {
 
           <button
             type="button"
+            onClick={handleSubmit}
             className="dash-submit mt-6 w-full rounded-xl py-4 text-[15px] font-bold"
           >
             <span className="inline-flex items-center gap-2">
               <Ticket size={17} /> Create Voucher
             </span>
           </button>
+
+          {error && (
+            <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+              <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+              <p className="text-[12.5px] font-medium text-rose-700">{error}</p>
+            </div>
+          )}
+          {success && (
+            <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+              <p className="text-[12.5px] font-medium text-emerald-700">
+                Your voucher has been created successfully.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

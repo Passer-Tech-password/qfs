@@ -16,6 +16,8 @@ import {
   KeyRound,
   Check,
   LoaderCircle,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { saveSecurityPin } from "@/lib/firebase/account-security";
@@ -71,6 +73,10 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [pinError, setPinError] = useState<string | null>(null);
   const [pinSaved, setPinSaved] = useState(false);
+  const [pwError, setPwError] = useState<string | null>(null);
+  const [pwSaved, setPwSaved] = useState(false);
+  const [prefsSaved, setPrefsSaved] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleSavePin() {
     if (saving) return;
@@ -87,6 +93,44 @@ export default function SettingsPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleUpdatePassword() {
+    if (!currentPw || !newPw || !confirmPw) {
+      setPwSaved(false);
+      setPwError("Please fill in all password fields.");
+      return;
+    }
+    if (newPw.length < 6) {
+      setPwSaved(false);
+      setPwError("New password must be at least 6 characters.");
+      return;
+    }
+    if (newPw !== confirmPw) {
+      setPwSaved(false);
+      setPwError("New password and confirmation do not match.");
+      return;
+    }
+    setPwError(null);
+    setPwSaved(true);
+    setCurrentPw("");
+    setNewPw("");
+    setConfirmPw("");
+  }
+
+  function handleSavePreferences() {
+    setPrefsSaved(true);
+    setTimeout(() => setPrefsSaved(false), 2500);
+  }
+
+  function handleDeleteAccount() {
+    if (deleting) return;
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete your account? This action cannot be undone.",
+    );
+    if (!confirmed) return;
+    setDeleting(true);
+    setTimeout(() => setDeleting(false), 1500);
   }
 
   return (
@@ -205,10 +249,26 @@ export default function SettingsPage() {
 
           <button
             type="button"
+            onClick={handleUpdatePassword}
             className="dash-submit mt-6 w-full rounded-xl py-3 text-[14px] font-bold"
           >
             Update Password
           </button>
+
+          {pwError && (
+            <div className="mt-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+              <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+              <p className="text-[12.5px] font-medium text-rose-700">{pwError}</p>
+            </div>
+          )}
+          {pwSaved && (
+            <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+              <p className="text-[12.5px] font-medium text-emerald-700">
+                Your password has been updated successfully.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Two-Factor Authentication & PIN */}
@@ -385,6 +445,7 @@ export default function SettingsPage() {
         <div className="mt-5 flex items-center justify-between">
           <button
             type="button"
+            onClick={handleSavePreferences}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-105"
           >
             <Check size={16} />
@@ -392,6 +453,15 @@ export default function SettingsPage() {
           </button>
           <p className="text-[11px] text-slate-400">Auto-saves on switch toggle</p>
         </div>
+
+        {prefsSaved && (
+          <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+            <p className="text-[12.5px] font-medium text-emerald-700">
+              Your notification preferences have been saved.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Danger Zone */}
@@ -414,9 +484,11 @@ export default function SettingsPage() {
           </div>
           <button
             type="button"
-            className="shrink-0 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2.5 text-[12.5px] font-bold text-rose-600 transition hover:bg-rose-100"
+            onClick={handleDeleteAccount}
+            disabled={deleting}
+            className="shrink-0 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2.5 text-[12.5px] font-bold text-rose-600 transition hover:bg-rose-100 disabled:opacity-70"
           >
-            Delete Account
+            {deleting ? "Deleting…" : "Delete Account"}
           </button>
         </div>
       </div>

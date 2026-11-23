@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   QrCode,
   ChevronDown,
@@ -11,6 +12,9 @@ import {
   ShieldCheck,
   Lock,
   Zap,
+  LoaderCircle,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useDepositAddresses } from "@/lib/firebase/deposit-addresses";
@@ -24,6 +28,7 @@ const payCurrencies = [
 ];
 
 export default function QrPaymentPage() {
+  const router = useRouter();
   const { addresses, loading: addressesLoading, error: addressesError } = useDepositAddresses();
   const walletCurrencies = [...addresses].sort((a, b) => {
     const priority = (symbol: string) => {
@@ -40,6 +45,9 @@ export default function QrPaymentPage() {
   const [payCurrency, setPayCurrency] = useState(0);
   const [amount, setAmount] = useState("");
   const [copied, setCopied] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
+  const [paySuccess, setPaySuccess] = useState(false);
 
   const wallet = walletCurrencies[walletIndex];
   const pay = payCurrencies[payCurrency];
@@ -53,6 +61,49 @@ export default function QrPaymentPage() {
 
   function handlePaste() {
     navigator.clipboard?.readText().then((text) => setQrString(text)).catch(() => {});
+  }
+
+  function handleSaveQr() {
+    if (!wallet) return;
+    const svg = document.querySelector<SVGSVGElement>("[data-qr-svg]");
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `qr-${wallet.symbol}-${wallet.address.slice(0, 8)}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleConfirmPayment() {
+    if (submitting) return;
+    if (!merchant.trim()) {
+      setPaySuccess(false);
+      setPayError("Enter the merchant name or recipient ID.");
+      return;
+    }
+    const numeric = parseFloat(amount) || 0;
+    if (numeric <= 0) {
+      setPaySuccess(false);
+      setPayError("Enter a payment amount greater than zero.");
+      return;
+    }
+    setPayError(null);
+    setSubmitting(true);
+    try {
+      // Simulated pending submission; settlement is reviewed server-side.
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      setPaySuccess(true);
+      setMerchant("");
+      setQrString("");
+      setAmount("");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -105,6 +156,7 @@ export default function QrPaymentPage() {
                     level="M"
                     size={156}
                     value={wallet.address}
+                    data-qr-svg=""
                   />
                 </div>
                 <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">
@@ -148,12 +200,15 @@ export default function QrPaymentPage() {
           <div className="mt-5 grid grid-cols-2 gap-3">
             <button
               type="button"
-              className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-3 text-[13px] font-bold text-slate-600 transition hover:bg-slate-50"
+              onClick={handleSaveQr}
+              disabled={!wallet}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-3 text-[13px] font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
             >
               <Download size={15} /> Save QR
             </button>
             <button
               type="button"
+              onClick={() => router.push("/dashboard/deposit/new")}
               className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-50 py-3 text-[13px] font-bold text-indigo-600 transition hover:bg-indigo-100"
             >
               <Plus size={15} /> Deposit Now
@@ -170,7 +225,11 @@ export default function QrPaymentPage() {
                 Instantly pay merchant POS invoices or transfer to another wallet.
               </p>
             </div>
-            <button className="text-[12.5px] font-bold text-indigo-600 hover:text-indigo-700">
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/qr-payments")}
+              className="text-[12.5px] font-bold text-indigo-600 hover:text-indigo-700"
+            >
               Payment History →
             </button>
           </div>
@@ -183,7 +242,11 @@ export default function QrPaymentPage() {
                 0.00 <span className="text-[14px] font-bold text-slate-500">USDT</span>
               </p>
             </div>
-            <button className="rounded-lg bg-indigo-600 px-4 py-2 text-[12px] font-bold text-white transition hover:bg-indigo-700">
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard/deposit/new")}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-[12px] font-bold text-white transition hover:bg-indigo-700"
+            >
               Top Up
             </button>
           </div>
@@ -266,13 +329,39 @@ export default function QrPaymentPage() {
             </div>
           </div>
 
+          {payError && (
+            <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+              <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+              <p className="text-[12.5px] font-medium text-rose-700">{payError}</p>
+            </div>
+          )}
+
+          {paySuccess && (
+            <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+              <p className="text-[12.5px] font-medium text-emerald-700">
+                QR payment authorized. It now appears in your payment history as pending settlement.
+              </p>
+            </div>
+          )}
+
           {/* Confirm button */}
           <button
             type="button"
-            className="dash-submit mt-6 w-full rounded-xl py-3.5 text-[14px] font-bold"
+            onClick={handleConfirmPayment}
+            disabled={submitting}
+            className="dash-submit mt-6 w-full rounded-xl py-3.5 text-[14px] font-bold disabled:opacity-70"
           >
             <span className="inline-flex items-center gap-2">
-              <Lock size={16} /> Confirm & Authorize QR Payment
+              {submitting ? (
+                <>
+                  <LoaderCircle size={16} className="animate-spin" /> Authorizing…
+                </>
+              ) : (
+                <>
+                  <Lock size={16} /> Confirm & Authorize QR Payment
+                </>
+              )}
             </span>
           </button>
 

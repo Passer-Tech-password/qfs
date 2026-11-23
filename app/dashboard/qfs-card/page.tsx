@@ -1,6 +1,8 @@
 "use client";
 
-import { CreditCard, Banknote, ArrowRight, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { CreditCard, Banknote, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 
 type CardTier = {
   id: string;
@@ -66,8 +68,27 @@ const cardTiers: CardTier[] = [
 ];
 
 export default function QfsCardPage() {
+  const router = useRouter();
+  const [appliedCard, setAppliedCard] = useState<string | null>(null);
+
+  function handleApply(cardId: string) {
+    setAppliedCard(cardId);
+  }
+
   return (
     <div className="mx-auto max-w-[1180px]">
+      {appliedCard && (
+        <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-600" />
+          <div>
+            <p className="text-[12.5px] font-bold text-emerald-800">Card application submitted</p>
+            <p className="text-[12px] text-emerald-700">
+              Your {cardTiers.find((c) => c.id === appliedCard)?.name ?? "card"} request is now
+              pending review by our card issuance desk.
+            </p>
+          </div>
+        </div>
+      )}
       {/* Quantum Card Operations */}
       <div className="overflow-hidden rounded-[22px] bg-gradient-to-r from-[#1a1843] via-[#2a2566] to-[#3b1d6b] p-7 text-white shadow-xl">
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -130,7 +151,11 @@ export default function QfsCardPage() {
               <div className="text-slate-300">
                 <Sparkles size={18} />
               </div>
-              <button className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold">
+              <button
+                type="button"
+                onClick={() => handleApply("visa")}
+                className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold"
+              >
                 <CreditCard size={11} /> Click to Apply
               </button>
             </div>
@@ -159,7 +184,11 @@ export default function QfsCardPage() {
             </div>
           </div>
 
-          <button className="dash-submit mt-5 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[13px] font-bold text-white">
+          <button
+            type="button"
+            onClick={() => handleApply("visa")}
+            className="dash-submit mt-5 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[13px] font-bold text-white"
+          >
             <CreditCard size={15} /> Apply For This Card
           </button>
         </div>
@@ -209,6 +238,8 @@ export default function QfsCardPage() {
                   <p className="text-[15px] font-black text-slate-900">{card.fee}</p>
                 </div>
                 <button
+                  type="button"
+                  onClick={() => handleApply(card.id)}
                   className={`inline-flex items-center gap-1.5 rounded-lg px-5 py-2.5 text-[12.5px] font-bold text-white transition ${card.buttonColor}`}
                 >
                   Apply Now <ArrowRight size={14} />

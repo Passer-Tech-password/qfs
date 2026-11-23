@@ -1,12 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { MessageSquareMore, ChevronDown } from "lucide-react";
+import { MessageSquareMore, ChevronDown, CheckCircle2, AlertCircle } from "lucide-react";
 
 export default function TicketsPage() {
   const [subject, setSubject] = useState("");
   const [priority, setPriority] = useState("Normal");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  function handleSubmit() {
+    setSuccess(false);
+    if (!subject.trim()) {
+      setError("Please enter a subject for your support ticket.");
+      return;
+    }
+    if (!message.trim()) {
+      setError("Please describe your issue in the message field.");
+      return;
+    }
+    setError(null);
+    setSuccess(true);
+    setSubject("");
+    setMessage("");
+    setPriority("Normal");
+  }
 
   return (
     <div className="mx-auto max-w-[1180px]">
@@ -76,10 +95,26 @@ export default function TicketsPage() {
 
           <button
             type="button"
+            onClick={handleSubmit}
             className="mt-5 w-full rounded-xl bg-blue-600 py-3 text-[14px] font-bold text-white shadow-lg shadow-blue-500/25 transition hover:bg-blue-700"
           >
             Submit Ticket
           </button>
+
+          {error && (
+            <div className="mt-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+              <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+              <p className="text-[12.5px] font-medium text-rose-700">{error}</p>
+            </div>
+          )}
+          {success && (
+            <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+              <p className="text-[12.5px] font-medium text-emerald-700">
+                Your support ticket has been submitted. Our team will respond shortly.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Your Support Tickets */}

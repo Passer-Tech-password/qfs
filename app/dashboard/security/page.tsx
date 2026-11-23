@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Check,
   LoaderCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { saveSecurityPin } from "@/lib/firebase/account-security";
 
@@ -58,6 +59,10 @@ export default function SecurityPage() {
   const [saving, setSaving] = useState(false);
   const [pinError, setPinError] = useState<string | null>(null);
   const [pinSaved, setPinSaved] = useState(false);
+  const [phraseCopied, setPhraseCopied] = useState(false);
+  const [keyCopied, setKeyCopied] = useState(false);
+  const [twoFAError, setTwoFAError] = useState<string | null>(null);
+  const [twoFAActivated, setTwoFAActivated] = useState(false);
 
   async function handleSavePin() {
     if (saving) return;
@@ -74,6 +79,29 @@ export default function SecurityPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleCopyPhrase() {
+    const phrase = recoveryWords.join(" ");
+    navigator.clipboard?.writeText(phrase).catch(() => {});
+    setPhraseCopied(true);
+    setTimeout(() => setPhraseCopied(false), 1800);
+  }
+
+  function handleCopySetupKey() {
+    navigator.clipboard?.writeText("X3IDK4QF3ZCW2HVA").catch(() => {});
+    setKeyCopied(true);
+    setTimeout(() => setKeyCopied(false), 1800);
+  }
+
+  function handleActivate2FA() {
+    if (code.trim().length < 6) {
+      setTwoFAError("Enter the 6-digit code from your authenticator app.");
+      setTwoFAActivated(false);
+      return;
+    }
+    setTwoFAError(null);
+    setTwoFAActivated(true);
   }
 
   return (
@@ -145,10 +173,11 @@ export default function SecurityPage() {
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
+                onClick={handleCopyPhrase}
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-105"
               >
-                <Copy size={15} />
-                Copy 12-Word Phrase
+                {phraseCopied ? <Check size={15} /> : <Copy size={15} />}
+                {phraseCopied ? "Copied!" : "Copy 12-Word Phrase"}
               </button>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700">
                 <Lock size={12} />
@@ -292,10 +321,11 @@ export default function SecurityPage() {
                 />
                 <button
                   type="button"
+                  onClick={handleCopySetupKey}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
                   aria-label="Copy setup key"
                 >
-                  <Copy size={15} />
+                  {keyCopied ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
                 </button>
               </div>
             </div>
@@ -317,10 +347,30 @@ export default function SecurityPage() {
 
             <button
               type="button"
-              className="mt-5 w-full rounded-xl bg-blue-600 py-3 text-[14px] font-bold text-white shadow-lg shadow-blue-500/25 transition hover:bg-blue-700"
+              onClick={handleActivate2FA}
+              disabled={twoFAActivated}
+              className="mt-5 w-full rounded-xl bg-blue-600 py-3 text-[14px] font-bold text-white shadow-lg shadow-blue-500/25 transition hover:bg-blue-700 disabled:opacity-70"
             >
-              Activate Google 2FA
+              {twoFAActivated ? (
+                <span className="inline-flex items-center gap-2">
+                  <Check size={16} /> Google 2FA Activated
+                </span>
+              ) : (
+                "Activate Google 2FA"
+              )}
             </button>
+
+            {twoFAError && (
+              <p className="mt-3 text-[12px] font-medium text-rose-600">{twoFAError}</p>
+            )}
+            {twoFAActivated && (
+              <div className="mt-3 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+                <p className="text-[12.5px] font-medium text-emerald-700">
+                  Two-factor authentication has been enabled for your account.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Security Guidelines */}

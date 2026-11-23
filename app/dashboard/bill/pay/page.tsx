@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Receipt, ChevronDown, Zap } from "lucide-react";
+import { Receipt, ChevronDown, Zap, CheckCircle2, AlertCircle } from "lucide-react";
 
 const billCategories = [
   "Electricity & Power",
@@ -21,10 +21,32 @@ export default function PayBillPage() {
   const [account, setAccount] = useState("");
   const [currency, setCurrency] = useState("USDT");
   const [amount, setAmount] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSuccess(false);
+    if (!biller.trim()) {
+      setError("Please enter the biller or provider name.");
+      return;
+    }
+    if (!account.trim()) {
+      setError("Please enter the account, meter, or customer reference.");
+      return;
+    }
+    const amt = parseFloat(amount);
+    if (!amount.trim() || isNaN(amt) || amt <= 0) {
+      setError("Please enter a valid bill amount greater than zero.");
+      return;
+    }
+    setError(null);
+    setSuccess(true);
+  }
 
   return (
     <div className="mx-auto max-w-[620px]">
-      <form className="dash-card p-8">
+      <form onSubmit={handleSubmit} className="dash-card p-8">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100">
           <Receipt size={22} className="text-indigo-600" />
         </div>
@@ -134,6 +156,21 @@ export default function PayBillPage() {
             <Zap size={16} /> Authorize Bill Payment
           </span>
         </button>
+
+        {error && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+            <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+            <p className="text-[12.5px] font-medium text-rose-700">{error}</p>
+          </div>
+        )}
+        {success && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+            <p className="text-[12.5px] font-medium text-emerald-700">
+              Your bill payment of {amount} {currency} to {biller} has been authorized successfully.
+            </p>
+          </div>
+        )}
       </form>
 
       <footer className="mt-10 pb-4 text-center text-[11.5px] text-slate-400">

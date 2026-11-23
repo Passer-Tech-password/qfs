@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, ChevronDown, Send, Calendar } from "lucide-react";
+import { FileText, ChevronDown, Send, Calendar, CheckCircle2, AlertCircle } from "lucide-react";
 
 const currencies = ["USDT", "BTC", "ETH", "BNB", "XLM"];
 
@@ -12,10 +12,32 @@ export default function CreateInvoicePage() {
   const [amount, setAmount] = useState("");
   const [dueDate, setDueDate] = useState("2026-11-24");
   const [notes, setNotes] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSuccess(false);
+    if (!clientName.trim()) {
+      setError("Please enter the client's full name.");
+      return;
+    }
+    if (!clientEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail.trim())) {
+      setError("Please enter a valid client email address.");
+      return;
+    }
+    const amt = parseFloat(amount);
+    if (!amount.trim() || isNaN(amt) || amt <= 0) {
+      setError("Please enter a valid invoice amount greater than zero.");
+      return;
+    }
+    setError(null);
+    setSuccess(true);
+  }
 
   return (
     <div className="mx-auto max-w-[620px]">
-      <form className="dash-card p-8">
+      <form onSubmit={handleSubmit} className="dash-card p-8">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100">
           <FileText size={22} className="text-indigo-600" />
         </div>
@@ -131,6 +153,21 @@ export default function CreateInvoicePage() {
             <Send size={16} /> Issue & Send Invoice
           </span>
         </button>
+
+        {error && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+            <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+            <p className="text-[12.5px] font-medium text-rose-700">{error}</p>
+          </div>
+        )}
+        {success && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+            <p className="text-[12.5px] font-medium text-emerald-700">
+              Invoice for {amount} {currency} has been issued and sent to {clientName}.
+            </p>
+          </div>
+        )}
       </form>
 
       <footer className="mt-10 pb-4 text-center text-[11.5px] text-slate-400">

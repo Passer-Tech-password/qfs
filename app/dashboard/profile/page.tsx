@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Camera, ArrowLeft, LogOut, Check, Shield } from "lucide-react";
+import { useRef, useState } from "react";
+import { Camera, ArrowLeft, LogOut, Check, Shield, CheckCircle2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -12,6 +12,7 @@ const darkField =
 
 export default function ProfilePage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [username] = useState("Cristiana456");
   const [email] = useState("Cristianalaww456@gmail.com");
   const [fullName, setFullName] = useState("");
@@ -22,6 +23,8 @@ export default function ProfilePage() {
   const [street, setStreet] = useState("");
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -37,6 +40,20 @@ export default function ProfilePage() {
       );
       setSigningOut(false);
     }
+  }
+
+  function handleChangePicture() {
+    fileInputRef.current?.click();
+  }
+
+  function handleSaveChanges() {
+    if (!fullName.trim()) {
+      setSaved(false);
+      setSaveError("Please enter your full legal name before saving.");
+      return;
+    }
+    setSaveError(null);
+    setSaved(true);
   }
 
   return (
@@ -73,11 +90,18 @@ export default function ProfilePage() {
               </div>
               <button
                 type="button"
+                onClick={handleChangePicture}
                 aria-label="Change profile picture"
                 className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg ring-2 ring-white"
               >
                 <Camera size={14} />
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+              />
             </div>
             <div>
               <p className="text-[15px] font-bold text-slate-900">{username}</p>
@@ -238,9 +262,26 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {saveError && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+            <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+            <p className="text-[12.5px] font-medium text-rose-700">{saveError}</p>
+          </div>
+        )}
+
+        {saved && (
+          <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+            <p className="text-[12.5px] font-medium text-emerald-700">
+              Your profile has been saved successfully.
+            </p>
+          </div>
+        )}
+
         <div className="mt-5 flex justify-end">
           <button
             type="button"
+            onClick={handleSaveChanges}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-[13.5px] font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-105"
           >
             <Check size={16} />
