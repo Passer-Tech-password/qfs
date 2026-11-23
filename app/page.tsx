@@ -155,7 +155,7 @@ const cardTiers = [
 ];
 
 const cardFeatures = [
-  "Auto-debit from USDT, BTC, ETH, XLM & XRP",
+  "Auto-debit from USDT, BTC, XLM & XRP",
   "Apple Pay & Google Pay mobile NFC sync",
   "0% Foreign exchange surcharge worldwide",
   "Custom ATM PIN & 1-click card freeze control",
@@ -183,7 +183,7 @@ const newsCards = [
     bulletinByline: "Published by QFS Global Reserve Board",
     bulletinBody: [
       "GENEVA & ZURICH — The Quantum Financial System (QFS) architectural core committee has officially certified the completion and activation of the v4.8 Mainnet Settlement Engine.",
-      "This deployment establishes native, quantum-resistant communication across sovereign multi-asset ledgers, enabling instant cross-border transfers for Stellar (XLM), Ripple (XRP), Bitcoin, Ethereum, and Tether (USDT).",
+      "This deployment establishes native, quantum-resistant communication across sovereign multi-asset ledgers, enabling instant cross-border transfers for Stellar (XLM), Ripple (XRP), Bitcoin, and Tether (USDT).",
     ],
     bulletinBulletsTitle: "Key Technical Enhancements in v4.8:",
     bulletinBullets: [

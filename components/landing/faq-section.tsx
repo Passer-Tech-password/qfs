@@ -10,7 +10,7 @@ const faqs = [
   },
   {
     q: "Which cryptocurrencies are supported for instant transfer?",
-    a: "Instant transfers are supported across Stellar (XLM), Ripple (XRP), Bitcoin (BTC), Tether (USDT), Ethereum (ETH), and major ERC-20/TRC20 tokens. Cross-chain swaps settle sub-second via the QFS liquidity bridge with zero counterparty friction.",
+    a: "Instant transfers are supported across Stellar (XLM), Ripple (XRP), Bitcoin (BTC), and Tether (USDT). Cross-chain swaps settle sub-second via the QFS liquidity bridge with zero counterparty friction.",
   },
   {
     q: "How do transfers between enrolled vault members work?",

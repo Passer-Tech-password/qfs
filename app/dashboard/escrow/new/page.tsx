@@ -12,9 +12,10 @@ import {
 import { createEscrow } from "@/lib/firebase/money";
 
 const currencies = [
-  { label: "BNB (BNB)", symbol: "BNB", balance: "0.0000" },
   { label: "Tether USD (USDT)", symbol: "USDT", balance: "0.00" },
   { label: "Bitcoin (BTC)", symbol: "BTC", balance: "0.000000" },
+  { label: "Stellar Lumens (XLM)", symbol: "XLM", balance: "0.0000" },
+  { label: "Ripple XRP (XRP)", symbol: "XRP", balance: "0.00" },
 ];
 
 export default function CreateEscrowPage() {

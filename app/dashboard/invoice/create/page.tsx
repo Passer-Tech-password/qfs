@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FileText, ChevronDown, Send, Calendar, CheckCircle2, AlertCircle } from "lucide-react";
 
-const currencies = ["USDT", "BTC", "ETH", "BNB", "XLM"];
+const currencies = ["USDT", "BTC", "XLM", "XRP"];
 
 export default function CreateInvoicePage() {
   const [clientName, setClientName] = useState("");

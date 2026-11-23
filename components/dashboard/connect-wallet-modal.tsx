@@ -23,7 +23,7 @@ const wallets: WalletItem[] = [
     color: "bg-orange-500",
     glyph: "🦊",
     icon: "/wallets/metamask.svg",
-    networks: ["Ethereum", "BNB Chain", "Polygon", "Arbitrum"],
+    networks: ["Tron (TRC20)"],
     connectionMethod: "Browser extension",
   },
   {
@@ -32,7 +32,7 @@ const wallets: WalletItem[] = [
     color: "bg-blue-500",
     glyph: "🛡",
     icon: "/wallets/trust.svg",
-    networks: ["Ethereum", "BNB Chain", "Polygon", "Bitcoin"],
+    networks: ["Bitcoin", "Tron (TRC20)"],
     connectionMethod: "Mobile app · QR",
   },
   {
@@ -41,7 +41,7 @@ const wallets: WalletItem[] = [
     color: "bg-blue-600",
     glyph: "C",
     icon: "/wallets/coinbase.svg",
-    networks: ["Ethereum", "Base", "Polygon", "Solana"],
+    networks: ["Bitcoin", "Tron (TRC20)"],
     connectionMethod: "Browser extension · Mobile app",
   },
   {
@@ -59,7 +59,7 @@ const wallets: WalletItem[] = [
     color: "bg-blue-700",
     glyph: "✦",
     icon: "/wallets/cardano.svg",
-    networks: ["Cardano"],
+    networks: ["Stellar"],
     connectionMethod: "Browser extension",
   },
   {
@@ -68,7 +68,7 @@ const wallets: WalletItem[] = [
     color: "bg-slate-700",
     glyph: "🐂",
     icon: "/wallets/daedalus.svg",
-    networks: ["Cardano"],
+    networks: ["Stellar"],
     connectionMethod: "Desktop app",
   },
   {
@@ -77,7 +77,7 @@ const wallets: WalletItem[] = [
     color: "bg-blue-500",
     glyph: "⬢",
     icon: "/wallets/yoroi.svg",
-    networks: ["Cardano", "Ergo"],
+    networks: ["Stellar"],
     connectionMethod: "Browser extension · Mobile app",
   },
   {
@@ -86,7 +86,7 @@ const wallets: WalletItem[] = [
     color: "bg-purple-600",
     glyph: "◆",
     icon: "/wallets/ccvault.svg",
-    networks: ["Cardano"],
+    networks: ["Stellar"],
     connectionMethod: "Browser extension",
   },
 ];

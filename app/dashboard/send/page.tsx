@@ -14,9 +14,10 @@ import {
 import { createTransfer } from "@/lib/firebase/money";
 
 const assets = [
-  { label: "BNB (BNB) — Bal: 0.0000 BNB (~$0.00 USD)", symbol: "BNB", price: 580, balanceUsd: 0, network: "BNB Smart Chain (BEP20)" },
   { label: "Tether USD (USDT) — Bal: 0.00 USDT (~$0.00 USD)", symbol: "USDT", price: 1, balanceUsd: 0, network: "Tron (TRC20)" },
-  { label: "Bitcoin (BTC) — Bal: 0.000000 BTC (~$0.00 USD)", symbol: "BTC", price: 0, balanceUsd: 0, network: "Bitcoin Network" },
+  { label: "Bitcoin (BTC) — Bal: 0.000000 BTC (~$0.00 USD)", symbol: "BTC", price: 97000, balanceUsd: 0, network: "Bitcoin Network" },
+  { label: "Stellar Lumens (XLM) — Bal: 0.0000 XLM (~$0.00 USD)", symbol: "XLM", price: 0.2489, balanceUsd: 0, network: "Stellar Network" },
+  { label: "Ripple XRP (XRP) — Bal: 0.00 XRP (~$0.00 USD)", symbol: "XRP", price: 1.5, balanceUsd: 0, network: "XRP Ledger" },
 ];
 
 export default function SendMoneyPage() {
@@ -127,7 +128,7 @@ export default function SendMoneyPage() {
               Select Asset
             </label>
             <span className="text-[11.5px] font-semibold text-indigo-600">
-              Bal: 0.0000 BNB (~$0.00)
+              Bal: 0.00 {asset.symbol} (~$0.00)
             </span>
           </div>
           <div className="relative">

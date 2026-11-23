@@ -13,7 +13,7 @@ const billCategories = [
   "Subscription & Membership",
 ];
 
-const currencies = ["USDT", "BTC", "ETH", "BNB", "XLM"];
+const currencies = ["USDT", "BTC", "XLM", "XRP"];
 
 export default function PayBillPage() {
   const [category, setCategory] = useState(billCategories[0]);

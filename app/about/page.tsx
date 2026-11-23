@@ -55,7 +55,7 @@ const workflowSteps = [
   {
     number: "2",
     title: "Multi-Asset Vaults",
-    text: "Hold and stake XLM, XRP, BTC, ETH, SOL, and USDT in isolated, cold-storage ledger accounts.",
+    text: "Hold and stake XLM, XRP, BTC, and USDT in isolated, cold-storage ledger accounts.",
   },
   {
     number: "3",
@@ -73,7 +73,7 @@ const values = [
   "Zero-trust, post-quantum security model",
   "Direct individual ledger access — no intermediaries",
   "Full ISO 20022 financial messaging compliance",
-  "Multi-asset cold-storage custody (XLM, XRP, BTC, ETH, SOL, USDT)",
+  "Multi-asset cold-storage custody (XLM, XRP, BTC, USDT)",
   "Humanitarian-first sovereign wealth distribution",
   "WebAuthn biometric passkeys + 4-digit security PIN",
 ];

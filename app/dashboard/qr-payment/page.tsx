@@ -24,7 +24,6 @@ const payCurrencies = [
   { label: "XLM (Stellar)", symbol: "XLM" },
   { label: "USDT (Tether USD)", symbol: "USDT" },
   { label: "BTC (Bitcoin)", symbol: "BTC" },
-  { label: "ETH (Ethereum)", symbol: "ETH" },
 ];
 
 export default function QrPaymentPage() {

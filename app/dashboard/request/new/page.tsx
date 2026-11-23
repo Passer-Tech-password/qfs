@@ -6,8 +6,8 @@ import { UserPlus, ChevronDown, Send } from "lucide-react";
 const currencies = [
   { label: "Tether USD (USDT)", symbol: "USDT" },
   { label: "Bitcoin (BTC)", symbol: "BTC" },
-  { label: "Ethereum (ETH)", symbol: "ETH" },
-  { label: "BNB (BNB)", symbol: "BNB" },
+  { label: "Stellar Lumens (XLM)", symbol: "XLM" },
+  { label: "Ripple XRP (XRP)", symbol: "XRP" },
 ];
 
 export default function RequestNewPage() {

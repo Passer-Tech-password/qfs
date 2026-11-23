@@ -160,6 +160,7 @@ export default function RequestPayoutPage() {
                 <option>USDT - Available: $0.00</option>
                 <option>BTC - Available: 0.000000</option>
                 <option>XLM - Available: 0.0000</option>
+                <option>XRP - Available: 0.00</option>
               </select>
               <ChevronDown
                 size={18}

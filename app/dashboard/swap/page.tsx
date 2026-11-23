@@ -27,34 +27,32 @@ import {
 import { createSwap } from "@/lib/firebase/money";
 
 const payAssets = [
-  { symbol: "BTC", label: "Bitcoin", icon: Bitcoin, balance: "0.000000" },
-  { symbol: "ETH", label: "Ethereum", icon: Rocket, balance: "0.0000" },
   { symbol: "USDT", label: "Tether USD", icon: Banknote, balance: "0.00" },
+  { symbol: "BTC", label: "Bitcoin", icon: Bitcoin, balance: "0.000000" },
+  { symbol: "XLM", label: "Stellar Lumens", icon: Rocket, balance: "0.0000" },
+  { symbol: "XRP", label: "Ripple XRP", icon: Zap, balance: "0.00" },
 ];
 
 const receiveAssets = [
-  { symbol: "XLM", label: "Stellar", icon: Rocket, balance: "0.0000" },
-  { symbol: "BNB", label: "BNB", icon: Repeat, balance: "0.0000" },
-  { symbol: "SOL", label: "Solana", icon: Rocket, balance: "0.0000" },
+  { symbol: "USDT", label: "Tether USD", icon: Banknote, balance: "0.00" },
+  { symbol: "BTC", label: "Bitcoin", icon: Bitcoin, balance: "0.000000" },
+  { symbol: "XLM", label: "Stellar Lumens", icon: Rocket, balance: "0.0000" },
+  { symbol: "XRP", label: "Ripple XRP", icon: Zap, balance: "0.00" },
 ];
 
 // Indicative USD reference prices used for the on-screen estimate only.
 const usdPrices: Record<string, number> = {
-  BTC: 97000,
-  ETH: 3400,
   USDT: 1,
+  BTC: 97000,
   XLM: 0.2489,
-  BNB: 580,
-  SOL: 180,
+  XRP: 1.5,
 };
 
 const assetBalances: Record<string, number> = {
-  BTC: 0,
-  ETH: 0,
   USDT: 0,
+  BTC: 0,
   XLM: 0,
-  BNB: 0,
-  SOL: 0,
+  XRP: 0,
 };
 
 const quickActions = [
