@@ -5,6 +5,7 @@ import {
   DollarSign,
   Bitcoin,
   Rocket,
+  Zap,
   Send,
   ChevronDown,
   LoaderCircle,
@@ -40,6 +41,15 @@ const balances = [
     card: "bg-violet-50 border-violet-100",
     iconBg: "bg-violet-500",
     pillBg: "bg-violet-100 text-violet-700",
+  },
+  {
+    icon: Zap,
+    label: "XRP Balance",
+    amount: "0.00",
+    pill: "XRP",
+    card: "bg-sky-50 border-sky-100",
+    iconBg: "bg-sky-500",
+    pillBg: "bg-sky-100 text-sky-700",
   },
 ];
 
