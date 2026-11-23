@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -34,18 +35,33 @@ export function TopBar({
         >
           <Menu size={18} />
         </button>
-        <h1 className="truncate text-[17px] font-bold tracking-tight text-[#161829] sm:text-[20px]">{title}</h1>
+        <h1 className="truncate text-[17px] font-bold tracking-tight text-[#161829] sm:text-[20px]">
+          {title}
+        </h1>
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-        <Link href="/dashboard/notifications" aria-label="Notifications" className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50">
+        <Link
+          href="/dashboard/notifications"
+          aria-label="Notifications"
+          className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50"
+        >
           <Settings size={17} />
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-rose-500 animate-quantum-blink" />
         </Link>
-        <Link href="/dashboard/profile" aria-label="Settings" className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50">
+
+        <Link
+          href="/dashboard/profile"
+          aria-label="Settings"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e6e8f0] text-slate-500 transition hover:bg-slate-50"
+        >
           <PersonHeart size={17} />
         </Link>
-        <button onClick={onOpenSignOut} aria-label="Sign out" className="flex h-9 w-9 items-center justify-center rounded-full border border-rose-200 text-rose-500 transition hover:bg-rose-50">
+
+        <button
+          onClick={onOpenSignOut}
+          aria-label="Sign out"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-rose-200 text-rose-500 transition hover:bg-rose-50"
+        >
           <Power size={17} />
         </button>
       </div>

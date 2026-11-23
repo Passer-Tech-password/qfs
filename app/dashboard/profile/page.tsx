@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, ArrowLeft, LogOut, Check, Shield, CheckCircle2, AlertCircle } from "lucide-react";
+import { Camera, ArrowLeft, LogOut, Check, Shield, CheckCircle2, AlertCircle, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -977,10 +977,10 @@ export default function ProfilePage() {
           <p className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500">
             Account Security &amp; Compliance
           </p>
-          <div className="mt-3 flex flex-wrap items-center gap-x-8 gap-y-2">
+          <div className="mt-3 flex flex-col gap-y-2.5">
             <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-700">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-quantum-blink" />
-              Account: Active
+              Account: <span className="text-emerald-600">Active</span>
             </span>
             <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-700">
               <span className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-quantum-blink" />
@@ -988,7 +988,7 @@ export default function ProfilePage() {
               <span className="text-amber-600">Pending</span>
             </span>
             <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-700">
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-400 animate-quantum-blink" />
+              <Calendar size={14} className="text-slate-400" />
               Joined: Nov 15, 2026
             </span>
           </div>
