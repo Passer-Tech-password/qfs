@@ -199,17 +199,749 @@ export default function ProfilePage() {
               <option value="" className="text-slate-900">
                 Select Country
               </option>
-              <option value="US" className="text-slate-900">
-                United States
+              <option value="AF" className="text-slate-900">
+                Afghanistan
               </option>
-              <option value="GB" className="text-slate-900">
-                United Kingdom
+              <option value="AX" className="text-slate-900">
+                Åland Islands
+              </option>
+              <option value="AL" className="text-slate-900">
+                Albania
+              </option>
+              <option value="DZ" className="text-slate-900">
+                Algeria
+              </option>
+              <option value="AS" className="text-slate-900">
+                American Samoa
+              </option>
+              <option value="AD" className="text-slate-900">
+                Andorra
+              </option>
+              <option value="AO" className="text-slate-900">
+                Angola
+              </option>
+              <option value="AI" className="text-slate-900">
+                Anguilla
+              </option>
+              <option value="AQ" className="text-slate-900">
+                Antarctica
+              </option>
+              <option value="AG" className="text-slate-900">
+                Antigua and Barbuda
+              </option>
+              <option value="AR" className="text-slate-900">
+                Argentina
+              </option>
+              <option value="AM" className="text-slate-900">
+                Armenia
+              </option>
+              <option value="AW" className="text-slate-900">
+                Aruba
+              </option>
+              <option value="AU" className="text-slate-900">
+                Australia
+              </option>
+              <option value="AT" className="text-slate-900">
+                Austria
+              </option>
+              <option value="AZ" className="text-slate-900">
+                Azerbaijan
+              </option>
+              <option value="BS" className="text-slate-900">
+                Bahamas
+              </option>
+              <option value="BH" className="text-slate-900">
+                Bahrain
+              </option>
+              <option value="BD" className="text-slate-900">
+                Bangladesh
+              </option>
+              <option value="BB" className="text-slate-900">
+                Barbados
+              </option>
+              <option value="BY" className="text-slate-900">
+                Belarus
+              </option>
+              <option value="BE" className="text-slate-900">
+                Belgium
+              </option>
+              <option value="BZ" className="text-slate-900">
+                Belize
+              </option>
+              <option value="BJ" className="text-slate-900">
+                Benin
+              </option>
+              <option value="BM" className="text-slate-900">
+                Bermuda
+              </option>
+              <option value="BT" className="text-slate-900">
+                Bhutan
+              </option>
+              <option value="BO" className="text-slate-900">
+                Bolivia
+              </option>
+              <option value="BQ" className="text-slate-900">
+                Bonaire, Sint Eustatius and Saba
+              </option>
+              <option value="BA" className="text-slate-900">
+                Bosnia and Herzegovina
+              </option>
+              <option value="BW" className="text-slate-900">
+                Botswana
+              </option>
+              <option value="BV" className="text-slate-900">
+                Bouvet Island
+              </option>
+              <option value="BR" className="text-slate-900">
+                Brazil
+              </option>
+              <option value="IO" className="text-slate-900">
+                British Indian Ocean Territory
+              </option>
+              <option value="BN" className="text-slate-900">
+                Brunei Darussalam
+              </option>
+              <option value="BG" className="text-slate-900">
+                Bulgaria
+              </option>
+              <option value="BF" className="text-slate-900">
+                Burkina Faso
+              </option>
+              <option value="BI" className="text-slate-900">
+                Burundi
+              </option>
+              <option value="CV" className="text-slate-900">
+                Cabo Verde
+              </option>
+              <option value="KH" className="text-slate-900">
+                Cambodia
+              </option>
+              <option value="CM" className="text-slate-900">
+                Cameroon
+              </option>
+              <option value="CA" className="text-slate-900">
+                Canada
+              </option>
+              <option value="KY" className="text-slate-900">
+                Cayman Islands
+              </option>
+              <option value="CF" className="text-slate-900">
+                Central African Republic
+              </option>
+              <option value="TD" className="text-slate-900">
+                Chad
+              </option>
+              <option value="CL" className="text-slate-900">
+                Chile
+              </option>
+              <option value="CN" className="text-slate-900">
+                China
+              </option>
+              <option value="CX" className="text-slate-900">
+                Christmas Island
+              </option>
+              <option value="CC" className="text-slate-900">
+                Cocos (Keeling) Islands
+              </option>
+              <option value="CO" className="text-slate-900">
+                Colombia
+              </option>
+              <option value="KM" className="text-slate-900">
+                Comoros
+              </option>
+              <option value="CG" className="text-slate-900">
+                Congo
+              </option>
+              <option value="CD" className="text-slate-900">
+                Congo, Democratic Republic of the
+              </option>
+              <option value="CK" className="text-slate-900">
+                Cook Islands
+              </option>
+              <option value="CR" className="text-slate-900">
+                Costa Rica
+              </option>
+              <option value="CI" className="text-slate-900">
+                Côte d'Ivoire
+              </option>
+              <option value="HR" className="text-slate-900">
+                Croatia
+              </option>
+              <option value="CU" className="text-slate-900">
+                Cuba
+              </option>
+              <option value="CW" className="text-slate-900">
+                Curaçao
+              </option>
+              <option value="CY" className="text-slate-900">
+                Cyprus
+              </option>
+              <option value="CZ" className="text-slate-900">
+                Czechia
+              </option>
+              <option value="DK" className="text-slate-900">
+                Denmark
+              </option>
+              <option value="DJ" className="text-slate-900">
+                Djibouti
+              </option>
+              <option value="DM" className="text-slate-900">
+                Dominica
+              </option>
+              <option value="DO" className="text-slate-900">
+                Dominican Republic
+              </option>
+              <option value="EC" className="text-slate-900">
+                Ecuador
+              </option>
+              <option value="EG" className="text-slate-900">
+                Egypt
+              </option>
+              <option value="SV" className="text-slate-900">
+                El Salvador
+              </option>
+              <option value="GQ" className="text-slate-900">
+                Equatorial Guinea
+              </option>
+              <option value="ER" className="text-slate-900">
+                Eritrea
+              </option>
+              <option value="EE" className="text-slate-900">
+                Estonia
+              </option>
+              <option value="SZ" className="text-slate-900">
+                Eswatini
+              </option>
+              <option value="ET" className="text-slate-900">
+                Ethiopia
+              </option>
+              <option value="FK" className="text-slate-900">
+                Falkland Islands (Malvinas)
+              </option>
+              <option value="FO" className="text-slate-900">
+                Faroe Islands
+              </option>
+              <option value="FJ" className="text-slate-900">
+                Fiji
+              </option>
+              <option value="FI" className="text-slate-900">
+                Finland
+              </option>
+              <option value="FR" className="text-slate-900">
+                France
+              </option>
+              <option value="GF" className="text-slate-900">
+                French Guiana
+              </option>
+              <option value="PF" className="text-slate-900">
+                French Polynesia
+              </option>
+              <option value="TF" className="text-slate-900">
+                French Southern Territories
+              </option>
+              <option value="GA" className="text-slate-900">
+                Gabon
+              </option>
+              <option value="GM" className="text-slate-900">
+                Gambia
+              </option>
+              <option value="GE" className="text-slate-900">
+                Georgia
               </option>
               <option value="DE" className="text-slate-900">
                 Germany
               </option>
-              <option value="NG" className="text-slate-900">
-                Nigeria
+              <option value="GH" className="text-slate-900">
+                Ghana
+              </option>
+              <option value="GI" className="text-slate-900">
+                Gibraltar
+              </option>
+              <option value="GR" className="text-slate-900">
+                Greece
+              </option>
+              <option value="GL" className="text-slate-900">
+                Greenland
+              </option>
+              <option value="GD" className="text-slate-900">
+                Grenada
+              </option>
+              <option value="GP" className="text-slate-900">
+                Guadeloupe
+              </option>
+              <option value="GU" className="text-slate-900">
+                Guam
+              </option>
+              <option value="GT" className="text-slate-900">
+                Guatemala
+              </option>
+              <option value="GG" className="text-slate-900">
+                Guernsey
+              </option>
+              <option value="GN" className="text-slate-900">
+                Guinea
+              </option>
+              <option value="GW" className="text-slate-900">
+                Guinea-Bissau
+              </option>
+              <option value="GY" className="text-slate-900">
+                Guyana
+              </option>
+              <option value="HT" className="text-slate-900">
+                Haiti
+              </option>
+              <option value="HM" className="text-slate-900">
+                Heard Island and McDonald Islands
+              </option>
+              <option value="VA" className="text-slate-900">
+                Holy See
+              </option>
+              <option value="HN" className="text-slate-900">
+                Honduras
+              </option>
+              <option value="HK" className="text-slate-900">
+                Hong Kong
+              </option>
+              <option value="HU" className="text-slate-900">
+                Hungary
+              </option>
+              <option value="IS" className="text-slate-900">
+                Iceland
+              </option>
+              <option value="IN" className="text-slate-900">
+                India
+              </option>
+              <option value="ID" className="text-slate-900">
+                Indonesia
+              </option>
+              <option value="IR" className="text-slate-900">
+                Iran
+              </option>
+              <option value="IQ" className="text-slate-900">
+                Iraq
+              </option>
+              <option value="IE" className="text-slate-900">
+                Ireland
+              </option>
+              <option value="IM" className="text-slate-900">
+                Isle of Man
+              </option>
+              <option value="IL" className="text-slate-900">
+                Israel
+              </option>
+              <option value="IT" className="text-slate-900">
+                Italy
+              </option>
+              <option value="JM" className="text-slate-900">
+                Jamaica
+              </option>
+              <option value="JP" className="text-slate-900">
+                Japan
+              </option>
+              <option value="JE" className="text-slate-900">
+                Jersey
+              </option>
+              <option value="JO" className="text-slate-900">
+                Jordan
+              </option>
+              <option value="KZ" className="text-slate-900">
+                Kazakhstan
+              </option>
+              <option value="KE" className="text-slate-900">
+                Kenya
+              </option>
+              <option value="KI" className="text-slate-900">
+                Kiribati
+              </option>
+              <option value="KP" className="text-slate-900">
+                Korea, North
+              </option>
+              <option value="KR" className="text-slate-900">
+                Korea, South
+              </option>
+              <option value="KW" className="text-slate-900">
+                Kuwait
+              </option>
+              <option value="KG" className="text-slate-900">
+                Kyrgyzstan
+              </option>
+              <option value="LA" className="text-slate-900">
+                Laos
+              </option>
+              <option value="LV" className="text-slate-900">
+                Latvia
+              </option>
+              <option value="LB" className="text-slate-900">
+                Lebanon
+              </option>
+              <option value="LS" className="text-slate-900">
+                Lesotho
+              </option>
+              <option value="LR" className="text-slate-900">
+                Liberia
+              </option>
+              <option value="LY" className="text-slate-900">
+                Libya
+              </option>
+              <option value="LI" className="text-slate-900">
+                Liechtenstein
+              </option>
+              <option value="LT" className="text-slate-900">
+                Lithuania
+              </option>
+              <option value="LU" className="text-slate-900">
+                Luxembourg
+              </option>
+              <option value="MO" className="text-slate-900">
+                Macao
+              </option>
+              <option value="MG" className="text-slate-900">
+                Madagascar
+              </option>
+              <option value="MW" className="text-slate-900">
+                Malawi
+              </option>
+              <option value="MY" className="text-slate-900">
+                Malaysia
+              </option>
+              <option value="MV" className="text-slate-900">
+                Maldives
+              </option>
+              <option value="ML" className="text-slate-900">
+                Mali
+              </option>
+              <option value="MT" className="text-slate-900">
+                Malta
+              </option>
+              <option value="MH" className="text-slate-900">
+                Marshall Islands
+              </option>
+              <option value="MQ" className="text-slate-900">
+                Martinique
+              </option>
+              <option value="MR" className="text-slate-900">
+                Mauritania
+              </option>
+              <option value="MU" className="text-slate-900">
+                Mauritius
+              </option>
+              <option value="YT" className="text-slate-900">
+                Mayotte
+              </option>
+              <option value="MX" className="text-slate-900">
+                Mexico
+              </option>
+              <option value="FM" className="text-slate-900">
+                Micronesia
+              </option>
+              <option value="MD" className="text-slate-900">
+                Moldova
+              </option>
+              <option value="MC" className="text-slate-900">
+                Monaco
+              </option>
+              <option value="MN" className="text-slate-900">
+                Mongolia
+              </option>
+              <option value="ME" className="text-slate-900">
+                Montenegro
+              </option>
+              <option value="MS" className="text-slate-900">
+                Montserrat
+              </option>
+              <option value="MA" className="text-slate-900">
+                Morocco
+              </option>
+              <option value="MZ" className="text-slate-900">
+                Mozambique
+              </option>
+              <option value="MM" className="text-slate-900">
+                Myanmar
+              </option>
+              <option value="NA" className="text-slate-900">
+                Namibia
+              </option>
+              <option value="NR" className="text-slate-900">
+                Nauru
+              </option>
+              <option value="NP" className="text-slate-900">
+                Nepal
+              </option>
+              <option value="NL" className="text-slate-900">
+                Netherlands
+              </option>
+              <option value="NC" className="text-slate-900">
+                New Caledonia
+              </option>
+              <option value="NZ" className="text-slate-900">
+                New Zealand
+              </option>
+              <option value="NI" className="text-slate-900">
+                Nicaragua
+              </option>
+              <option value="NE" className="text-slate-900">
+                Niger
+              </option>
+              <option value="NU" className="text-slate-900">
+                Niue
+              </option>
+              <option value="NF" className="text-slate-900">
+                Norfolk Island
+              </option>
+              <option value="MK" className="text-slate-900">
+                North Macedonia
+              </option>
+              <option value="MP" className="text-slate-900">
+                Northern Mariana Islands
+              </option>
+              <option value="NO" className="text-slate-900">
+                Norway
+              </option>
+              <option value="OM" className="text-slate-900">
+                Oman
+              </option>
+              <option value="PK" className="text-slate-900">
+                Pakistan
+              </option>
+              <option value="PW" className="text-slate-900">
+                Palau
+              </option>
+              <option value="PS" className="text-slate-900">
+                Palestine
+              </option>
+              <option value="PA" className="text-slate-900">
+                Panama
+              </option>
+              <option value="PG" className="text-slate-900">
+                Papua New Guinea
+              </option>
+              <option value="PY" className="text-slate-900">
+                Paraguay
+              </option>
+              <option value="PE" className="text-slate-900">
+                Peru
+              </option>
+              <option value="PH" className="text-slate-900">
+                Philippines
+              </option>
+              <option value="PN" className="text-slate-900">
+                Pitcairn
+              </option>
+              <option value="PL" className="text-slate-900">
+                Poland
+              </option>
+              <option value="PT" className="text-slate-900">
+                Portugal
+              </option>
+              <option value="PR" className="text-slate-900">
+                Puerto Rico
+              </option>
+              <option value="QA" className="text-slate-900">
+                Qatar
+              </option>
+              <option value="RE" className="text-slate-900">
+                Réunion
+              </option>
+              <option value="RO" className="text-slate-900">
+                Romania
+              </option>
+              <option value="RU" className="text-slate-900">
+                Russia
+              </option>
+              <option value="RW" className="text-slate-900">
+                Rwanda
+              </option>
+              <option value="BL" className="text-slate-900">
+                Saint Barthélemy
+              </option>
+              <option value="SH" className="text-slate-900">
+                Saint Helena, Ascension and Tristan da Cunha
+              </option>
+              <option value="KN" className="text-slate-900">
+                Saint Kitts and Nevis
+              </option>
+              <option value="LC" className="text-slate-900">
+                Saint Lucia
+              </option>
+              <option value="MF" className="text-slate-900">
+                Saint Martin (French part)
+              </option>
+              <option value="PM" className="text-slate-900">
+                Saint Pierre and Miquelon
+              </option>
+              <option value="VC" className="text-slate-900">
+                Saint Vincent and the Grenadines
+              </option>
+              <option value="WS" className="text-slate-900">
+                Samoa
+              </option>
+              <option value="SM" className="text-slate-900">
+                San Marino
+              </option>
+              <option value="ST" className="text-slate-900">
+                Sao Tome and Principe
+              </option>
+              <option value="SA" className="text-slate-900">
+                Saudi Arabia
+              </option>
+              <option value="SN" className="text-slate-900">
+                Senegal
+              </option>
+              <option value="RS" className="text-slate-900">
+                Serbia
+              </option>
+              <option value="SC" className="text-slate-900">
+                Seychelles
+              </option>
+              <option value="SL" className="text-slate-900">
+                Sierra Leone
+              </option>
+              <option value="SG" className="text-slate-900">
+                Singapore
+              </option>
+              <option value="SX" className="text-slate-900">
+                Sint Maarten (Dutch part)
+              </option>
+              <option value="SK" className="text-slate-900">
+                Slovakia
+              </option>
+              <option value="SI" className="text-slate-900">
+                Slovenia
+              </option>
+              <option value="SB" className="text-slate-900">
+                Solomon Islands
+              </option>
+              <option value="SO" className="text-slate-900">
+                Somalia
+              </option>
+              <option value="ZA" className="text-slate-900">
+                South Africa
+              </option>
+              <option value="GS" className="text-slate-900">
+                South Georgia and the South Sandwich Islands
+              </option>
+              <option value="SS" className="text-slate-900">
+                South Sudan
+              </option>
+              <option value="ES" className="text-slate-900">
+                Spain
+              </option>
+              <option value="LK" className="text-slate-900">
+                Sri Lanka
+              </option>
+              <option value="SD" className="text-slate-900">
+                Sudan
+              </option>
+              <option value="SR" className="text-slate-900">
+                Suriname
+              </option>
+              <option value="SJ" className="text-slate-900">
+                Svalbard and Jan Mayen
+              </option>
+              <option value="SE" className="text-slate-900">
+                Sweden
+              </option>
+              <option value="CH" className="text-slate-900">
+                Switzerland
+              </option>
+              <option value="SY" className="text-slate-900">
+                Syria
+              </option>
+              <option value="TW" className="text-slate-900">
+                Taiwan
+              </option>
+              <option value="TJ" className="text-slate-900">
+                Tajikistan
+              </option>
+              <option value="TZ" className="text-slate-900">
+                Tanzania
+              </option>
+              <option value="TH" className="text-slate-900">
+                Thailand
+              </option>
+              <option value="TL" className="text-slate-900">
+                Timor-Leste
+              </option>
+              <option value="TG" className="text-slate-900">
+                Togo
+              </option>
+              <option value="TK" className="text-slate-900">
+                Tokelau
+              </option>
+              <option value="TO" className="text-slate-900">
+                Tonga
+              </option>
+              <option value="TT" className="text-slate-900">
+                Trinidad and Tobago
+              </option>
+              <option value="TN" className="text-slate-900">
+                Tunisia
+              </option>
+              <option value="TR" className="text-slate-900">
+                Türkiye
+              </option>
+              <option value="TM" className="text-slate-900">
+                Turkmenistan
+              </option>
+              <option value="TC" className="text-slate-900">
+                Turks and Caicos Islands
+              </option>
+              <option value="TV" className="text-slate-900">
+                Tuvalu
+              </option>
+              <option value="UG" className="text-slate-900">
+                Uganda
+              </option>
+              <option value="UA" className="text-slate-900">
+                Ukraine
+              </option>
+              <option value="AE" className="text-slate-900">
+                United Arab Emirates
+              </option>
+              <option value="GB" className="text-slate-900">
+                United Kingdom
+              </option>
+              <option value="US" className="text-slate-900">
+                United States
+              </option>
+              <option value="UM" className="text-slate-900">
+                United States Minor Outlying Islands
+              </option>
+              <option value="UY" className="text-slate-900">
+                Uruguay
+              </option>
+              <option value="UZ" className="text-slate-900">
+                Uzbekistan
+              </option>
+              <option value="VU" className="text-slate-900">
+                Vanuatu
+              </option>
+              <option value="VE" className="text-slate-900">
+                Venezuela
+              </option>
+              <option value="VN" className="text-slate-900">
+                Vietnam
+              </option>
+              <option value="VG" className="text-slate-900">
+                Virgin Islands (British)
+              </option>
+              <option value="VI" className="text-slate-900">
+                Virgin Islands (U.S.)
+              </option>
+              <option value="WF" className="text-slate-900">
+                Wallis and Futuna
+              </option>
+              <option value="EH" className="text-slate-900">
+                Western Sahara
+              </option>
+              <option value="YE" className="text-slate-900">
+                Yemen
+              </option>
+              <option value="ZM" className="text-slate-900">
+                Zambia
+              </option>
+              <option value="ZW" className="text-slate-900">
+                Zimbabwe
               </option>
             </select>
           </div>
