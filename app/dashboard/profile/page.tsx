@@ -972,27 +972,56 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* Account Security & Compliance */}
-        <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50/70 p-4">
-          <p className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500">
-            Account Security &amp; Compliance
-          </p>
-          <div className="mt-3 flex flex-col gap-y-2.5">
-            <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-700">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-quantum-blink" />
-              Account: <span className="text-emerald-600">Active</span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-700">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-quantum-blink" />
-              KYC Status:{" "}
-              <span className="text-amber-600">Pending</span>
-            </span>
-            <span className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-slate-700">
-              <Calendar size={14} className="text-slate-400" />
-              Joined: Nov 15, 2026
-            </span>
-          </div>
-        </div>
+
+{/* Account Security & Compliance */}
+<div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+    Account Security &amp; Compliance
+  </p>
+
+  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+
+    {/* Account Status */}
+    <div className="flex items-center gap-2.5 rounded-xl bg-emerald-50 px-3 py-3">
+      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500 animate-quantum-blink" />
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-[12px] font-medium text-slate-700">
+          Account:
+        </span>
+        <span className="text-[12px] font-bold text-emerald-700">
+          Active
+        </span>
+      </div>
+    </div>
+
+    {/* KYC Status */}
+    <div className="flex items-center gap-2.5 rounded-xl bg-amber-50 px-3 py-3">
+      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500 animate-quantum-blink" />
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-[12px] font-medium text-slate-700">
+          KYC Status:
+        </span>
+        <span className="text-[12px] font-bold text-amber-700">
+          Pending
+        </span>
+      </div>
+    </div>
+
+    {/* Joined Date */}
+    <div className="flex items-center gap-2.5 rounded-xl bg-slate-50 px-3 py-3">
+      <Calendar size={15} className="shrink-0 text-slate-500" />
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-[12px] font-medium text-slate-600">
+          Joined:
+        </span>
+        <span className="text-[12px] font-bold text-slate-900">
+          Nov 15, 2026
+        </span>
+      </div>
+    </div>
+
+  </div>
+</div>
 
         {saveError && (
           <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
