@@ -1,17 +1,53 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Camera, ArrowLeft, LogOut, Check, Shield, CheckCircle2, AlertCircle, Calendar } from "lucide-react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { Camera, ArrowLeft, LogOut, Check, Shield, CheckCircle2, AlertCircle, Calendar, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signOut } from "firebase/auth";
+import { signOut, updateProfile } from "firebase/auth";
 import { getFirebaseClients } from "@/lib/firebase/client";
+import { useAuth } from "@/lib/hooks/use-auth";
 
 const darkField =
   "w-full rounded-xl border border-slate-700 bg-[#1e2235] px-4 py-3 text-[13.5px] text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder:text-slate-500";
 
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+// Uploads a single profile image to Cloudinary via an unsigned upload preset.
+async function uploadProfileImage(file: File): Promise<string> {
+  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+    throw new Error(
+      "Image upload is not configured. Add the NEXT_PUBLIC_CLOUDINARY_* values to .env.local and restart the app.",
+    );
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    { method: "POST", body: formData },
+  );
+
+  if (!response.ok) {
+    throw new Error("Upload failed. Please try a different image.");
+  }
+
+  const data = (await response.json()) as { secure_url?: string };
+  if (!data.secure_url) {
+    throw new Error("Upload did not return an image URL. Please try again.");
+  }
+
+  return data.secure_url;
+}
+
 export default function ProfilePage() {
   const router = useRouter();
+  const auth = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [username] = useState("Cristiana456");
   const [email] = useState("Cristianalaww456@gmail.com");
@@ -25,6 +61,15 @@ export default function ProfilePage() {
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (auth.status === "signed-in") {
+      setAvatarUrl(auth.user.photoURL ?? null);
+    }
+  }, [auth]);
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -43,7 +88,45 @@ export default function ProfilePage() {
   }
 
   function handleChangePicture() {
+    if (uploading) return;
     fileInputRef.current?.click();
+  }
+
+  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    // Reset so selecting the same file again re-triggers the change event.
+    event.target.value = "";
+    if (!file) return;
+
+    setUploadError(null);
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setUploadError("Please choose a JPG, PNG, WEBP, or GIF image.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setUploadError("Image must be 5 MB or smaller.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const url = await uploadProfileImage(file);
+      setAvatarUrl(url);
+
+      if (auth.status === "signed-in") {
+        const { auth: firebaseAuth } = getFirebaseClients();
+        if (firebaseAuth.currentUser) {
+          await updateProfile(firebaseAuth.currentUser, { photoURL: url });
+        }
+      }
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : "Image upload failed. Please try again.",
+      );
+    } finally {
+      setUploading(false);
+    }
   }
 
   function handleSaveChanges() {
@@ -85,21 +168,31 @@ export default function ProfilePage() {
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="relative">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 text-[10px] font-semibold text-slate-400">
-                No Photo
-              </div>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile picture"
+                  className="h-16 w-16 rounded-2xl border border-slate-200 object-cover"
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 text-[10px] font-semibold text-slate-400">
+                  No Photo
+                </div>
+              )}
               <button
                 type="button"
                 onClick={handleChangePicture}
+                disabled={uploading}
                 aria-label="Change profile picture"
-                className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg ring-2 ring-white"
+                className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg ring-2 ring-white disabled:cursor-wait disabled:opacity-70"
               >
-                <Camera size={14} />
+                {uploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
               </button>
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                onChange={handleFileChange}
                 className="hidden"
               />
             </div>
@@ -107,7 +200,7 @@ export default function ProfilePage() {
               <p className="text-[15px] font-bold text-slate-900">{username}</p>
               <p className="text-[12px] text-slate-500">Member since November 2026</p>
               <p className="mt-1 text-[11.5px] text-slate-400">
-                Click camera badge to change picture
+                {uploading ? "Uploading image…" : "Click camera badge to change picture"}
               </p>
             </div>
           </div>
@@ -125,6 +218,15 @@ export default function ProfilePage() {
           <p role="alert" className="mt-3 text-[12px] font-medium text-rose-600">
             {signOutError}
           </p>
+        )}
+        {uploadError && (
+          <div
+            role="alert"
+            className="mt-3 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3"
+          >
+            <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+            <p className="text-[12.5px] font-medium text-rose-700">{uploadError}</p>
+          </div>
         )}
 
         {/* Personal Information */}
