@@ -13,6 +13,7 @@ import {
   LoaderCircle,
   CheckCircle2,
 } from "lucide-react";
+
 import { saveSecurityPin } from "@/lib/firebase/account-security";
 
 // Deterministic pseudo-QR pattern (visual placeholder only)
@@ -186,78 +187,92 @@ export default function SecurityPage() {
             </div>
           </div>
 
-          {/* 4-Digit PIN */}
-          <div className="dash-card p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
-                  <Lock size={20} className="text-amber-600" />
-                </div>
-                <div>
-                  <h3 className="text-[16px] font-bold text-slate-900">
-                    4-Digit Security &amp; Transaction PIN
-                  </h3>
-                  <p className="mt-0.5 text-[12px] text-slate-500">
-                    Your 4-digit security PIN is used for Step-Up sign-in verification and
-                    authorizing vault transfers.
-                  </p>
-                </div>
-              </div>
-              <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-                PIN Active
-              </span>
-            </div>
 
-            <div className="mt-5 flex items-center gap-3">
-              <div className="relative flex-1">
-                <input
-                  type={showPin ? "text" : "password"}
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value)}
-                  inputMode="numeric"
-                  maxLength={4}
-                  placeholder="••••"
-                  className="dash-input w-full py-3 pl-4 pr-12 text-center text-[18px] font-bold tracking-[0.5em] text-slate-800"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPin((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
-                  aria-label={showPin ? "Hide PIN" : "Show PIN"}
-                >
-                  {showPin ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              <button
-                type="button"
-                onClick={handleSavePin}
-                disabled={saving}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-[13.5px] font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-105 disabled:opacity-70"
-              >
-                {saving ? (
-                  <>
-                    <LoaderCircle className="animate-spin" size={16} />
-                    Saving…
-                  </>
-                ) : (
-                  <>
-                    <Check size={16} />
-                    Save PIN
-                  </>
-                )}
-              </button>
-            </div>
+{/* 4-Digit PIN */}
+<div className="dash-card p-6">
+  <div className="flex items-start justify-between gap-4">
+    <div className="flex items-start gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
+        <Lock size={20} className="text-amber-600" />
+      </div>
 
-            {pinError && (
-              <p className="mt-3 text-[12px] font-medium text-rose-600">{pinError}</p>
-            )}
-            {pinSaved && (
-              <p className="mt-3 text-[12px] font-medium text-emerald-600">
-                Your 4-digit security PIN has been saved.
-              </p>
-            )}
-          </div>
-        </div>
+      <div>
+        <h3 className="text-[16px] font-bold text-slate-900">
+          4-Digit Security &amp; Transaction PIN
+        </h3>
+        <p className="mt-0.5 text-[12px] text-slate-500">
+          Your 4-digit security PIN is used for Step-Up sign-in verification and
+          authorizing vault transfers.
+        </p>
+      </div>
+    </div>
+
+    <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+      PIN Active
+    </span>
+  </div>
+
+  {/* PIN Input and Visibility Toggle */}
+  <div className="mt-5 flex items-center gap-3">
+    <div className="relative min-w-0 flex-1">
+      <input
+        type={showPin ? "text" : "password"}
+        value={pin}
+        onChange={(e) => setPin(e.target.value)}
+        inputMode="numeric"
+        maxLength={4}
+        placeholder="••••"
+        autoComplete="off"
+        className="dash-input w-full py-3 pl-4 pr-12 text-center text-[18px] font-bold tracking-[0.5em] text-slate-800"
+      />
+
+      <button
+        type="button"
+        onClick={() => setShowPin((prev) => !prev)}
+        aria-label={showPin ? "Hide PIN" : "Show PIN"}
+        aria-pressed={showPin}
+        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 cursor-pointer rounded-md p-1 text-slate-400 transition-colors hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      >
+        {showPin ? (
+          <EyeOff size={20} />
+        ) : (
+          <Eye size={20} />
+        )}
+      </button>
+    </div>
+
+    <button
+      type="button"
+      onClick={handleSavePin}
+      disabled={saving}
+      className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-[13.5px] font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-105 disabled:opacity-70"
+    >
+      {saving ? (
+        <>
+          <LoaderCircle className="animate-spin" size={16} />
+          Saving…
+        </>
+      ) : (
+        <>
+          <Check size={16} />
+          Save PIN
+        </>
+      )}
+    </button>
+  </div>
+
+  {pinError && (
+    <p className="mt-3 text-[12px] font-medium text-rose-600">
+      {pinError}
+    </p>
+  )}
+
+  {pinSaved && (
+    <p className="mt-3 text-[12px] font-medium text-emerald-600">
+      Your 4-digit security PIN has been saved.
+    </p>
+  )}
+</div>
 
         {/* Right column */}
         <div className="space-y-5">
