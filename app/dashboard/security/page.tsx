@@ -273,6 +273,7 @@ export default function SecurityPage() {
     </p>
   )}
 </div>
+        </div>
 
         {/* Right column */}
         <div className="space-y-5">
