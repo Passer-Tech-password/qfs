@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 import {
   Wallet,
   CreditCard,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 import { createFixedDeposit } from "@/lib/firebase/money";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
+import { ConnectWalletModal } from "@/components/dashboard/connect-wallet-modal";
 
 export type InvestmentPlan = {
   id: string;
@@ -100,6 +102,8 @@ function StatCard({
 }
 
 export function FixedDepositHero() {
+  const [walletOpen, setWalletOpen] = useState(false);
+
   return (
     <section className="dash-hero relative overflow-hidden rounded-[22px] p-6 text-white">
       <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
@@ -113,14 +117,23 @@ export function FixedDepositHero() {
           <p className="mt-1 text-[12.5px] text-indigo-200">No active investment</p>
         </div>
         <div className="flex flex-wrap gap-2.5">
-          <button className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-[12.5px] font-bold text-white transition hover:bg-white/20">
+          <Link
+            href="/dashboard/fixed-deposits"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-[12.5px] font-bold text-white transition hover:bg-white/20"
+          >
             <CreditCard size={15} /> My Contracts
-          </button>
-          <button className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-[12.5px] font-bold text-indigo-700 transition hover:bg-indigo-50">
+          </Link>
+          <button
+            type="button"
+            onClick={() => setWalletOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-[12.5px] font-bold text-indigo-700 transition hover:bg-indigo-50"
+          >
             <Wallet size={15} /> Connect Wallet
           </button>
         </div>
       </div>
+
+      <ConnectWalletModal open={walletOpen} onClose={() => setWalletOpen(false)} />
     </section>
   );
 }
