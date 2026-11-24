@@ -155,8 +155,11 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
       const credential = await createUserWithEmailAndPassword(auth, email, password);
 
+      // Save the user profile to Firestore first — this is the critical step
+      // that allows username-based login and dashboard access. It runs
+      // independently of updateProfile so a profile-display failure can never
+      // leave the account without a saved record.
       try {
-        await updateProfile(credential.user, { displayName: `${firstName} ${lastName}` });
         await setDoc(doc(db, "users", credential.user.uid), {
           firstName,
           lastName,
@@ -166,12 +169,21 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           email,
           createdAt: serverTimestamp(),
         });
-      } catch {
+      } catch (saveError) {
+        console.error("Failed to save user profile to Firestore.", saveError);
         setMessage({
           type: "error",
           text: "Your account was created, but we couldn't save its profile. You can sign in while the profile setup is resolved.",
         });
         return;
+      }
+
+      // Updating the display name is a nice-to-have and must not block the
+      // account from being usable, so failures here are swallowed.
+      try {
+        await updateProfile(credential.user, { displayName: `${firstName} ${lastName}` });
+      } catch {
+        // Non-fatal — the Firestore profile is already saved.
       }
 
       setMessage({
