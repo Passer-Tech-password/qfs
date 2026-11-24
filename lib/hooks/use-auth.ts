@@ -17,6 +17,18 @@ type AuthState =
 const SESSION_MAX_AGE_MS = 5 * 60 * 60 * 1000;
 const SESSION_CHECK_INTERVAL_MS = 60 * 1000;
 
+// Users are signed out after five minutes of inactivity (no mouse, keyboard,
+// scroll, or touch input). Any of those events resets the countdown.
+const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
+const ACTIVITY_EVENTS: (keyof WindowEventMap)[] = [
+  "mousemove",
+  "mousedown",
+  "keydown",
+  "scroll",
+  "touchstart",
+  "click",
+];
+
 export function useAuth(): AuthState {
   const [state, setState] = useState<AuthState>({ status: "loading" });
 
@@ -90,6 +102,39 @@ export function useAuth(): AuthState {
     return () => {
       cancelled = true;
       if (interval) clearInterval(interval);
+    };
+  }, [state]);
+
+  // Sign the user out after INACTIVITY_TIMEOUT_MS of no activity. Any user
+  // interaction (mouse, keyboard, scroll, touch, click) resets the timer.
+  useEffect(() => {
+    if (state.status !== "signed-in") return;
+
+    let timer: ReturnType<typeof setTimeout>;
+
+    async function forceSignOut() {
+      try {
+        await signOut(getFirebaseClients().auth);
+      } catch {
+        // Ignore failures; the layouts will still route to the login page.
+      }
+    }
+
+    function resetTimer() {
+      clearTimeout(timer);
+      timer = setTimeout(() => void forceSignOut(), INACTIVITY_TIMEOUT_MS);
+    }
+
+    resetTimer();
+    for (const eventName of ACTIVITY_EVENTS) {
+      window.addEventListener(eventName, resetTimer, { passive: true });
+    }
+
+    return () => {
+      clearTimeout(timer);
+      for (const eventName of ACTIVITY_EVENTS) {
+        window.removeEventListener(eventName, resetTimer);
+      }
     };
   }, [state]);
 
