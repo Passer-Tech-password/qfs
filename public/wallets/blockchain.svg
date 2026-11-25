@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Blockchain">
+  <rect width="32" height="32" rx="4" fill="#0E76FD"/>
+  <path d="M16 5l10 6-10 6L6 11z" fill="#4FA8FF"/>
+  <path d="M16 15l10 6-10 6-10-6z" fill="#fff"/>
+  <path d="M16 15v12" stroke="#0E76FD" stroke-width="1.5"/>
+  <path d="M6 11l10 6 10-6" stroke="#0E76FD" stroke-width="1.5" fill="none"/>
+</svg>

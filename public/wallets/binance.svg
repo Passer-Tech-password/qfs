@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Binance Smart Chain">
+  <rect width="32" height="32" rx="4" fill="#F0B90B"/>
+  <path d="M6 16l4-4 6 6 6-6 4 4-10 10z" fill="#fff"/>
+  <path d="M10 12l6-6 6 6" stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round"/>
+</svg>

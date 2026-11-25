@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Other Wallet">
+  <rect width="32" height="32" rx="6" fill="#64748B"/>
+  <path d="M6 12h20v10a2 2 0 01-2 2H8a2 2 0 01-2-2z" fill="#fff"/>
+  <path d="M6 12V9a2 2 0 012-2h16a2 2 0 012 2v3" stroke="#fff" stroke-width="2" fill="none"/>
+  <circle cx="23" cy="17" r="2" fill="#64748B"/>
+</svg>

@@ -17,78 +17,43 @@ type WalletItem = {
 };
 
 const wallets: WalletItem[] = [
-  {
-    id: "metamask",
-    name: "Metamask",
-    color: "bg-orange-500",
-    glyph: "🦊",
-    icon: "/wallets/metamask.svg",
-    networks: ["Tron (TRC20)"],
-    connectionMethod: "Browser extension",
-  },
-  {
-    id: "trust",
-    name: "Trust",
-    color: "bg-blue-500",
-    glyph: "🛡",
-    icon: "/wallets/trust.svg",
-    networks: ["Bitcoin", "Tron (TRC20)"],
-    connectionMethod: "Mobile app · QR",
-  },
-  {
-    id: "coinbase",
-    name: "Coinbase",
-    color: "bg-blue-600",
-    glyph: "C",
-    icon: "/wallets/coinbase.svg",
-    networks: ["Bitcoin", "Tron (TRC20)"],
-    connectionMethod: "Browser extension · Mobile app",
-  },
-  {
-    id: "xumm",
-    name: "Xumm",
-    color: "bg-blue-500",
-    glyph: "✕",
-    icon: "/wallets/xumm.svg",
-    networks: ["XRP Ledger"],
-    connectionMethod: "Mobile app · QR",
-  },
-  {
-    id: "cardano",
-    name: "Cardano",
-    color: "bg-blue-700",
-    glyph: "✦",
-    icon: "/wallets/cardano.svg",
-    networks: ["Stellar"],
-    connectionMethod: "Browser extension",
-  },
-  {
-    id: "daedalus",
-    name: "Daedalus",
-    color: "bg-slate-700",
-    glyph: "🐂",
-    icon: "/wallets/daedalus.svg",
-    networks: ["Stellar"],
-    connectionMethod: "Desktop app",
-  },
-  {
-    id: "yoroi",
-    name: "Yoroi",
-    color: "bg-blue-500",
-    glyph: "⬢",
-    icon: "/wallets/yoroi.svg",
-    networks: ["Stellar"],
-    connectionMethod: "Browser extension · Mobile app",
-  },
-  {
-    id: "ccvault",
-    name: "CCVault",
-    color: "bg-purple-600",
-    glyph: "◆",
-    icon: "/wallets/ccvault.svg",
-    networks: ["Stellar"],
-    connectionMethod: "Browser extension",
-  },
+  { id: "metamask", name: "Metamask", color: "bg-orange-500", glyph: "🦊", icon: "/wallets/metamask.svg", networks: ["Ethereum"], connectionMethod: "Browser extension" },
+  { id: "trust", name: "Trust", color: "bg-blue-500", glyph: "🛡", icon: "/wallets/trust.svg", networks: ["Multi-chain"], connectionMethod: "Mobile app · QR" },
+  { id: "coinbase", name: "Coinbase", color: "bg-blue-600", glyph: "C", icon: "/wallets/coinbase.svg", networks: ["Multi-chain"], connectionMethod: "Browser extension · Mobile app" },
+  { id: "xumm", name: "Xumm", color: "bg-blue-500", glyph: "✕", icon: "/wallets/xumm.svg", networks: ["XRP Ledger"], connectionMethod: "Mobile app · QR" },
+  { id: "cardano", name: "Cardano", color: "bg-blue-700", glyph: "✦", icon: "/wallets/cardano.svg", networks: ["Cardano"], connectionMethod: "Browser extension" },
+  { id: "daedalus", name: "Daedalus", color: "bg-slate-700", glyph: "🐂", icon: "/wallets/daedalus.svg", networks: ["Cardano"], connectionMethod: "Desktop app" },
+  { id: "yoroi", name: "Yoroi", color: "bg-blue-500", glyph: "⬢", icon: "/wallets/yoroi.svg", networks: ["Cardano"], connectionMethod: "Browser extension · Mobile app" },
+  { id: "ccvault", name: "CCVault", color: "bg-purple-600", glyph: "◆", icon: "/wallets/ccvault.svg", networks: ["Cardano"], connectionMethod: "Browser extension" },
+  { id: "gero", name: "Gero", color: "bg-teal-500", glyph: "G", icon: "/wallets/gero.svg", networks: ["Cardano"], connectionMethod: "Browser extension" },
+  { id: "nami", name: "Nami", color: "bg-teal-400", glyph: "N", icon: "/wallets/nami.svg", networks: ["Cardano"], connectionMethod: "Browser extension" },
+  { id: "solana", name: "Solana", color: "bg-slate-900", glyph: "S", icon: "/wallets/solana.svg", networks: ["Solana"], connectionMethod: "Browser extension" },
+  { id: "phantom", name: "Phantom", color: "bg-violet-500", glyph: "👻", icon: "/wallets/phantom.svg", networks: ["Solana"], connectionMethod: "Browser extension · Mobile app" },
+  { id: "solflare", name: "Solflare", color: "bg-orange-500", glyph: "☀", icon: "/wallets/solflare.svg", networks: ["Solana"], connectionMethod: "Browser extension" },
+  { id: "sollet", name: "Sollet", color: "bg-blue-500", glyph: "S", icon: "/wallets/sollet.svg", networks: ["Solana"], connectionMethod: "Browser extension" },
+  { id: "solong", name: "Solong", color: "bg-slate-700", glyph: "◉", icon: "/wallets/solong.svg", networks: ["Solana"], connectionMethod: "Browser extension" },
+  { id: "exodus", name: "Exodus", color: "bg-slate-800", glyph: "✕", icon: "/wallets/exodus.svg", networks: ["Multi-chain"], connectionMethod: "Desktop · Mobile app" },
+  { id: "avalanche", name: "Avalanche", color: "bg-red-500", glyph: "▲", icon: "/wallets/avalanche.svg", networks: ["Avalanche"], connectionMethod: "Browser extension" },
+  { id: "velas", name: "Velas", color: "bg-purple-600", glyph: "▽", icon: "/wallets/velas.svg", networks: ["Velas"], connectionMethod: "Browser extension" },
+  { id: "cryptocom", name: "crypto.com", color: "bg-slate-800", glyph: "C", icon: "/wallets/cryptocom.svg", networks: ["Cronos"], connectionMethod: "Mobile app · Browser extension" },
+  { id: "blockchain", name: "Blockchain", color: "bg-blue-500", glyph: "◆", icon: "/wallets/blockchain.svg", networks: ["Bitcoin · Ethereum"], connectionMethod: "Browser extension · Mobile app" },
+  { id: "binance", name: "Binance Smart Chain", color: "bg-yellow-500", glyph: "⬢", icon: "/wallets/binance.svg", networks: ["BNB Chain"], connectionMethod: "Browser extension" },
+  { id: "safepal", name: "Safepal", color: "bg-blue-600", glyph: "S", icon: "/wallets/safepal.svg", networks: ["Multi-chain"], connectionMethod: "Hardware · Mobile app" },
+  { id: "argent", name: "Argent", color: "bg-orange-500", glyph: "ᐱ", icon: "/wallets/argent.svg", networks: ["Ethereum · Starknet"], connectionMethod: "Mobile app" },
+  { id: "fortmatic", name: "Fortmatic", color: "bg-violet-600", glyph: "F", icon: "/wallets/fortmatic.svg", networks: ["Ethereum"], connectionMethod: "SDK · Email" },
+  { id: "aktionariat", name: "Aktionariat", color: "bg-yellow-600", glyph: "△", icon: "/wallets/aktionariat.svg", networks: ["Ethereum"], connectionMethod: "Browser extension" },
+  { id: "keyring", name: "Keyring Pro", color: "bg-blue-500", glyph: "◎", icon: "/wallets/keyring.svg", networks: ["Multi-chain"], connectionMethod: "Browser extension" },
+  { id: "bitkeep", name: "BitKeep", color: "bg-amber-500", glyph: "B", icon: "/wallets/bitkeep.svg", networks: ["Multi-chain"], connectionMethod: "Mobile app · Browser extension" },
+  { id: "sparkpoint", name: "SparkPoint", color: "bg-cyan-600", glyph: "✦", icon: "/wallets/sparkpoint.svg", networks: ["Multi-chain"], connectionMethod: "Mobile app" },
+  { id: "ownbit", name: "OwnBit", color: "bg-cyan-500", glyph: "O", icon: "/wallets/ownbit.svg", networks: ["Multi-chain"], connectionMethod: "Mobile app" },
+  { id: "infinity", name: "Infinity Wallet", color: "bg-slate-800", glyph: "∞", icon: "/wallets/infinity.svg", networks: ["Multi-chain"], connectionMethod: "Browser extension" },
+  { id: "walletio", name: "Wallet.io", color: "bg-blue-500", glyph: "W", icon: "/wallets/walletio.svg", networks: ["Multi-chain"], connectionMethod: "Web · Mobile app" },
+  { id: "infinito", name: "Infinito", color: "bg-violet-600", glyph: "∞", icon: "/wallets/infinito.svg", networks: ["Multi-chain"], connectionMethod: "Mobile app" },
+  { id: "torus", name: "Torus", color: "bg-blue-500", glyph: "◯", icon: "/wallets/torus.svg", networks: ["Ethereum"], connectionMethod: "Web · OAuth" },
+  { id: "nash", name: "Nash", color: "bg-blue-700", glyph: "N", icon: "/wallets/nash.svg", networks: ["NEO · Ethereum"], connectionMethod: "Desktop · Mobile app" },
+  { id: "bitpay", name: "BitPay", color: "bg-blue-600", glyph: "B", icon: "/wallets/bitpay.svg", networks: ["Bitcoin"], connectionMethod: "Mobile app" },
+  { id: "imtoken", name: "imToken", color: "bg-cyan-500", glyph: "i", icon: "/wallets/imtoken.svg", networks: ["Multi-chain"], connectionMethod: "Mobile app" },
+  { id: "other", name: "Other Wallet", color: "bg-slate-500", glyph: "◈", icon: "/wallets/other.svg", networks: ["Multi-chain"], connectionMethod: "Manual import" },
 ];
 
 export function ConnectWalletModal({
@@ -162,7 +127,7 @@ export function ConnectWalletModal({
                 </span>
               </div>
               <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-slate-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-quantum-blink" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Multi-Chain Decentralized Protocol &amp; Node Sync
               </div>
             </div>
@@ -206,16 +171,10 @@ export function ConnectWalletModal({
                     onClick={() => handleSelect(w)}
                     className="flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3.5 text-left transition hover:border-indigo-300 hover:bg-indigo-50/40"
                   >
-                    <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500 animate-quantum-blink" />
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[15px] font-semibold text-slate-800">
                         {w.name}
-                      </span>
-                      <span className="mt-0.5 block truncate text-[11.5px] text-slate-500">
-                        {w.networks.join(" · ")}
-                      </span>
-                      <span className="mt-0.5 block truncate text-[10.5px] text-slate-400">
-                        {w.connectionMethod}
                       </span>
                     </span>
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-slate-200">
@@ -321,7 +280,7 @@ export function ConnectWalletModal({
                 Your wallet has been verified successfully.
               </p>
               <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-[13px] font-bold text-emerald-700 ring-1 ring-emerald-200">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-quantum-blink" />
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 STATUS: 1 CONNECTED
               </div>
               <button
