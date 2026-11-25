@@ -65,5 +65,25 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if isAdmin();
     }
+
+    // Operator-facing security audit log (login, logout, role change, suspend).
+    // The admin console reads it; entries are written server-side / by admins.
+    match /security_logs/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Public site content (events shown on the marketing site). Published
+    // events are world-readable so the landing page can render them; only
+    // admins may create, edit, or remove them.
+    match /site_events/{docId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Platform-wide announcements managed by admins and shown to members.
+    match /announcements/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
   }
 }
