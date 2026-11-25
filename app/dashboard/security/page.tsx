@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   KeyRound,
   Eye,
@@ -14,7 +14,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-import { saveSecurityPin } from "@/lib/firebase/account-security";
+import { saveSecurityPin, useSecurityPin } from "@/lib/firebase/account-security";
 
 // Deterministic pseudo-QR pattern (visual placeholder only)
 const QR_SIZE = 17;
@@ -72,10 +72,16 @@ export default function SecurityPage() {
   const [saving, setSaving] = useState(false);
   const [pinError, setPinError] = useState<string | null>(null);
   const [pinSaved, setPinSaved] = useState(false);
+  const { hasPin, savedAt, pin: savedPin } = useSecurityPin();
   const [phraseCopied, setPhraseCopied] = useState(false);
   const [keyCopied, setKeyCopied] = useState(false);
   const [twoFAError, setTwoFAError] = useState<string | null>(null);
   const [twoFAActivated, setTwoFAActivated] = useState(false);
+
+  // Restore the saved PIN so it is reused on load (without clobbering typing).
+  useEffect(() => {
+    if (savedPin) setPin((current) => (current === "" ? savedPin : current));
+  }, [savedPin]);
 
   async function handleSavePin() {
     if (saving) return;
@@ -219,8 +225,12 @@ export default function SecurityPage() {
       </div>
     </div>
 
-    <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-      PIN Active
+    <span
+      className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide ${
+        hasPin ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
+      }`}
+    >
+      {hasPin ? "PIN Active" : "No PIN Set"}
     </span>
   </div>
 
@@ -282,6 +292,13 @@ export default function SecurityPage() {
   {pinSaved && (
     <p className="mt-3 text-[12px] font-medium text-emerald-600">
       Your 4-digit security PIN has been saved.
+    </p>
+  )}
+
+  {hasPin && !pinSaved && (
+    <p className="mt-3 text-[12px] font-medium text-emerald-600">
+      A 4-digit security PIN is saved on this account
+      {savedAt ? ` (last updated ${new Date(savedAt).toLocaleDateString()})` : ""}.
     </p>
   )}
 </div>

@@ -2,12 +2,103 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Wallet, Plus, ArrowUpRight, QrCode, Sparkles, Download } from "lucide-react";
+import { Wallet, Plus, ArrowUpRight, QrCode, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { ConnectWalletModal } from "@/components/dashboard/connect-wallet-modal";
 import { useDepositAddresses } from "@/lib/firebase/deposit-addresses";
 
 type MarketStatus = "loading" | "live" | "delayed" | "unavailable";
+
+type MarketSnapshot = { history: number[]; spot: number };
+
+const CHART_POINTS = 24;
+
+function validPrices(values: unknown[]): number[] {
+  return values
+    .map((value) => Number(value))
+    .filter((price) => Number.isFinite(price) && price > 0);
+}
+
+// Reduce a longer series down to CHART_POINTS evenly spaced samples.
+function downsample(values: number[], target = CHART_POINTS): number[] {
+  if (values.length <= target) return values;
+  const step = values.length / target;
+  return Array.from({ length: target }, (_, index) =>
+    values[Math.min(values.length - 1, Math.floor(index * step))],
+  );
+}
+
+// Public XLM/USD market-data providers, tried in order until one responds. A
+// single hard-coded exchange is unreliable (geo-blocking / CORS), so falling
+// through this list keeps the dashboard chart live.
+const marketProviders: {
+  name: string;
+  load: (signal: AbortSignal) => Promise<MarketSnapshot>;
+}[] = [
+  {
+    name: "Kraken",
+    async load(signal) {
+      const [historyResponse, tickerResponse] = await Promise.all([
+        fetch("https://api.kraken.com/0/public/OHLC?pair=XLMUSD&interval=60", {
+          cache: "no-store",
+          signal,
+        }),
+        fetch("https://api.kraken.com/0/public/Ticker?pair=XLMUSD", {
+          cache: "no-store",
+          signal,
+        }),
+      ]);
+      if (!historyResponse.ok || !tickerResponse.ok) throw new Error("Kraken unavailable.");
+
+      const historyData = (await historyResponse.json()) as { result?: Record<string, unknown> };
+      const series = Object.values(historyData.result ?? {}).find((value) => Array.isArray(value));
+      const rows = Array.isArray(series) ? (series as unknown[][]) : [];
+      const history = validPrices(rows.map((row) => row[4])).slice(-CHART_POINTS);
+      if (history.length < 2) throw new Error("Not enough Kraken history.");
+
+      const tickerData = (await tickerResponse.json()) as {
+        result?: Record<string, { c?: unknown[] }>;
+      };
+      const entry = Object.values(tickerData.result ?? {})[0];
+      const spot = Number(Array.isArray(entry?.c) ? entry.c[0] : NaN);
+      return {
+        history,
+        spot: Number.isFinite(spot) && spot > 0 ? spot : history[history.length - 1],
+      };
+    },
+  },
+  {
+    name: "Binance",
+    async load(signal) {
+      const response = await fetch(
+        "https://api.binance.com/api/v3/klines?symbol=XLMUSDT&interval=1h&limit=24",
+        { cache: "no-store", signal },
+      );
+      if (!response.ok) throw new Error("Binance unavailable.");
+      const candles = (await response.json()) as unknown;
+      if (!Array.isArray(candles)) throw new Error("Invalid Binance history.");
+      const history = validPrices(candles.map((candle) => (Array.isArray(candle) ? candle[4] : NaN)));
+      if (history.length < 2) throw new Error("Not enough Binance history.");
+      return { history, spot: history[history.length - 1] };
+    },
+  },
+  {
+    name: "CoinGecko",
+    async load(signal) {
+      const response = await fetch(
+        "https://api.coingecko.com/api/v3/coins/stellar/market_chart?vs_currency=usd&days=1",
+        { cache: "no-store", signal },
+      );
+      if (!response.ok) throw new Error("CoinGecko unavailable.");
+      const data = (await response.json()) as { prices?: unknown[] };
+      const history = downsample(
+        validPrices((data.prices ?? []).map((point) => (Array.isArray(point) ? point[1] : NaN))),
+      );
+      if (history.length < 2) throw new Error("Not enough CoinGecko history.");
+      return { history, spot: history[history.length - 1] };
+    },
+  },
+];
 
 function MarketVelocity() {
   const [prices, setPrices] = useState<number[]>([]);
@@ -16,75 +107,37 @@ function MarketVelocity() {
 
   useEffect(() => {
     let active = true;
-    let hasHistory = false;
     const controller = new AbortController();
 
-    async function loadHistory(): Promise<boolean> {
-      try {
-        const response = await fetch(
-          "https://api.binance.com/api/v3/klines?symbol=XLMUSDT&interval=1h&limit=24",
-          { cache: "no-store", signal: controller.signal },
-        );
-        if (!response.ok) throw new Error("Market history is unavailable.");
-
-        const candles = (await response.json()) as unknown;
-        if (!Array.isArray(candles)) throw new Error("Invalid market history.");
-
-        const history = candles
-          .map((candle) => Number(Array.isArray(candle) ? candle[4] : NaN))
-          .filter((price) => Number.isFinite(price) && price > 0);
-        if (history.length < 2) throw new Error("Not enough market history.");
-
-        hasHistory = true;
-        if (active) {
-          setPrices(history);
-          setSpotPrice(history[history.length - 1]);
+    // Try each provider in turn; the first successful response wins.
+    async function loadFromProviders(): Promise<boolean> {
+      for (const provider of marketProviders) {
+        try {
+          const snapshot = await provider.load(controller.signal);
+          if (!active) return true;
+          setPrices(snapshot.history);
+          setSpotPrice(snapshot.spot);
           setStatus("live");
-        }
-        return true;
-      } catch {
-        if (active && !controller.signal.aborted) setStatus("unavailable");
-        return false;
-      }
-    }
-
-    async function refreshSpotPrice() {
-      try {
-        const response = await fetch(
-          "https://api.binance.com/api/v3/ticker/price?symbol=XLMUSDT",
-          { cache: "no-store", signal: controller.signal },
-        );
-        if (!response.ok) throw new Error("Spot price is unavailable.");
-
-        const result = (await response.json()) as { price?: string };
-        const price = Number(result.price);
-        if (!Number.isFinite(price) || price <= 0) throw new Error("Invalid spot price.");
-
-        if (active) {
-          setSpotPrice(price);
-          setPrices((current) =>
-            current.length > 0 ? [...current.slice(0, -1), price] : current,
-          );
-          setStatus("live");
-        }
-      } catch {
-        if (active && !controller.signal.aborted) {
-          setStatus((current) => (current === "live" ? "delayed" : current));
+          return true;
+        } catch {
+          if (controller.signal.aborted) return false;
+          // Provider failed — fall through to the next one.
         }
       }
+      return false;
     }
 
-    void loadHistory().then((loaded) => {
-      if (loaded && active) void refreshSpotPrice();
+    void loadFromProviders().then((loaded) => {
+      if (active && !loaded) setStatus("unavailable");
     });
+
     const interval = window.setInterval(() => {
-      if (!hasHistory) {
-        void loadHistory().then((loaded) => {
-          if (loaded && active) void refreshSpotPrice();
-        });
-      } else {
-        void refreshSpotPrice();
-      }
+      void loadFromProviders().then((loaded) => {
+        if (!active || loaded) return;
+        setStatus((current) =>
+          current === "live" ? "delayed" : current === "loading" ? "unavailable" : current,
+        );
+      });
     }, 30_000);
 
     return () => {
@@ -96,19 +149,39 @@ function MarketVelocity() {
 
   const chart = useMemo(() => {
     if (prices.length < 2) return null;
+
+    // Scale the chart to the 24-hour history only. The indicator dot is mapped
+    // through this same scale, so its vertical position is a direct, proportional
+    // read of the market value: it rises when the price rises and falls when the
+    // price falls.
     const min = Math.min(...prices);
     const max = Math.max(...prices);
     const range = max - min || max * 0.001;
-    const points = prices.map((price, index) => {
-      const x = (index / (prices.length - 1)) * 400;
-      const y = 96 - ((price - min) / range) * 70;
-      return `${x.toFixed(2)},${y.toFixed(2)}`;
+
+    const liveValue =
+      spotPrice !== null && Number.isFinite(spotPrice) ? spotPrice : prices[prices.length - 1];
+
+    // Single value -> y mapper shared by the line and the dot so they always
+    // stay aligned. Clamped only to keep the marker on-canvas.
+    const toY = (price: number) => {
+      const y = 100 - ((price - min) / range) * 38;
+      return Math.min(106, Math.max(6, y));
+    };
+
+    // The final point carries the live value so the line ends where the dot sits.
+    const series = [...prices.slice(0, -1), liveValue];
+    const points = series.map((price, index) => {
+      const x = (index / (series.length - 1)) * 400;
+      return `${x.toFixed(2)},${toY(price).toFixed(2)}`;
     });
+
     const line = `M ${points.join(" L ")}`;
     const area = `${line} L 400,108 L 0,108 Z`;
-    const [lastX, lastY] = points[points.length - 1].split(",");
+    const lastX = "400.00";
+    const lastY = toY(liveValue).toFixed(2);
+
     return { line, area, lastX, lastY };
-  }, [prices]);
+  }, [prices, spotPrice]);
 
   const statusLabel = {
     loading: "CONNECTING",
@@ -118,7 +191,7 @@ function MarketVelocity() {
   }[status];
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
+    <div className="flex min-h-[158px] flex-col rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[12.5px] font-semibold text-indigo-100">
           Live Yield &amp; Market Velocity
@@ -145,10 +218,10 @@ function MarketVelocity() {
           {statusLabel}
         </span>
       </div>
-      <div className="mt-3 h-[108px]">
+      <div className="mt-auto h-[92px] pt-2">
         {chart ? (
           <svg
-            className="h-full w-full overflow-visible"
+            className="h-full w-full overflow-hidden"
             viewBox="0 0 400 112"
             preserveAspectRatio="none"
             role="img"
@@ -171,7 +244,13 @@ function MarketVelocity() {
               vectorEffect="non-scaling-stroke"
               style={{ filter: "drop-shadow(0 0 3px #31e6a3)" }}
             />
-            <circle cx={chart.lastX} cy={chart.lastY} r="4" fill="#fff" />
+            <circle
+              cx={chart.lastX}
+              cy={chart.lastY}
+              r="4"
+              fill="#fff"
+              style={{ transition: "cy 600ms ease-out" }}
+            />
           </svg>
         ) : (
           <div className="flex h-full items-center justify-center text-[11px] text-indigo-100/75">
@@ -282,22 +361,22 @@ export function VaultHero() {
         </div>
       </div>
 
-      <div className="relative mt-7 grid grid-cols-1 gap-5 lg:grid-cols-[1.6fr_1fr]">
+      <div className="relative mt-7 grid grid-cols-1 items-center gap-5 lg:grid-cols-[1.28fr_1fr]">
         <MarketVelocity />
 
-        <div className="flex min-h-[184px] flex-col items-center rounded-2xl bg-white p-4 text-slate-800 shadow-lg sm:p-5">
-          <p className="text-[12px] font-bold uppercase tracking-wide text-slate-700">
+        <div className="flex min-h-[208px] flex-col items-center rounded-2xl bg-white px-4 py-4 text-slate-800 shadow-lg sm:px-5">
+          <p className="text-[12px] font-bold uppercase tracking-wide text-slate-900">
             Scan to Pay
           </p>
           {addressesLoading ? (
-            <div className="mt-2 flex h-[112px] w-[112px] items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-center text-[10px] text-slate-500">
+            <div className="mt-2 flex h-[124px] w-[124px] items-center justify-center rounded-[15px] border border-slate-100 bg-slate-50 text-center text-[10px] text-slate-500">
               Loading payment address…
             </div>
           ) : paymentAddress ? (
             <Link
               href="/dashboard/qr-payment"
               aria-label={`Open ${paymentAddress.symbol} QR payment`}
-              className="mt-2 flex h-[112px] w-[112px] items-center justify-center rounded-xl border border-slate-100 bg-white p-1 transition hover:shadow-md focus-visible:outline-indigo-500"
+              className="mt-2 flex h-[124px] w-[124px] items-center justify-center rounded-[15px] border border-slate-100 bg-white p-1.5 transition hover:shadow-md focus-visible:outline-indigo-500"
             >
               <span id="overview-payment-qr">
                 <QRCodeSVG
@@ -305,7 +384,7 @@ export function VaultHero() {
                   fgColor="#0f172a"
                   includeMargin
                   level="M"
-                  size={102}
+                  size={110}
                   value={paymentQrValue}
                 />
               </span>
@@ -313,29 +392,26 @@ export function VaultHero() {
           ) : (
             <Link
               href="/dashboard/qr-payment"
-              className="mt-2 flex h-[112px] w-[112px] items-center justify-center rounded-xl border border-slate-100 bg-slate-50 p-3 text-center text-[10px] font-medium text-slate-500 transition hover:bg-slate-100"
+              className="mt-2 flex h-[124px] w-[124px] items-center justify-center rounded-[15px] border border-slate-100 bg-slate-50 p-3 text-center text-[10px] font-medium text-slate-500 transition hover:bg-slate-100"
             >
               Payment QR unavailable. Open QR payment setup.
             </Link>
           )}
-          <div className="mt-2 flex items-center justify-center gap-3">
-            <Link
-              href="/dashboard/qr-payment"
-              className="text-center text-[10px] text-slate-500 hover:text-indigo-600"
-            >
-              {paymentAddress
-                ? `${paymentAddress.symbol} · Click QR to open`
-                : "Open QR payment"}
-            </Link>
+          <div className="mt-2 flex items-center justify-center">
             {paymentAddress && !addressesLoading && (
               <button
                 type="button"
                 onClick={downloadPaymentQr}
                 aria-label="Download payment QR code"
-                className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 hover:text-indigo-700"
+                className="text-center text-[10px] text-slate-500 transition hover:text-indigo-600"
               >
-                <Download size={12} /> Download
+                Click QR to open / download
               </button>
+            )}
+            {(!paymentAddress || addressesLoading) && (
+              <Link href="/dashboard/qr-payment" className="text-center text-[10px] text-slate-500 hover:text-indigo-600">
+                {addressesLoading ? "Loading QR code…" : "Open QR payment"}
+              </Link>
             )}
           </div>
         </div>

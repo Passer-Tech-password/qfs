@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Lock,
   Shield,
@@ -20,7 +20,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { saveSecurityPin } from "@/lib/firebase/account-security";
+import { saveSecurityPin, useSecurityPin } from "@/lib/firebase/account-security";
 
 function Toggle({ on }: { on: boolean }) {
   return (
@@ -73,10 +73,16 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [pinError, setPinError] = useState<string | null>(null);
   const [pinSaved, setPinSaved] = useState(false);
+  const { hasPin, pin: savedPin } = useSecurityPin();
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwSaved, setPwSaved] = useState(false);
   const [prefsSaved, setPrefsSaved] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Restore the saved PIN so it is reused on load (without clobbering typing).
+  useEffect(() => {
+    if (savedPin) setPin((current) => (current === "" ? savedPin : current));
+  }, [savedPin]);
 
   async function handleSavePin() {
     if (saving) return;
@@ -310,8 +316,12 @@ export default function SettingsPage() {
                   4-Digit Security PIN
                 </span>
               </div>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-                PIN Set
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                  hasPin ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
+                }`}
+              >
+                {hasPin ? "PIN Set" : "Not Set"}
               </span>
             </div>
             <p className="mt-1.5 text-[11.5px] text-slate-500">

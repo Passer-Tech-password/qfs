@@ -1,6 +1,7 @@
 "use client";
 
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { addDoc, collection, onSnapshot, serverTimestamp } from "firebase/firestore";
 import { getFirebaseClients } from "@/lib/firebase/client";
 
 /**
@@ -26,25 +27,106 @@ async function createAccountRecord(
   return ref.id;
 }
 
-async function hashPin(pin: string): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(pin),
-  );
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
 /**
- * Persists the 4-digit transaction PIN as a hashed, pending security record.
- * The raw PIN is never written to Firestore.
+ * Persists the 4-digit transaction PIN on the signed-in user's own database
+ * record so it can be reused later. Each save appends a new record, so the
+ * newest `savedAt` is treated as the active PIN.
  */
 export async function saveSecurityPin(pin: string): Promise<string> {
   if (!/^\d{4}$/.test(pin)) {
     throw new Error("Your PIN must be exactly 4 digits.");
   }
-  return createAccountRecord("securityPins", { pinHash: await hashPin(pin) });
+  return createAccountRecord("securityPins", { pin, savedAt: Date.now() });
+}
+
+export type SecurityPinState = {
+  /** True while the saved-PIN lookup is in flight. */
+  loading: boolean;
+  /** True once the account has at least one saved PIN. */
+  hasPin: boolean;
+  /** The saved 4-digit PIN, restored for reuse, or null when none is set. */
+  pin: string | null;
+  /** Epoch-ms of the most recent save, or null when no PIN exists. */
+  savedAt: number | null;
+  error: string | null;
+};
+
+/**
+ * Live view of the signed-in account's saved security PIN. Reading from
+ * Firestore (rather than component state) is what lets the PIN survive page
+ * reloads, navigation, and fresh browser sessions, and update the instant a
+ * new PIN is saved — so it can be reused whenever needed.
+ */
+export function useSecurityPin(): SecurityPinState {
+  const [state, setState] = useState<SecurityPinState>({
+    loading: true,
+    hasPin: false,
+    pin: null,
+    savedAt: null,
+    error: null,
+  });
+
+  useEffect(() => {
+    let active = true;
+    let unsubscribe = () => {};
+
+    try {
+      const { auth, db } = getFirebaseClients();
+      const uid = auth.currentUser?.uid;
+      if (!uid) {
+        setState({ loading: false, hasPin: false, pin: null, savedAt: null, error: null });
+        return;
+      }
+
+      unsubscribe = onSnapshot(
+        collection(db, "users", uid, "securityPins"),
+        (snapshot) => {
+          if (!active) return;
+          let latest: { pin: string; savedAt: number } | null = null;
+          for (const record of snapshot.docs) {
+            const data = record.data();
+            const savedPin = typeof data.pin === "string" && data.pin.length > 0 ? data.pin : null;
+            if (!savedPin) continue;
+            const at = typeof data.savedAt === "number" ? data.savedAt : 0;
+            if (!latest || at >= latest.savedAt) latest = { pin: savedPin, savedAt: at };
+          }
+          setState({
+            loading: false,
+            hasPin: latest !== null,
+            pin: latest?.pin ?? null,
+            savedAt: latest?.savedAt ?? null,
+            error: null,
+          });
+        },
+        (caught) => {
+          if (!active) return;
+          setState({
+            loading: false,
+            hasPin: false,
+            pin: null,
+            savedAt: null,
+            error: caught.message,
+          });
+        },
+      );
+    } catch (caught) {
+      setState({
+        loading: false,
+        hasPin: false,
+        pin: null,
+        savedAt: null,
+        error: caught instanceof Error ? caught.message : "Firebase is not configured.",
+      });
+      return;
+    }
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, []);
+
+  return state;
 }
 
 export type KycInput = {

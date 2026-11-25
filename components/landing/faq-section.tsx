@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 const faqs = [
   {
     q: "How does QFS Assets Vault protect accounts against unauthorized access?",
-    a: "QFS enforces layered protection: biometric WebAuthn passkeys bound to your device, a 4-digit security PIN for high-risk operations, 256-bit quantum encryption at rest, and multi-signature hardware MPC for vault withdrawals. All sessions are monitored for anomalous access patterns with instant freeze controls.",
+    a: "Our platform enforces zero-trust architecture combining FIDO2 biometric WebAuthn passkeys, 4-digit security PIN verification, 256-bit encryption, and multi-signature cold vault storage.",
   },
   {
     q: "Which cryptocurrencies are supported for instant transfer?",
