@@ -122,18 +122,23 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             body: JSON.stringify({ identifier, password }),
           });
           const result = (await response.json().catch(() => null)) as
-            | { customToken?: string; error?: string }
+            | { customToken?: string; email?: string; error?: string; reason?: string }
             | null;
 
-          if (!response.ok || !result?.customToken) {
+          if (!response.ok || (!result?.customToken && !result?.email)) {
+            const detail = result?.reason ? ` (${result.reason})` : "";
             setMessage({
               type: "error",
-              text: result?.error ?? "The username or password is incorrect. Please try again.",
+              text: `${result?.error ?? "The username or password is incorrect. Please try again."}${detail}`,
             });
             return;
           }
 
-          await signInWithCustomToken(auth, result.customToken);
+          if (result.customToken) {
+            await signInWithCustomToken(auth, result.customToken);
+          } else if (result.email) {
+            await signInWithEmailAndPassword(auth, result.email, password);
+          }
         }
         const next = new URLSearchParams(window.location.search).get("next");
         router.push(next === "/dashboard/security" ? next : "/dashboard");

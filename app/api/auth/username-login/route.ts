@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     // example a Node version mismatch) is reported here instead of crashing the
     // serverless function with an empty 500 response.
     const { getFirebaseAdmin } = await import("@/lib/firebase/admin");
-    const { auth, db } = getFirebaseAdmin();
+    const { db } = getFirebaseAdmin();
     const normalizedUsername = identifier.toLowerCase();
     const users = db.collection("users");
     let matches = await users
@@ -55,6 +55,12 @@ export async function POST(request: Request) {
     const email = profile.get("email");
     if (typeof email !== "string" || !email.includes("@")) return invalidCredentials();
 
+    // Verify the password against Firebase Auth. We intentionally avoid
+    // auth.createCustomToken() here because that call requires the Service
+    // Account Token Creator IAM role, which is not granted in every
+    // deployment (especially when Application Default Credentials are used).
+    // Instead, the password is verified via the REST API and the verified
+    // email is returned so the client can sign in directly.
     const authResponse = await fetch(
       `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
       {
@@ -69,8 +75,7 @@ export async function POST(request: Request) {
     const authResult = (await authResponse.json()) as { localId?: unknown };
     if (authResult.localId !== profile.id) return invalidCredentials();
 
-    const customToken = await auth.createCustomToken(profile.id);
-    return NextResponse.json({ customToken }, { headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ email }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Username sign-in failed to complete.", error);
     return NextResponse.json(
