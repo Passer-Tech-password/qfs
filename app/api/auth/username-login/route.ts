@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getFirebaseAdmin } from "@/lib/firebase/admin";
 
 export const runtime = "nodejs";
 
@@ -33,6 +32,10 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Loaded dynamically so that a failure to initialise firebase-admin (for
+    // example a Node version mismatch) is reported here instead of crashing the
+    // serverless function with an empty 500 response.
+    const { getFirebaseAdmin } = await import("@/lib/firebase/admin");
     const { auth, db } = getFirebaseAdmin();
     const normalizedUsername = identifier.toLowerCase();
     const users = db.collection("users");
@@ -71,7 +74,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Username sign-in failed to complete.", error);
     return NextResponse.json(
-      { error: "Username sign-in is temporarily unavailable. Please try again." },
+      {
+        error: "Username sign-in is temporarily unavailable. Please try again.",
+        reason: error instanceof Error ? error.message : String(error),
+      },
       { status: 503 },
     );
   }
