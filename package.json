@@ -31,6 +31,7 @@
   "overrides": {
     "@grpc/grpc-js": "^1.14.7",
     "postcss": "^8.5.33",
-    "@firebase/app": "0.16.6"
+    "@firebase/app": "0.16.6",
+    "jose": "^4.15.9"
   }
 }
