@@ -7,7 +7,6 @@ import {
   AtSign,
   Eye,
   EyeOff,
-  KeyRound,
   LoaderCircle,
   LockKeyhole,
   Mail,
@@ -221,12 +220,6 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           <Field id="username" label="USERNAME" icon={<AtSign size={13} />}>
             <input autoComplete="username" className={inputClass} id="username" maxLength={30} minLength={3} name="username" pattern="[A-Za-z0-9_]{3,30}" placeholder="Choose a username" required />
             <span className="mt-1.5 block text-[10px] font-medium leading-relaxed text-slate-400">3–30 letters, numbers, or underscores</span>
-          </Field>
-          <Field id="securityPin" label="4-DIGIT SECURITY PIN" icon={<KeyRound size={13} />}>
-            <input aria-describedby="pin-help" className={`${inputClass} cursor-not-allowed opacity-70`} disabled id="securityPin" inputMode="numeric" placeholder="Set up after account creation" />
-            <span className="mt-1.5 block text-[10px] font-medium leading-relaxed text-slate-400" id="pin-help">
-              Transaction PIN setup requires a secure service and is not enabled yet.
-            </span>
           </Field>
           <Field id="registerEmail" label="EMAIL ADDRESS" icon={<Mail size={13} />}>
             <input autoComplete="email" className={inputClass} id="registerEmail" name="email" placeholder="Enter your email" required type="email" />
