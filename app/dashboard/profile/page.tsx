@@ -1115,22 +1115,29 @@ export default function ProfilePage() {
 
   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
 
-    {/* Account Status */}
-    <div className="flex items-center gap-2.5 rounded-xl bg-emerald-50 px-3 py-3">
-      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500 animate-quantum-blink" />
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[12px] font-medium text-slate-700">
-          Account:
-        </span>
-        <span className="text-[12px] font-bold text-emerald-700">
-          Active
-        </span>
+      {/* Account Status */}
+      <div className="flex items-center gap-2.5 rounded-xl bg-emerald-50 px-3 py-3">
+        <span
+          className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500"
+          aria-hidden="true"
+        />
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[12px] font-medium text-slate-700">
+            Account:
+          </span>
+          <span className="text-[12px] font-bold text-emerald-700">
+            Active
+          </span>
+        </div>
       </div>
-    </div>
+
 
     {/* KYC Status */}
     <div className="flex items-center gap-2.5 rounded-xl bg-amber-50 px-3 py-3">
-      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500 animate-quantum-blink" />
+      <span
+        className="h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500"
+        aria-hidden="true"
+      />
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-[12px] font-medium text-slate-700">
           KYC Status:
@@ -1140,6 +1147,7 @@ export default function ProfilePage() {
         </span>
       </div>
     </div>
+
 
     {/* Joined Date */}
     <div className="flex items-center gap-2.5 rounded-xl bg-slate-50 px-3 py-3">
