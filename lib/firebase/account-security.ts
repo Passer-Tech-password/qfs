@@ -132,11 +132,44 @@ export function useSecurityPin(): SecurityPinState {
 export type KycInput = {
   idType: string;
   idNumber: string;
-  frontFileName: string | null;
-  backFileName: string | null;
+  frontFile: File;
+  backFile: File | null;
+  confirmed: boolean;
 };
 
-/** Submits an identity-verification (KYC) request for operator review. */
-export function submitKycRequest(input: KycInput) {
-  return createAccountRecord("kyc", input);
+export async function submitKycRequest(input: KycInput) {
+  const { auth } = getFirebaseClients();
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("You must be signed in to continue.");
+  }
+
+  const token = await user.getIdToken();
+
+  const formData = new FormData();
+  formData.append("idType", input.idType);
+  formData.append("idNumber", input.idNumber);
+  formData.append("frontFile", input.frontFile);
+  formData.append("confirmed", String(input.confirmed));
+
+  if (input.backFile) {
+    formData.append("backFile", input.backFile);
+  }
+
+  const response = await fetch("/api/kyc", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || "Unable to submit KYC.");
+  }
+
+  return result;
 }

@@ -92,42 +92,74 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   }
 
-  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+
+  async function handleFileChange(
+    event: ChangeEvent<HTMLInputElement>
+  ) {
     const file = event.target.files?.[0];
-    // Reset so selecting the same file again re-triggers the change event.
     event.target.value = "";
+
     if (!file) return;
 
     setUploadError(null);
 
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      setUploadError("Please choose a JPG, PNG, WEBP, or GIF image.");
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      setUploadError("Please choose a JPG or PNG image.");
       return;
     }
-    if (file.size > MAX_IMAGE_BYTES) {
+
+    if (file.size > 5 * 1024 * 1024) {
       setUploadError("Image must be 5 MB or smaller.");
       return;
     }
 
-    setUploading(true);
-    try {
-      const url = await uploadProfileImage(file);
-      setAvatarUrl(url);
+    const { auth: firebaseAuth } = getFirebaseClients();
+    const user = firebaseAuth.currentUser;
 
-      if (auth.status === "signed-in") {
-        const { auth: firebaseAuth } = getFirebaseClients();
-        if (firebaseAuth.currentUser) {
-          await updateProfile(firebaseAuth.currentUser, { photoURL: url });
-        }
+    if (!user) {
+      setUploadError("Please sign in again.");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const token = await user.getIdToken();
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/profile/avatar", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Image upload failed.");
       }
+
+      await updateProfile(user, {
+        photoURL: result.photoURL,
+      });
+
+      setAvatarUrl(result.photoURL);
+
     } catch (error) {
       setUploadError(
-        error instanceof Error ? error.message : "Image upload failed. Please try again.",
+        error instanceof Error
+          ? error.message
+          : "Image upload failed. Please try again."
       );
     } finally {
       setUploading(false);
     }
   }
+
 
   function handleSaveChanges() {
     if (!fullName.trim()) {
