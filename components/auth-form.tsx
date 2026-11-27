@@ -574,21 +574,35 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             />
           </Field>
 
-          <Field
-            id="loginPassword"
-            label="PASSWORD"
-            icon={<LockKeyhole size={14} />}
-          >
-            <input
-              autoComplete="current-password"
-              className={inputClass}
-              id="loginPassword"
-              name="password"
-              placeholder="Enter your password"
-              required
-              type="password"
-            />
-          </Field>
+      <Field
+        id="loginPassword"
+        label="PASSWORD"
+        icon={<LockKeyhole size={14} />}
+      >
+        <input
+          autoComplete="current-password"
+          className={`${inputClass} pr-11`}
+          id="loginPassword"
+          name="password"
+          placeholder="Enter your password"
+          required
+          type={showPassword ? "text" : "password"}
+        />
+
+        <button
+          type="button"
+          aria-label={showPassword ? "Hide password" : "Show password"}
+          aria-pressed={showPassword}
+          onClick={() => setShowPassword((visible) => !visible)}
+          className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-95 active:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+        >
+          {showPassword ? (
+            <Eye size={17} />
+          ) : (
+            <EyeOff size={17} />
+          )}
+        </button>
+      </Field>
         </>
       )}
 
