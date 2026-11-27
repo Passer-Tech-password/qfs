@@ -11,6 +11,7 @@ const TITLES: Record<string, string> = {
   "/admin/users": "User Management",
   "/admin/activities": "Activity Monitor",
   "/admin/requests": "Money Requests",
+  "/admin/funding": "Account Funding",
   "/admin/deposit-addresses": "Deposit Receiving Addresses",
   "/admin/content": "Site Content & Events",
   "/admin/announcements": "Announcements",

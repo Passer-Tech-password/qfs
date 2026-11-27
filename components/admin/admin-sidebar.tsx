@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -22,6 +23,10 @@ const NAV = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/activities", label: "Activities", icon: Activity },
   { href: "/admin/requests", label: "Money Requests", icon: ArrowLeftRight },
+
+  // Account Funding
+  { href: "/admin/funding", label: "Account Funding", icon: Wallet },
+
   { href: "/admin/deposit-addresses", label: "Deposit Addresses", icon: Wallet },
   { href: "/admin/content", label: "Site Content", icon: FileEdit },
   { href: "/admin/announcements", label: "Announcements", icon: Bell },
@@ -46,6 +51,7 @@ export function AdminSidebar({
         open ? "translate-x-0" : "-translate-x-full"
       }`}
     >
+      {/* Sidebar Header */}
       <div className="flex h-[68px] items-center justify-between border-b border-[#eef0f6] px-4 sm:px-6">
         <Link href="/admin" className="flex items-center gap-2">
           <Brand compact />
@@ -53,6 +59,7 @@ export function AdminSidebar({
             Admin
           </span>
         </Link>
+
         <button
           type="button"
           onClick={onClose}
@@ -63,18 +70,28 @@ export function AdminSidebar({
         </button>
       </div>
 
-      <nav aria-label="Admin sections" className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      {/* Navigation */}
+      <nav
+        aria-label="Admin sections"
+        className="flex-1 space-y-1 overflow-y-auto px-3 py-4"
+      >
         <p className="px-3 pb-2 text-[9px] font-extrabold uppercase tracking-[0.12em] text-slate-400">
           Control Center
         </p>
+
         {NAV.map((item) => {
           const Icon = item.icon;
-          const active = item.exact ? pathname === item.href : pathname?.startsWith(item.href);
+
+          const active = item.exact
+            ? pathname === item.href
+            : pathname?.startsWith(item.href);
+
           return (
             <Link
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
+              onClick={onClose}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition ${
                 active
                   ? "bg-indigo-50 text-indigo-700"
@@ -88,6 +105,7 @@ export function AdminSidebar({
         })}
       </nav>
 
+      {/* Footer */}
       <div className="border-t border-[#eef0f6] p-4">
         <Link
           href="/"

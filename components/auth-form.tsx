@@ -1,11 +1,13 @@
 
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  AlertCircle,
   AtSign,
+  CheckCircle2,
   Eye,
   EyeOff,
   LoaderCircle,
@@ -120,11 +122,69 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const [verificationNotice, setVerificationNotice] = useState<{
+    type: "success" | "error";
+    title: string;
+    text: string;
+  } | null>(null);
+
+  // Surface the outcome of the email-verification redirect (?verification=...).
+  // Kept in its own state so it never conflicts with form submit messages.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("verification");
+
+    if (!status) return;
+
+    const notices: Record<
+      string,
+      { type: "success" | "error"; title: string; text: string }
+    > = {
+      success: {
+        type: "success",
+        title: "Email verified successfully",
+        text: "Your email address has been confirmed. You can now sign in to your account.",
+      },
+      expired: {
+        type: "error",
+        title: "Verification link expired",
+        text: "This verification link has expired. Please sign in and request a new verification email.",
+      },
+      invalid: {
+        type: "error",
+        title: "Invalid verification link",
+        text: "This verification link is invalid or has already been used.",
+      },
+      error: {
+        type: "error",
+        title: "Verification failed",
+        text: "We couldn't verify your email address. Please try again.",
+      },
+    };
+
+    const notice = notices[status];
+
+    if (notice) {
+      setVerificationNotice(notice);
+    }
+
+    // Remove the parameter so the notice isn't repeated on refresh.
+    params.delete("verification");
+    const query = params.toString();
+
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}`
+    );
+  }, []);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setPending(true);
     setMessage(null);
+    setVerificationNotice(null);
 
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
@@ -400,14 +460,63 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   }
 
   return (
-    <form
-      className={
-        isRegister
-          ? "auth-register-form mt-7 space-y-5"
-          : "mt-5 space-y-3.5"
-      }
-      onSubmit={handleSubmit}
-    >
+    <>
+      {verificationNotice && (
+        <div
+          aria-live="polite"
+          className={`mt-5 flex items-start gap-3 rounded-xl border p-4 text-left ${
+            verificationNotice.type === "success"
+              ? "border-emerald-400/30 bg-emerald-400/10"
+              : "border-rose-400/30 bg-rose-400/10"
+          }`}
+          role={verificationNotice.type === "success" ? "status" : "alert"}
+        >
+          {verificationNotice.type === "success" ? (
+            <CheckCircle2
+              aria-hidden="true"
+              className="mt-0.5 shrink-0 text-emerald-300"
+              size={20}
+            />
+          ) : (
+            <AlertCircle
+              aria-hidden="true"
+              className="mt-0.5 shrink-0 text-rose-300"
+              size={20}
+            />
+          )}
+
+          <div className="min-w-0">
+            <p
+              className={`text-[12px] font-extrabold leading-snug sm:text-[13px] ${
+                verificationNotice.type === "success"
+                  ? "text-emerald-100"
+                  : "text-rose-100"
+              }`}
+            >
+              {verificationNotice.title}
+            </p>
+
+            <p
+              className={`mt-1 text-[10px] leading-relaxed sm:text-[11px] ${
+                verificationNotice.type === "success"
+                  ? "text-emerald-200/90"
+                  : "text-rose-200/90"
+              }`}
+            >
+              {verificationNotice.text}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <form
+        className={
+          isRegister
+            ? "auth-register-form mt-7 space-y-5"
+            : "mt-5 space-y-3.5"
+        }
+        onSubmit={handleSubmit}
+      >
       {isRegister && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
           <Field
@@ -690,7 +799,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           {isRegister ? "Sign in here" : "Create Account"}
         </Link>
       </p>
-    </form>
+      </form>
+    </>
   );
 }
 

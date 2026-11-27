@@ -62,8 +62,6 @@ service cloud.firestore {
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.createdAt == request.time;
 
-      // Users can update only basic profile information.
-      // Admins can update user profiles.
       allow update: if isAdmin()
         || (
           isOwner(userId)
@@ -88,34 +86,89 @@ service cloud.firestore {
 
       allow read: if isOwner(userId) || isAdmin();
 
-      // KYC creation, review and modification
-      // must be performed through trusted server APIs.
+      // Trusted server APIs only.
       allow create, update, delete: if false;
     }
 
     // ==========================================
-    // USER FINANCIAL TRANSACTIONS
+    // USER SUBCOLLECTIONS
     // ==========================================
 
     match /users/{userId}/{collection}/{docId} {
 
-      // KYC has its own dedicated security rules.
       allow read: if collection != 'kyc'
         && (
           isOwner(userId)
           || isAdmin()
         );
 
-      // Users may create pending transactions only.
       allow create: if collection != 'kyc'
         && isOwner(userId)
         && request.resource.data.status == 'pending'
         && request.resource.data.createdAt == request.time;
 
-      // Only administrators can modify or delete
-      // existing financial transaction records.
       allow update, delete: if collection != 'kyc'
         && isAdmin();
+    }
+
+    // ==========================================
+    // WALLETS
+    // ==========================================
+
+    match /wallets/{uid} {
+
+      allow read: if isOwner(uid) || isAdmin();
+
+      // Wallet balances must only be modified
+      // through trusted Firebase Admin SDK APIs.
+      allow create, update, delete: if false;
+    }
+
+    // ==========================================
+    // WALLET TRANSACTIONS
+    // ==========================================
+
+    match /walletTransactions/{transactionId} {
+
+      allow read: if isEmailVerified()
+        && (
+          resource.data.userId == request.auth.uid
+          || isAdmin()
+        );
+
+      allow create, update, delete: if false;
+    }
+
+    // ==========================================
+    // ADMIN AUDIT LOGS
+    // ==========================================
+
+    match /adminAuditLogs/{logId} {
+
+      allow read: if isAdmin();
+
+      allow create, update, delete: if false;
+    }
+
+    // ==========================================
+    // USER NOTIFICATIONS
+    // ==========================================
+
+    match /userNotifications/{notificationId} {
+
+      allow read: if isEmailVerified()
+        && resource.data.userId == request.auth.uid;
+
+      allow create, update, delete: if false;
+    }
+
+    // ==========================================
+    // ADMIN FUNDING RATE LIMITS
+    // ==========================================
+
+    match /adminFundingRateLimits/{rateId} {
+
+      allow read, write: if false;
     }
 
     // ==========================================
@@ -169,9 +222,8 @@ service cloud.firestore {
 
     match /emailVerificationTokens/{tokenId} {
 
-      // Verification tokens are private.
       // Only trusted Firebase Admin SDK server code
-      // can create, read, update or delete these records.
+      // can access verification tokens.
       allow read, write: if false;
     }
 
@@ -179,7 +231,8 @@ service cloud.firestore {
     // DEFAULT DENY
     // ==========================================
 
-    // No client access is permitted to collections
-    // that do not have an explicitly defined rule.
+    // All unspecified collections are denied
+    // by default.
+
   }
 }
