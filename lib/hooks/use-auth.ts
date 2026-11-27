@@ -1,25 +1,27 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  reload,
+  signOut,
+  type User,
+} from "firebase/auth";
 import { getFirebaseClients } from "@/lib/firebase/client";
 
 type AuthState =
   | { status: "loading" }
   | { status: "error"; message: string }
   | { status: "signed-in"; user: User }
+  | { status: "unverified"; user: User }
   | { status: "signed-out" };
 
-// Every signed-in session is capped at five hours, measured from the moment the
-// user authenticated (`auth_time`). Using the token's auth time (rather than the
-// page load time) keeps the limit consistent across reloads and hourly token
-// refreshes: once the window elapses the user is signed out automatically.
 const SESSION_MAX_AGE_MS = 5 * 60 * 60 * 1000;
 const SESSION_CHECK_INTERVAL_MS = 60 * 1000;
 
-// Users are signed out after five minutes of inactivity (no mouse, keyboard,
-// scroll, or touch input). Any of those events resets the countdown.
 const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
+
 const ACTIVITY_EVENTS: (keyof WindowEventMap)[] = [
   "mousemove",
   "mousedown",
@@ -30,32 +32,84 @@ const ACTIVITY_EVENTS: (keyof WindowEventMap)[] = [
 ];
 
 export function useAuth(): AuthState {
-  const [state, setState] = useState<AuthState>({ status: "loading" });
+  const [state, setState] = useState<AuthState>({
+    status: "loading",
+  });
 
+  // Monitor Firebase authentication and enforce email verification.
   useEffect(() => {
     let auth;
+    let active = true;
+
     try {
       auth = getFirebaseClients().auth;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Firebase is not configured.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Firebase is not configured.";
+
       setState({ status: "error", message });
       return;
     }
 
     const unsubscribe = onAuthStateChanged(
       auth,
-      (user) => {
-        setState(user ? { status: "signed-in", user } : { status: "signed-out" });
+      async (user) => {
+        if (!user) {
+          if (active) {
+            setState({ status: "signed-out" });
+          }
+          return;
+        }
+
+        try {
+          // Refresh Firebase user information before checking verification.
+          await reload(user);
+
+          if (!active) return;
+
+          if (!user.emailVerified) {
+            setState({
+              status: "unverified",
+              user,
+            });
+            return;
+          }
+
+          setState({
+            status: "signed-in",
+            user,
+          });
+        } catch (error) {
+          if (!active) return;
+
+          setState({
+            status: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Unable to verify your authentication status.",
+          });
+        }
       },
       (error) => {
-        setState({ status: "error", message: error.message });
+        if (active) {
+          setState({
+            status: "error",
+            message: error.message,
+          });
+        }
       },
     );
 
-    return () => unsubscribe();
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
-  // Automatically sign out every user once their five-hour session expires.
+  // Automatically sign out after five hours.
   useEffect(() => {
     if (state.status !== "signed-in") return;
 
@@ -67,23 +121,29 @@ export function useAuth(): AuthState {
       try {
         await signOut(getFirebaseClients().auth);
       } catch {
-        // Ignore failures; the layouts will still route to the login page.
+        // Ignore sign-out failures.
       }
     }
 
     async function enforceSessionLimit() {
       const now = Date.now();
       let startedAt = now;
+
       try {
         const token = await user.getIdTokenResult();
         const authTime = token.claims.auth_time;
-        if (typeof authTime === "number") startedAt = authTime * 1000;
+
+        if (typeof authTime === "number") {
+          startedAt = authTime * 1000;
+        }
       } catch {
-        // Fall back to the current time if the token cannot be read.
+        // Use current time as fallback.
       }
+
       if (cancelled) return;
 
       const expiresAt = startedAt + SESSION_MAX_AGE_MS;
+
       if (now >= expiresAt) {
         await forceSignOut();
         return;
@@ -97,7 +157,7 @@ export function useAuth(): AuthState {
       }, SESSION_CHECK_INTERVAL_MS);
     }
 
-    enforceSessionLimit();
+    void enforceSessionLimit();
 
     return () => {
       cancelled = true;
@@ -105,8 +165,7 @@ export function useAuth(): AuthState {
     };
   }, [state]);
 
-  // Sign the user out after INACTIVITY_TIMEOUT_MS of no activity. Any user
-  // interaction (mouse, keyboard, scroll, touch, click) resets the timer.
+  // Automatically sign out after five minutes of inactivity.
   useEffect(() => {
     if (state.status !== "signed-in") return;
 
@@ -116,22 +175,29 @@ export function useAuth(): AuthState {
       try {
         await signOut(getFirebaseClients().auth);
       } catch {
-        // Ignore failures; the layouts will still route to the login page.
+        // Ignore sign-out failures.
       }
     }
 
     function resetTimer() {
       clearTimeout(timer);
-      timer = setTimeout(() => void forceSignOut(), INACTIVITY_TIMEOUT_MS);
+
+      timer = setTimeout(() => {
+        void forceSignOut();
+      }, INACTIVITY_TIMEOUT_MS);
     }
 
     resetTimer();
+
     for (const eventName of ACTIVITY_EVENTS) {
-      window.addEventListener(eventName, resetTimer, { passive: true });
+      window.addEventListener(eventName, resetTimer, {
+        passive: true,
+      });
     }
 
     return () => {
       clearTimeout(timer);
+
       for (const eventName of ACTIVITY_EVENTS) {
         window.removeEventListener(eventName, resetTimer);
       }
