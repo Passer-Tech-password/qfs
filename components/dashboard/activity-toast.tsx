@@ -120,6 +120,38 @@ function buildPool(): Activity[] {
     });
   }
 
+  // Add 40 client activity entries for each country.
+  const additionalCountries = [
+    "Australia",
+    "Canada",
+    "Mexico",
+    "New Zealand",
+    "Italy",
+    "Puerto Rico",
+    "Cuba",
+    "UK",
+    "France",
+    "Brazil",
+    "Japan",
+    "India",
+    "South Africa",
+    "Argentina",
+    "Colombia",
+    "Chile",
+    "Singapore",
+    "United Arab Emirates",
+  ];
+
+  for (const country of additionalCountries) {
+    for (let i = 0; i < 40; i++) {
+      pool.push({
+        name: `${pick(europeanFirstNames)} ${pick(europeanLastNames)}`,
+        country,
+        amount: "",
+      });
+    }
+  }
+
   return pool;
 }
 
