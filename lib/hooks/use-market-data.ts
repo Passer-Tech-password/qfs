@@ -13,6 +13,7 @@ export type MarketData = {
   assets: {
     XLM: AssetMarketData;
     XRP: AssetMarketData;
+    BTC: AssetMarketData;
   };
   velocity: { timestamp: number; percentPerHour: number }[];
   observedAt: number;

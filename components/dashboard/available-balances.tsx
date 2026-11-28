@@ -1,70 +1,96 @@
-import { DollarSign, Bitcoin, Sparkles, Zap, ArrowUpRight } from "lucide-react";
+"use client";
 
-type Asset = {
+import { Bitcoin, DollarSign, Sparkles, Zap, ArrowUpRight } from "lucide-react";
+import {
+  useWalletBalances,
+  type WalletAsset,
+} from "@/lib/hooks/use-wallet-balances";
+import type { WalletCurrency } from "@/lib/server/wallet-currency";
+
+type Presentation = {
+  currency: WalletCurrency;
   icon: typeof DollarSign;
   name: string;
-  amount: string;
   unit: string;
-  usd: string;
-  change: string;
-  changeTone: "up" | "flat";
   card: string;
   iconBg: string;
   iconColor: string;
+  dollarDisplay?: boolean;
 };
 
-const assets: Asset[] = [
+const ASSETS: Presentation[] = [
   {
+    currency: "USDT",
     icon: DollarSign,
     name: "Tether USD",
-    amount: "$0.00",
     unit: "",
-    usd: "1.00 USDT = $1.00 USD",
-    change: "STABLE 0.00%",
-    changeTone: "flat",
     card: "bg-emerald-50 border-emerald-100",
     iconBg: "bg-emerald-500",
     iconColor: "text-white",
+    dollarDisplay: true,
   },
   {
+    currency: "BTC",
     icon: Bitcoin,
     name: "Bitcoin",
-    amount: "0.000000",
     unit: "BTC",
-    usd: "≈ $0.00 USD",
-    change: "+2.45%",
-    changeTone: "up",
     card: "bg-amber-50 border-amber-100",
     iconBg: "bg-amber-500",
     iconColor: "text-white",
   },
   {
+    currency: "XLM",
     icon: Sparkles,
     name: "Stellar Lumens",
-    amount: "0.0000",
     unit: "XLM",
-    usd: "≈ $0.00 USD",
-    change: "+4.82%",
-    changeTone: "up",
     card: "bg-violet-50 border-violet-100",
     iconBg: "bg-violet-500",
     iconColor: "text-white",
   },
   {
+    currency: "XRP",
     icon: Zap,
     name: "Ripple XRP",
-    amount: "0.00",
     unit: "XRP",
-    usd: "≈ $0.00 USD",
-    change: "+1.95%",
-    changeTone: "up",
     card: "bg-sky-50 border-sky-100",
     iconBg: "bg-sky-500",
     iconColor: "text-white",
   },
 ];
 
+function formatUsd(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+type Badge = { label: string; tone: "up" | "down" | "flat" };
+
+function changeBadge(asset: WalletAsset, pegged: boolean): Badge {
+  if (pegged) return { label: "STABLE 0.00%", tone: "flat" };
+  if (asset.changePct === null) return { label: "—", tone: "flat" };
+
+  const sign = asset.changePct > 0 ? "+" : "";
+
+  return {
+    label: `${sign}${asset.changePct.toFixed(2)}%`,
+    tone:
+      asset.changePct > 0 ? "up" : asset.changePct < 0 ? "down" : "flat",
+  };
+}
+
+const BADGE_TONE: Record<Badge["tone"], string> = {
+  up: "bg-emerald-100 text-emerald-700",
+  down: "bg-rose-100 text-rose-700",
+  flat: "bg-slate-200 text-slate-600",
+};
+
 export function AvailableBalances() {
+  const { assets, loading } = useWalletBalances();
+  const byCurrency = new Map(assets.map((asset) => [asset.currency, asset]));
+
   return (
     <section className="mt-8">
       <div className="flex items-end justify-between">
@@ -78,29 +104,48 @@ export function AvailableBalances() {
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {assets.map((asset) => {
-          const Icon = asset.icon;
+        {ASSETS.map((config) => {
+          const Icon = config.icon;
+          const asset = byCurrency.get(config.currency);
+          const pegged = config.currency === "USDT";
+          const badge = asset
+            ? changeBadge(asset, pegged)
+            : { label: "—", tone: "flat" as const };
+
+          const amountText = loading
+            ? "—"
+            : config.dollarDisplay
+              ? asset?.usdValue !== null && asset?.usdValue !== undefined
+                ? formatUsd(asset.usdValue)
+                : "—"
+              : (asset?.amount ?? "0");
+
+          const usdText = (() => {
+            if (loading) return "—";
+            if (config.dollarDisplay) return "1.00 USDT = $1.00 USD";
+            return asset?.usdValue !== null && asset?.usdValue !== undefined
+              ? `≈ ${formatUsd(asset.usdValue)} USD`
+              : "Price unavailable";
+          })();
+
           return (
-            <div key={asset.name} className={`rounded-2xl border p-5 ${asset.card}`}>
+            <div key={config.name} className={`rounded-2xl border p-5 ${config.card}`}>
               <div className="flex items-start justify-between">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${asset.iconBg}`}>
-                  <Icon size={20} className={asset.iconColor} />
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${config.iconBg}`}>
+                  <Icon size={20} className={config.iconColor} />
                 </div>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                    asset.changeTone === "up"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-slate-200 text-slate-600"
-                  }`}
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${BADGE_TONE[badge.tone]}`}
                 >
-                  {asset.change}
+                  {badge.label}
                 </span>
               </div>
-              <p className="mt-3 text-[13px] font-semibold text-slate-700">{asset.name}</p>
+              <p className="mt-3 text-[13px] font-semibold text-slate-700">{config.name}</p>
               <p className="mt-1 text-[22px] font-black tracking-tight text-slate-900">
-                {asset.amount} <span className="text-[14px] font-bold text-slate-500">{asset.unit}</span>
+                {amountText}{" "}
+                <span className="text-[14px] font-bold text-slate-500">{config.unit}</span>
               </p>
-              <p className="mt-1 text-[11px] text-slate-500">{asset.usd}</p>
+              <p className="mt-1 text-[11px] text-slate-500">{usdText}</p>
             </div>
           );
         })}

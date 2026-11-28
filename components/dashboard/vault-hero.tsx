@@ -7,8 +7,18 @@ import { QRCodeSVG } from "qrcode.react";
 import { ConnectWalletModal } from "@/components/dashboard/connect-wallet-modal";
 import { useDepositAddresses } from "@/lib/firebase/deposit-addresses";
 import { useMarketData } from "@/lib/hooks/use-market-data";
+import { useWalletBalances } from "@/lib/hooks/use-wallet-balances";
 
 type MarketStatus = "loading" | "live" | "delayed" | "unavailable";
+
+// Full-precision USD formatting for portfolio totals.
+function formatPortfolioUsd(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
 
 function MarketVelocity() {
   const { data, status } = useMarketData();
@@ -174,6 +184,10 @@ function MarketVelocity() {
 export function VaultHero() {
   const [walletOpen, setWalletOpen] = useState(false);
   const { addresses, loading: addressesLoading } = useDepositAddresses();
+  const { totalUsd, hasUnpricedHolding, loading: walletLoading } =
+    useWalletBalances();
+  const portfolioTotal =
+    walletLoading || hasUnpricedHolding ? "—" : formatPortfolioUsd(totalUsd);
   const paymentAddress = useMemo(
     () =>
       [...addresses].sort((a, b) => {
@@ -224,11 +238,11 @@ export function VaultHero() {
           </span>
 
           <p className="mt-4 text-[13px] text-indigo-100">Total Portfolio Value</p>
-          <p className="mt-1 text-[32px] font-black leading-none tracking-tight sm:text-[38px] lg:text-[44px]">$0.00</p>
+          <p className="mt-1 text-[32px] font-black leading-none tracking-tight sm:text-[38px] lg:text-[44px]">{portfolioTotal}</p>
           <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-indigo-100">
             <span className="font-semibold text-emerald-300">↗ 3.48%</span>
             <span aria-hidden="true" className="text-indigo-200/60">·</span>
-            <span>Available Assets: <span className="font-semibold">$0.00</span></span>
+            <span>Available Assets: <span className="font-semibold">{portfolioTotal}</span></span>
             <span aria-hidden="true" className="text-indigo-200/60">·</span>
             <span>APY: <span className="font-semibold text-emerald-300">+$0.00</span></span>
           </p>

@@ -119,6 +119,7 @@ export async function GET() {
         assets: {
           XLM: parseAsset("stellar"),
           XRP: parseAsset("ripple"),
+          BTC: parseAsset("bitcoin"),
         },
         velocity,
         observedAt: Date.now(),
