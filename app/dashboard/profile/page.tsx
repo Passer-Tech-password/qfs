@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { signOut, updateProfile } from "firebase/auth";
 import { getFirebaseClients } from "@/lib/firebase/client";
 import { useAuth } from "@/lib/hooks/use-auth";
+import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
 const darkField =
   "w-full rounded-xl border border-slate-700 bg-[#1e2235] px-4 py-3 text-[13.5px] text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder:text-slate-500";
@@ -15,6 +16,31 @@ const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+// Formats the signed-in user's stored account creation timestamp.
+function formatMonthYear(createdAt?: { seconds?: number } | null): string | null {
+  if (!createdAt?.seconds) return null;
+  return new Date(createdAt.seconds * 1000).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function formatJoinedDate(createdAt?: { seconds?: number } | null): string | null {
+  if (!createdAt?.seconds) return null;
+  return new Date(createdAt.seconds * 1000).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+const ACCOUNT_STATUS_LABELS: Record<string, string> = {
+  active: "Active",
+  suspended: "Suspended",
+  blocked: "Blocked",
+  closed: "Closed",
+};
 
 // Uploads a single profile image to Cloudinary via an unsigned upload preset.
 async function uploadProfileImage(file: File): Promise<string> {
@@ -48,11 +74,11 @@ async function uploadProfileImage(file: File): Promise<string> {
 export default function ProfilePage() {
   const router = useRouter();
   const auth = useAuth();
+  const { profile } = useUserProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [username] = useState("Cristiana456");
-  const [email] = useState("Cristianalaww456@gmail.com");
+  const hydratedUidRef = useRef<string | null>(null);
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("+1 (555) 123-4567");
+  const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
@@ -67,9 +93,75 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (auth.status === "signed-in") {
-      setAvatarUrl(auth.user.photoURL ?? null);
+      setAvatarUrl(auth.user.photoURL ?? profile?.photoURL ?? null);
     }
-  }, [auth]);
+  }, [auth, profile]);
+
+  // Populate the editable fields from the signed-in user's own profile.
+  // Tracking the hydrated uid ensures one account's values never appear for another.
+  useEffect(() => {
+    if (auth.status !== "signed-in") {
+      hydratedUidRef.current = null;
+      return;
+    }
+
+    const uid = auth.user.uid;
+
+    // A different account became active: clear the previous user's details at once.
+    if (hydratedUidRef.current && hydratedUidRef.current !== uid) {
+      hydratedUidRef.current = null;
+      setFullName("");
+      setPhone("");
+      setDob("");
+      setCountry("");
+      setCity("");
+      setStreet("");
+      return;
+    }
+
+    if (!profile || hydratedUidRef.current === uid) return;
+
+    hydratedUidRef.current = uid;
+
+    setFullName(
+      [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim(),
+    );
+    setPhone(profile.phoneNumber ?? "");
+    setDob(profile.dateOfBirth ?? "");
+    setCountry(profile.country ?? "");
+    setCity(profile.city ?? "");
+    setStreet(profile.street ?? "");
+  }, [auth, profile]);
+
+  // Identity values always come from the authenticated account, never a literal.
+  const accountUsername =
+    profile?.username?.trim() ||
+    (auth.status === "signed-in"
+      ? auth.user.displayName?.trim() || "—"
+      : "—");
+
+  const accountEmail =
+    profile?.email?.trim() ||
+    (auth.status === "signed-in" ? auth.user.email ?? "" : "");
+
+  const memberSince = formatMonthYear(profile?.createdAt);
+  const joinedDate = formatJoinedDate(profile?.createdAt);
+  const accountStatusLabel =
+    ACCOUNT_STATUS_LABELS[profile?.status ?? "active"] ?? "Active";
+  const kycStatusLabel = profile?.kycStatus
+    ? ACCOUNT_STATUS_LABELS[profile.kycStatus] ?? profile.kycStatus
+    : "Pending";
+
+  const accountStatusTone =
+    (profile?.status ?? "active") === "active"
+      ? {
+          card: "bg-emerald-50",
+          dot: "bg-emerald-500",
+          text: "text-emerald-700",
+        }
+      : profile?.status === "blocked" || profile?.status === "closed"
+        ? { card: "bg-rose-50", dot: "bg-rose-500", text: "text-rose-700" }
+        : { card: "bg-amber-50", dot: "bg-amber-500", text: "text-amber-700" };
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -229,8 +321,10 @@ export default function ProfilePage() {
               />
             </div>
             <div>
-              <p className="text-[15px] font-bold text-slate-900">{username}</p>
-              <p className="text-[12px] text-slate-500">Member since November 2026</p>
+              <p className="text-[15px] font-bold text-slate-900">{accountUsername}</p>
+              <p className="text-[12px] text-slate-500">
+                {memberSince ? `Member since ${memberSince}` : "Member since —"}
+              </p>
               <p className="mt-1 text-[11.5px] text-slate-400">
                 {uploading ? "Uploading image…" : "Click camera badge to change picture"}
               </p>
@@ -271,7 +365,7 @@ export default function ProfilePage() {
             </label>
             <input
               type="text"
-              value={username}
+              value={accountUsername}
               readOnly
               className={darkField}
             />
@@ -282,7 +376,7 @@ export default function ProfilePage() {
             </label>
             <input
               type="email"
-              value={email}
+              value={accountEmail}
               readOnly
               className={darkField}
             />
@@ -1116,17 +1210,17 @@ export default function ProfilePage() {
   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
 
       {/* Account Status */}
-      <div className="flex items-center gap-2.5 rounded-xl bg-emerald-50 px-3 py-3">
+      <div className={`flex items-center gap-2.5 rounded-xl px-3 py-3 ${accountStatusTone.card}`}>
         <span
-          className="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500"
+          className={`h-2.5 w-2.5 shrink-0 rounded-full ${accountStatusTone.dot}`}
           aria-hidden="true"
         />
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-[12px] font-medium text-slate-700">
             Account:
           </span>
-          <span className="text-[12px] font-bold text-emerald-700">
-            Active
+          <span className={`text-[12px] font-bold ${accountStatusTone.text}`}>
+            {accountStatusLabel}
           </span>
         </div>
       </div>
@@ -1143,7 +1237,7 @@ export default function ProfilePage() {
           KYC Status:
         </span>
         <span className="text-[12px] font-bold text-amber-700">
-          Pending
+          {kycStatusLabel}
         </span>
       </div>
     </div>
@@ -1157,7 +1251,7 @@ export default function ProfilePage() {
           Joined:
         </span>
         <span className="text-[12px] font-bold text-slate-900">
-          Nov 15, 2026
+          {joinedDate ?? "—"}
         </span>
       </div>
     </div>

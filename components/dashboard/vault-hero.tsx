@@ -1,206 +1,82 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Wallet, Plus, ArrowUpRight, QrCode, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { ConnectWalletModal } from "@/components/dashboard/connect-wallet-modal";
 import { useDepositAddresses } from "@/lib/firebase/deposit-addresses";
+import { useMarketData } from "@/lib/hooks/use-market-data";
 
 type MarketStatus = "loading" | "live" | "delayed" | "unavailable";
 
-type MarketSnapshot = { history: number[]; spot: number };
-
-const CHART_POINTS = 24;
-
-function validPrices(values: unknown[]): number[] {
-  return values
-    .map((value) => Number(value))
-    .filter((price) => Number.isFinite(price) && price > 0);
-}
-
-// Reduce a longer series down to CHART_POINTS evenly spaced samples.
-function downsample(values: number[], target = CHART_POINTS): number[] {
-  if (values.length <= target) return values;
-  const step = values.length / target;
-  return Array.from({ length: target }, (_, index) =>
-    values[Math.min(values.length - 1, Math.floor(index * step))],
-  );
-}
-
-// Public XLM/USD market-data providers, tried in order until one responds. A
-// single hard-coded exchange is unreliable (geo-blocking / CORS), so falling
-// through this list keeps the dashboard chart live.
-const marketProviders: {
-  name: string;
-  load: (signal: AbortSignal) => Promise<MarketSnapshot>;
-}[] = [
-  {
-    name: "Kraken",
-    async load(signal) {
-      const [historyResponse, tickerResponse] = await Promise.all([
-        fetch("https://api.kraken.com/0/public/OHLC?pair=XLMUSD&interval=60", {
-          cache: "no-store",
-          signal,
-        }),
-        fetch("https://api.kraken.com/0/public/Ticker?pair=XLMUSD", {
-          cache: "no-store",
-          signal,
-        }),
-      ]);
-      if (!historyResponse.ok || !tickerResponse.ok) throw new Error("Kraken unavailable.");
-
-      const historyData = (await historyResponse.json()) as { result?: Record<string, unknown> };
-      const series = Object.values(historyData.result ?? {}).find((value) => Array.isArray(value));
-      const rows = Array.isArray(series) ? (series as unknown[][]) : [];
-      const history = validPrices(rows.map((row) => row[4])).slice(-CHART_POINTS);
-      if (history.length < 2) throw new Error("Not enough Kraken history.");
-
-      const tickerData = (await tickerResponse.json()) as {
-        result?: Record<string, { c?: unknown[] }>;
-      };
-      const entry = Object.values(tickerData.result ?? {})[0];
-      const spot = Number(Array.isArray(entry?.c) ? entry.c[0] : NaN);
-      return {
-        history,
-        spot: Number.isFinite(spot) && spot > 0 ? spot : history[history.length - 1],
-      };
-    },
-  },
-  {
-    name: "Binance",
-    async load(signal) {
-      const response = await fetch(
-        "https://api.binance.com/api/v3/klines?symbol=XLMUSDT&interval=1h&limit=24",
-        { cache: "no-store", signal },
-      );
-      if (!response.ok) throw new Error("Binance unavailable.");
-      const candles = (await response.json()) as unknown;
-      if (!Array.isArray(candles)) throw new Error("Invalid Binance history.");
-      const history = validPrices(candles.map((candle) => (Array.isArray(candle) ? candle[4] : NaN)));
-      if (history.length < 2) throw new Error("Not enough Binance history.");
-      return { history, spot: history[history.length - 1] };
-    },
-  },
-  {
-    name: "CoinGecko",
-    async load(signal) {
-      const response = await fetch(
-        "https://api.coingecko.com/api/v3/coins/stellar/market_chart?vs_currency=usd&days=1",
-        { cache: "no-store", signal },
-      );
-      if (!response.ok) throw new Error("CoinGecko unavailable.");
-      const data = (await response.json()) as { prices?: unknown[] };
-      const history = downsample(
-        validPrices((data.prices ?? []).map((point) => (Array.isArray(point) ? point[1] : NaN))),
-      );
-      if (history.length < 2) throw new Error("Not enough CoinGecko history.");
-      return { history, spot: history[history.length - 1] };
-    },
-  },
-];
-
 function MarketVelocity() {
-  const [prices, setPrices] = useState<number[]>([]);
-  const [spotPrice, setSpotPrice] = useState<number | null>(null);
-  const [status, setStatus] = useState<MarketStatus>("loading");
-
-  useEffect(() => {
-    let active = true;
-    const controller = new AbortController();
-
-    // Try each provider in turn; the first successful response wins.
-    async function loadFromProviders(): Promise<boolean> {
-      for (const provider of marketProviders) {
-        try {
-          const snapshot = await provider.load(controller.signal);
-          if (!active) return true;
-          setPrices(snapshot.history);
-          setSpotPrice(snapshot.spot);
-          setStatus("live");
-          return true;
-        } catch {
-          if (controller.signal.aborted) return false;
-          // Provider failed — fall through to the next one.
-        }
-      }
-      return false;
-    }
-
-    void loadFromProviders().then((loaded) => {
-      if (active && !loaded) setStatus("unavailable");
-    });
-
-    const interval = window.setInterval(() => {
-      void loadFromProviders().then((loaded) => {
-        if (!active || loaded) return;
-        setStatus((current) =>
-          current === "live" ? "delayed" : current === "loading" ? "unavailable" : current,
-        );
-      });
-    }, 30_000);
-
-    return () => {
-      active = false;
-      window.clearInterval(interval);
-      controller.abort();
-    };
-  }, []);
+  const { data, status } = useMarketData();
+  const marketStatus: MarketStatus = status;
+  const velocity = data?.velocity ?? [];
 
   const chart = useMemo(() => {
-    if (prices.length < 2) return null;
+    const validVelocity = velocity.filter(
+      (point) =>
+        Number.isFinite(point.timestamp) &&
+        Number.isFinite(point.percentPerHour),
+    );
+    if (validVelocity.length < 2) return null;
 
-    // Scale the chart to the 24-hour history only. The indicator dot is mapped
-    // through this same scale, so its vertical position is a direct, proportional
-    // read of the market value: it rises when the price rises and falls when the
-    // price falls.
-    const min = Math.min(...prices);
-    const max = Math.max(...prices);
-    const range = max - min || max * 0.001;
-
-    const liveValue =
-      spotPrice !== null && Number.isFinite(spotPrice) ? spotPrice : prices[prices.length - 1];
-
-    // Single value -> y mapper shared by the line and the dot so they always
-    // stay aligned. Clamped only to keep the marker on-canvas.
-    const toY = (price: number) => {
-      const y = 100 - ((price - min) / range) * 38;
-      return Math.min(106, Math.max(6, y));
-    };
-
-    // The final point carries the live value so the line ends where the dot sits.
-    const series = [...prices.slice(0, -1), liveValue];
-    const points = series.map((price, index) => {
-      const x = (index / (series.length - 1)) * 400;
-      return `${x.toFixed(2)},${toY(price).toFixed(2)}`;
+    const maxMagnitude = Math.max(
+      ...validVelocity.map((point) => Math.abs(point.percentPerHour)),
+      0.001,
+    );
+    const zeroY = 56;
+    const toY = (value: number) =>
+      zeroY - (value / maxMagnitude) * 38;
+    const points = validVelocity.map((point, index) => {
+      const x = (index / (validVelocity.length - 1)) * 400;
+      return `${x.toFixed(2)},${toY(point.percentPerHour).toFixed(2)}`;
     });
-
     const line = `M ${points.join(" L ")}`;
-    const area = `${line} L 400,108 L 0,108 Z`;
+    const area = `${line} L 400,${zeroY} L 0,${zeroY} Z`;
     const lastX = "400.00";
-    const lastY = toY(liveValue).toFixed(2);
+    const lastY = toY(validVelocity[validVelocity.length - 1].percentPerHour).toFixed(2);
 
-    return { line, area, lastX, lastY };
-  }, [prices, spotPrice]);
+    return {
+      line,
+      area,
+      lastX,
+      lastY,
+      zeroY,
+      currentVelocity: validVelocity[validVelocity.length - 1].percentPerHour,
+    };
+  }, [velocity]);
 
   const statusLabel = {
     loading: "CONNECTING",
     live: "LIVE 24H",
     delayed: "DELAYED",
     unavailable: "OFFLINE",
-  }[status];
+  }[marketStatus];
+
+  const formatUsd = (value?: number) => {
+    if (!Number.isFinite(value)) return "—";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      notation: "compact",
+      maximumFractionDigits: 2,
+    }).format(value!);
+  };
 
   return (
-    <div className="flex min-h-[158px] flex-col rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-5">
+    <div className="flex min-h-[205px] flex-col rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[12.5px] font-semibold text-indigo-100">
-          Live Yield &amp; Market Velocity
+          XLM Market Cap &amp; Velocity
         </p>
         <span
           className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-bold sm:text-[10px] ${
-            status === "live"
+            marketStatus === "live"
               ? "bg-emerald-500/20 text-emerald-200"
-              : status === "delayed"
+              : marketStatus === "delayed"
                 ? "bg-amber-500/20 text-amber-200"
                 : "bg-white/10 text-indigo-100"
           }`}
@@ -208,9 +84,9 @@ function MarketVelocity() {
         >
           <span
             className={`h-1.5 w-1.5 rounded-full ${
-              status === "live"
+              marketStatus === "live"
                 ? "animate-quantum-blink bg-emerald-300"
-                : status === "delayed"
+                : marketStatus === "delayed"
                   ? "bg-amber-300"
                   : "bg-slate-300"
             }`}
@@ -225,7 +101,7 @@ function MarketVelocity() {
             viewBox="0 0 400 112"
             preserveAspectRatio="none"
             role="img"
-            aria-label={`24-hour XLM market price chart${spotPrice ? `, current price ${spotPrice} USDT` : ""}`}
+            aria-label={`24-hour XLM price velocity chart, current velocity ${chart.currentVelocity.toFixed(4)} percent per hour`}
           >
             <defs>
               <linearGradient id="market-area-fill" x1="0" x2="0" y1="0" y2="1">
@@ -233,6 +109,13 @@ function MarketVelocity() {
                 <stop offset="100%" stopColor="#31e6a3" stopOpacity="0.02" />
               </linearGradient>
             </defs>
+            <path
+              d={`M 0,${chart.zeroY} L 400,${chart.zeroY}`}
+              fill="none"
+              stroke="#ffffff"
+              strokeOpacity="0.2"
+              strokeDasharray="4 5"
+            />
             <path d={chart.area} fill="url(#market-area-fill)" />
             <path
               d={chart.line}
@@ -254,15 +137,34 @@ function MarketVelocity() {
           </svg>
         ) : (
           <div className="flex h-full items-center justify-center text-[11px] text-indigo-100/75">
-            {status === "unavailable"
+            {marketStatus === "unavailable"
               ? "Live market data is unavailable."
-              : "Loading 24-hour market data…"}
+              : marketStatus === "loading"
+                ? "Loading calculated market velocity…"
+                : "Velocity history is unavailable."}
           </div>
         )}
       </div>
-      {spotPrice !== null && (
+      <div className="mt-2 grid grid-cols-3 gap-2 border-t border-white/10 pt-2 text-[10px]">
+        <div>
+          <p className="text-indigo-100/70">Market cap</p>
+          <p className="font-bold text-white">{formatUsd(data?.assets.XLM.marketCapUsd)}</p>
+        </div>
+        <div>
+          <p className="text-indigo-100/70">24h volume</p>
+          <p className="font-bold text-white">{formatUsd(data?.assets.XLM.volume24hUsd)}</p>
+        </div>
+        <div>
+          <p className="text-indigo-100/70">Velocity / hour</p>
+          <p className="font-bold text-white">
+            {chart ? `${chart.currentVelocity >= 0 ? "+" : ""}${chart.currentVelocity.toFixed(4)}%` : "—"}
+          </p>
+        </div>
+      </div>
+      {data && (
         <p className="sr-only" aria-live="polite">
-          Current XLM price: {spotPrice} USDT
+          Current XLM price: {formatUsd(data.assets.XLM.priceUsd)}. Market cap:{" "}
+          {formatUsd(data.assets.XLM.marketCapUsd)}. Source: {data.source}.
         </p>
       )}
     </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, ShieldCheck, FileText, Menu, X, ChartNoAxesCombined } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { useMarketData } from "@/lib/hooks/use-market-data";
 
 const navLinks = [
   { href: "/", label: "HOME", icon: Home, exact: true },
@@ -15,6 +16,33 @@ const navLinks = [
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { data, status } = useMarketData();
+
+  function renderTickerAsset(symbol: "XLM" | "XRP", name: string, color: string) {
+    const market = data?.assets[symbol];
+    const change = market?.priceChange24hPct;
+    const changeColor =
+      change === undefined
+        ? "text-slate-400"
+        : change >= 0
+          ? "text-emerald-400"
+          : "text-rose-400";
+
+    return (
+      <span className="flex items-center gap-1.5">
+        <strong className="text-white">{symbol} ({name}):</strong>
+        <span className={`${color} font-bold`}>
+          {market ? `$${market.priceUsd.toFixed(4)}` : status === "unavailable" ? "Offline" : "Loading"}
+        </span>
+        {market && Number.isFinite(change) && (
+          <span className={`${changeColor} font-bold`}>
+            {change! >= 0 ? "+" : ""}{change!.toFixed(2)}%
+          </span>
+        )}
+        <span className="text-slate-500">(CoinGecko, 24h)</span>
+      </span>
+    );
+  }
 
   // Close the mobile menu on navigation.
   useEffect(() => {
@@ -40,15 +68,15 @@ export function SiteHeader() {
         <div className="animate-marquee flex items-center space-x-8 whitespace-nowrap">
           <div className="flex items-center space-x-8">
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-quantum-blink"></span> <strong className="text-white">QFS Mainnet:</strong> <span className="text-emerald-400">100% Operational</span></span>
-            <span className="flex items-center gap-1.5"><strong className="text-white">XLM (Stellar):</strong> <span className="ticker-xlm-price text-purple-300 font-bold">$0.1418</span> <span className="ticker-xlm-change text-emerald-400 font-bold">+3.50%</span> <span className="text-slate-500">(indicative)</span></span>
-            <span className="flex items-center gap-1.5"><strong className="text-white">XRP (Ripple):</strong> <span className="ticker-xrp-price text-cyan-300 font-bold">$1.0016</span> <span className="ticker-xrp-change text-emerald-400 font-bold">+4.71%</span> <span className="text-slate-500">(indicative)</span></span>
+            {renderTickerAsset("XLM", "Stellar", "text-purple-300")}
+            {renderTickerAsset("XRP", "Ripple", "text-cyan-300")}
             <span className="flex items-center gap-1.5"><strong className="text-white">ISO 20022 Status:</strong> <span className="text-cyan-300 font-bold">Synchronized</span></span>
             <span className="flex items-center gap-1.5"><strong className="text-white">Settlement Protocol:</strong> <span className="text-emerald-400">Instant Finality</span></span>
           </div>
           <div className="flex items-center space-x-8">
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-quantum-blink"></span> <strong className="text-white">QFS Mainnet:</strong> <span className="text-emerald-400">100% Operational</span></span>
-            <span className="flex items-center gap-1.5"><strong className="text-white">XLM (Stellar):</strong> <span className="ticker-xlm-price text-purple-300 font-bold">$0.1418</span> <span className="ticker-xlm-change text-emerald-400 font-bold">+3.50%</span> <span className="text-slate-500">(indicative)</span></span>
-            <span className="flex items-center gap-1.5"><strong className="text-white">XRP (Ripple):</strong> <span className="ticker-xrp-price text-cyan-300 font-bold">$1.0016</span> <span className="ticker-xrp-change text-emerald-400 font-bold">+4.71%</span> <span className="text-slate-500">(indicative)</span></span>
+            {renderTickerAsset("XLM", "Stellar", "text-purple-300")}
+            {renderTickerAsset("XRP", "Ripple", "text-cyan-300")}
             <span className="flex items-center gap-1.5"><strong className="text-white">ISO 20022 Status:</strong> <span className="text-cyan-300 font-bold">Synchronized</span></span>
             <span className="flex items-center gap-1.5"><strong className="text-white">Settlement Protocol:</strong> <span className="text-emerald-400">Instant Finality</span></span>
           </div>

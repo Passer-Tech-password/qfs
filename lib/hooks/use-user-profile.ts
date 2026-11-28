@@ -10,6 +10,15 @@ export type UserProfile = {
   lastName?: string;
   username?: string;
   email?: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  country?: string;
+  city?: string;
+  street?: string;
+  status?: string;
+  kycStatus?: string;
+  photoURL?: string;
+  createdAt?: { seconds?: number } | null;
 };
 
 export function useUserProfile() {
