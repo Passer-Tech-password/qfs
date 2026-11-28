@@ -32,6 +32,15 @@ service cloud.firestore {
         ).data.role == 'admin';
     }
 
+    // Money-flow subcollections that are written exclusively by trusted server
+    // APIs. Clients may read their own records but must never create them.
+    function isServerManagedFlow(flow) {
+      return flow == 'transfers'
+        || flow == 'payouts'
+        || flow == 'vouchers'
+        || flow == 'qrPayments';
+    }
+
     // ==========================================
     // USER PROFILES
     // ==========================================
@@ -102,7 +111,9 @@ service cloud.firestore {
           || isAdmin()
         );
 
+      // Server-managed wallets flows cannot be created from the client.
       allow create: if collection != 'kyc'
+        && !isServerManagedFlow(collection)
         && isOwner(userId)
         && request.resource.data.status == 'pending'
         && request.resource.data.createdAt == request.time;
@@ -137,6 +148,17 @@ service cloud.firestore {
         );
 
       allow create, update, delete: if false;
+    }
+
+    // ==========================================
+    // VOUCHERS
+    // ==========================================
+
+    match /vouchers/{code} {
+
+      // Voucher issuance and redemption are handled entirely by trusted
+      // server APIs; clients never read or write voucher documents directly.
+      allow read, write: if false;
     }
 
     // ==========================================

@@ -1,7 +1,34 @@
+"use client";
+
 import Link from "next/link";
-import { Plus, Ticket, Gift } from "lucide-react";
+import { Plus, Ticket } from "lucide-react";
+import { useUserCollection } from "@/lib/hooks/use-user-collection";
+import { RecordStatusBadge, formatRecordDate } from "@/components/dashboard/record-status";
+import { RecordTable, RecordTableMessage } from "@/components/dashboard/record-table";
+
+type VoucherRecord = {
+  id: string;
+  direction?: string;
+  asset?: string;
+  symbol?: string;
+  amount?: string | number;
+  code?: string;
+  recipientEmail?: string | null;
+  note?: string | null;
+  status?: string;
+  createdAt?: unknown;
+};
+
+function formatVoucherAmount(row: VoucherRecord): string {
+  if (row.amount === undefined || row.amount === null || row.amount === "") {
+    return "—";
+  }
+  return `${row.amount} ${row.symbol || row.asset || ""}`.trim();
+}
 
 export default function VoucherListPage() {
+  const { records, loading, error } = useUserCollection<VoucherRecord>("vouchers");
+
   return (
     <div className="mx-auto max-w-[1180px]">
       <div className="flex items-start justify-between">
@@ -28,21 +55,53 @@ export default function VoucherListPage() {
       </div>
 
       <div className="dash-card mt-5 p-6">
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-14 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-            <Ticket size={26} className="text-slate-400" />
+        {loading ? (
+          <RecordTableMessage>Loading your vouchers…</RecordTableMessage>
+        ) : error ? (
+          <RecordTableMessage tone="error">{error}</RecordTableMessage>
+        ) : records.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-14 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
+              <Ticket size={26} className="text-slate-400" />
+            </div>
+            <p className="mt-4 text-[15px] font-bold text-slate-700">No Vouchers Found</p>
+            <p className="mt-1.5 max-w-[360px] text-[12.5px] text-slate-500">
+              Create your first voucher to send crypto securely or redeem an existing one.
+            </p>
+            <Link
+              href="/dashboard/voucher/create"
+              className="dash-submit mt-5 inline-flex items-center gap-1.5 rounded-lg px-5 py-2.5 text-[12.5px] font-bold text-white"
+            >
+              Create a Voucher
+            </Link>
           </div>
-          <p className="mt-4 text-[15px] font-bold text-slate-700">No Vouchers Found</p>
-          <p className="mt-1.5 max-w-[360px] text-[12.5px] text-slate-500">
-            Create your first voucher to send crypto securely or redeem an existing one.
-          </p>
-          <Link
-            href="/dashboard/voucher/create"
-            className="dash-submit mt-5 inline-flex items-center gap-1.5 rounded-lg px-5 py-2.5 text-[12.5px] font-bold text-white"
-          >
-            Create a Voucher
-          </Link>
-        </div>
+        ) : (
+          <RecordTable
+            rows={records}
+            columns={[
+              {
+                header: "Voucher Code",
+                render: (row) => (
+                  <span className="font-mono font-semibold text-slate-800">
+                    {row.code || "—"}
+                  </span>
+                ),
+              },
+              {
+                header: "Type",
+                render: (row) => (row.direction === "in" ? "Redeemed" : "Created"),
+              },
+              { header: "Amount", render: (row) => formatVoucherAmount(row) },
+              { header: "Recipient", render: (row) => row.recipientEmail || "—" },
+              { header: "Date", render: (row) => formatRecordDate(row.createdAt) },
+              {
+                header: "Status",
+                align: "right",
+                render: (row) => <RecordStatusBadge status={row.status} />,
+              },
+            ]}
+          />
+        )}
       </div>
 
       <footer className="mt-10 pb-4 text-center text-[11.5px] text-slate-400">

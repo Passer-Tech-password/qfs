@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   QrCode,
@@ -18,6 +18,16 @@ import {
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useDepositAddresses } from "@/lib/firebase/deposit-addresses";
+import { useWalletBalances } from "@/lib/hooks/use-wallet-balances";
+import {
+  postWalletAction,
+  type WalletActionResult,
+} from "@/lib/firebase/wallet-api";
+import {
+  WALLET_CURRENCIES,
+  formatWalletAmount,
+  type WalletCurrency,
+} from "@/lib/server/wallet-currency";
 
 const payCurrencies = [
   { label: "XRP (Ripple)", symbol: "XRP" },
@@ -29,6 +39,7 @@ const payCurrencies = [
 export default function QrPaymentPage() {
   const router = useRouter();
   const { addresses, loading: addressesLoading, error: addressesError } = useDepositAddresses();
+  const { assets: walletAssets } = useWalletBalances();
   const walletCurrencies = [...addresses].sort((a, b) => {
     const priority = (symbol: string) => {
       const normalized = symbol.toUpperCase();
@@ -46,10 +57,22 @@ export default function QrPaymentPage() {
   const [copied, setCopied] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
-  const [paySuccess, setPaySuccess] = useState(false);
+  const [paySuccess, setPaySuccess] = useState<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   const wallet = walletCurrencies[walletIndex];
   const pay = payCurrencies[payCurrency];
+
+  const paySymbol = pay.symbol as WalletCurrency;
+  const payAsset = walletAssets.find((a) => a.currency === paySymbol);
+  const payAvailableUnits = payAsset?.units ?? 0;
+  const payAvailable = formatWalletAmount(payAvailableUnits, paySymbol);
+  const payAvailableHuman =
+    payAvailableUnits / 10 ** WALLET_CURRENCIES[paySymbol].decimals;
+  const payPrice = payAsset?.priceUsd ?? null;
+  const amountNumeric = parseFloat(amount) || 0;
+  const amountUsd =
+    payPrice !== null && Number.isFinite(payPrice) ? amountNumeric * payPrice : null;
 
   function handleCopy() {
     if (!wallet) return;
@@ -81,25 +104,60 @@ export default function QrPaymentPage() {
   async function handleConfirmPayment() {
     if (submitting) return;
     if (!merchant.trim()) {
-      setPaySuccess(false);
+      setPaySuccess(null);
       setPayError("Enter the merchant name or recipient ID.");
       return;
     }
-    const numeric = parseFloat(amount) || 0;
-    if (numeric <= 0) {
-      setPaySuccess(false);
+    const amountStr = amount.trim();
+    const decimals = WALLET_CURRENCIES[paySymbol].decimals;
+
+    if (amountNumeric <= 0) {
+      setPaySuccess(null);
       setPayError("Enter a payment amount greater than zero.");
       return;
     }
+    if (
+      !/^\d+(\.\d+)?$/.test(amountStr) ||
+      (amountStr.split(".")[1] ?? "").length > decimals
+    ) {
+      setPaySuccess(null);
+      setPayError(`Enter a valid ${paySymbol} amount (up to ${decimals} decimal places).`);
+      return;
+    }
+    if (amountNumeric - payAvailableHuman > 1e-9) {
+      setPaySuccess(null);
+      setPayError(
+        `Insufficient ${paySymbol} balance. Available: ${payAvailable} ${paySymbol}.`,
+      );
+      return;
+    }
+
     setPayError(null);
+    setPaySuccess(null);
     setSubmitting(true);
     try {
-      // Simulated pending submission; settlement is reviewed server-side.
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      setPaySuccess(true);
+      idempotencyKeyRef.current ??= crypto.randomUUID();
+      const result = await postWalletAction<WalletActionResult>(
+        "/api/wallet/qr-payment",
+        {
+          currency: paySymbol,
+          merchant: merchant.trim(),
+          qrString: qrString.trim(),
+          amount: amountStr,
+          idempotencyKey: idempotencyKeyRef.current,
+        },
+      );
+      idempotencyKeyRef.current = null;
+      setPaySuccess(result.message);
       setMerchant("");
       setQrString("");
       setAmount("");
+    } catch (caught) {
+      setPayError(
+        caught instanceof Error
+          ? caught.message
+          : "The payment could not be completed. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -238,7 +296,8 @@ export default function QrPaymentPage() {
             <div>
               <p className="text-[12px] font-semibold text-indigo-600">Available Wallet Balance</p>
               <p className="mt-1 text-[26px] font-black text-slate-900">
-                0.00 <span className="text-[14px] font-bold text-slate-500">USDT</span>
+                {payAvailable}{" "}
+                <span className="text-[14px] font-bold text-slate-500">{paySymbol}</span>
               </p>
             </div>
             <button
@@ -328,6 +387,12 @@ export default function QrPaymentPage() {
             </div>
           </div>
 
+          {amountUsd !== null && amountNumeric > 0 && (
+            <p className="mt-2 text-[11.5px] text-slate-400">
+              ≈ ${amountUsd.toFixed(2)} USD at current market rate
+            </p>
+          )}
+
           {payError && (
             <div className="mt-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
               <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
@@ -338,9 +403,7 @@ export default function QrPaymentPage() {
           {paySuccess && (
             <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
               <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
-              <p className="text-[12.5px] font-medium text-emerald-700">
-                QR payment authorized. It now appears in your payment history as pending settlement.
-              </p>
+              <p className="text-[12.5px] font-medium text-emerald-700">{paySuccess}</p>
             </div>
           )}
 

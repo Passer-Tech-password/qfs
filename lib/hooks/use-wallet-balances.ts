@@ -24,6 +24,7 @@ export type WalletAsset = {
   currency: WalletCurrency;
   units: number;
   amount: string;
+  priceUsd: number | null;
   usdValue: number | null;
   changePct: number | null;
 };
@@ -97,7 +98,11 @@ export function useWalletBalances() {
               ? marketData?.assets.BTC
               : undefined;
 
-      const priceUsd = PEGGED_USD[currency] ?? marketAsset?.priceUsd;
+      const rawPrice = PEGGED_USD[currency] ?? marketAsset?.priceUsd;
+      const priceUsd =
+        typeof rawPrice === "number" && Number.isFinite(rawPrice)
+          ? rawPrice
+          : null;
       const changePct = PEGGED_USD[currency]
         ? 0
         : (marketAsset?.priceChange24hPct ?? null);
@@ -108,10 +113,8 @@ export function useWalletBalances() {
         currency,
         units,
         amount: formatWalletAmount(units, currency),
-        usdValue:
-          typeof priceUsd === "number" && Number.isFinite(priceUsd)
-            ? humanAmount * priceUsd
-            : null,
+        priceUsd,
+        usdValue: priceUsd !== null ? humanAmount * priceUsd : null,
         changePct:
           typeof changePct === "number" && Number.isFinite(changePct)
             ? changePct

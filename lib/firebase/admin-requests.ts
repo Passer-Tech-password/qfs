@@ -2,10 +2,7 @@
 
 import {
   collection,
-  doc,
   getDocs,
-  serverTimestamp,
-  updateDoc,
   type Firestore,
 } from "firebase/firestore";
 import { getFirebaseClients } from "@/lib/firebase/client";
@@ -95,14 +92,40 @@ export async function loadMoneyRequests(flow: MoneyFlowKey): Promise<MoneyReques
   return results.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
 }
 
-/** Settlement is an admin status transition on a member's request record. */
+/**
+ * Settlement runs on the server so that reserved wallet funds are released or
+ * refunded atomically. The client only supplies the request identity; the
+ * server verifies the admin session and mutates the ledger in a transaction.
+ */
 export async function settleMoneyRequest(
   request: MoneyRequest,
   status: "completed" | "rejected" | "processing",
-) {
-  const { db } = getFirebaseClients();
-  await updateDoc(doc(db, "users", request.uid, request.flow, request.id), {
-    status,
-    settledAt: serverTimestamp(),
+): Promise<void> {
+  const { auth } = getFirebaseClients();
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("Authentication required.");
+  }
+
+  const token = await user.getIdToken();
+  const response = await fetch("/api/admin/requests/settle", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      uid: request.uid,
+      flow: request.flow,
+      id: request.id,
+      status,
+    }),
   });
+
+  const result = (await response.json().catch(() => ({}))) as { error?: string };
+
+  if (!response.ok) {
+    throw new Error(result.error || "Failed to settle the request.");
+  }
 }

@@ -15,6 +15,8 @@ import {
   CheckCircle2,
   X,
 } from "lucide-react";
+import { useWalletBalances } from "@/lib/hooks/use-wallet-balances";
+import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
 type CardTier = {
   id: string;
@@ -498,9 +500,23 @@ function CardApplicationModal({
 }
 
 export default function QfsCardPage() {
+  const { assets, totalUsd, hasUnpricedHolding } = useWalletBalances();
+  const { profile } = useUserProfile();
   const [appliedCard, setAppliedCard] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<CardTier | null>(null);
   const closeApplication = useCallback(() => setActiveCard(null), []);
+
+  const usdtUsd =
+    assets.find((asset) => asset.currency === "USDT")?.usdValue ?? 0;
+  const cryptoUsd = Math.max(totalUsd - usdtUsd, 0);
+  const totalPrefix = hasUnpricedHolding ? "≈$" : "$";
+  const formatUsd = (value: number) => `${totalPrefix}${value.toFixed(2)}`;
+
+  const fullName = [profile?.firstName, profile?.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const holderName = (profile?.username || fullName).trim();
 
   function handleApply(cardId: string) {
     const card = cardTiers.find((tier) => tier.id === cardId);
@@ -543,14 +559,18 @@ export default function QfsCardPage() {
             </span>
             <p className="mt-3 text-[12.5px] text-indigo-100">Total Portfolio Value</p>
             <p className="mt-0.5 text-[32px] font-black leading-none tracking-tight sm:text-[38px] lg:text-[42px]">
-              $0.00
+              {formatUsd(totalUsd)}
             </p>
             <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-indigo-200">
-              <span className="font-semibold text-white">Available Assets: $0.00</span>
+              <span className="font-semibold text-white">
+                Available Assets: {formatUsd(totalUsd)}
+              </span>
               <span aria-hidden="true">·</span>
-              <span className="font-semibold text-emerald-300">USDT/Fiat: $0.00</span>
+              <span className="font-semibold text-emerald-300">
+                USDT/Fiat: {formatUsd(usdtUsd)}
+              </span>
               <span aria-hidden="true">·</span>
-              <span>Crypto Holdings: $0.00</span>
+              <span>Crypto Holdings: {formatUsd(cryptoUsd)}</span>
             </p>
           </div>
 
@@ -560,7 +580,7 @@ export default function QfsCardPage() {
             </div>
             <div>
               <p className="text-[11.5px] font-semibold text-indigo-100">Account Fiat / USDT</p>
-              <p className="text-[22px] font-black">$0.00</p>
+              <p className="text-[22px] font-black">{formatUsd(usdtUsd)}</p>
             </div>
           </div>
         </div>
@@ -571,6 +591,10 @@ export default function QfsCardPage() {
         <h2 className="text-[20px] font-bold text-slate-900">Live Interactive Card Preview</h2>
         <p className="mt-0.5 text-[12.5px] text-slate-500">
           Click the preview card or choose any tier below to launch the instant card issuance modal.
+        </p>
+        <p className="mt-2 text-[11.5px] font-semibold text-amber-600">
+          Card issuance, card funding, and card payments are not yet available. The preview below is
+          illustrative only — no physical or virtual card is issued.
         </p>
 
         <div className="mt-5 flex flex-col items-center">
@@ -617,7 +641,9 @@ export default function QfsCardPage() {
             <div className="mt-3 flex items-end justify-between text-[10px]">
               <div>
                 <p className="text-slate-400 uppercase">Card Holder</p>
-                <p className="font-bold">CRISTIANA456</p>
+                <p className="font-bold">
+                  {holderName ? holderName.toUpperCase() : "••••••••"}
+                </p>
               </div>
               <div>
                 <p className="text-slate-400 uppercase">Expires</p>

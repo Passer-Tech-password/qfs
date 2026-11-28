@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   DollarSign,
   Bitcoin,
@@ -12,6 +12,25 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import { useWalletBalances } from "@/lib/hooks/use-wallet-balances";
+import {
+  postWalletAction,
+  type WalletActionResult,
+} from "@/lib/firebase/wallet-api";
+import {
+  WALLET_CURRENCIES,
+  formatWalletAmount,
+  type WalletCurrency,
+} from "@/lib/server/wallet-currency";
+
+const CURRENCY_ORDER: WalletCurrency[] = ["USDT", "BTC", "XLM", "XRP"];
+
+const CURRENCY_LABELS: Record<WalletCurrency, string> = {
+  USDT: "USDT (Tether)",
+  BTC: "BTC (Bitcoin)",
+  XLM: "XLM (Stellar)",
+  XRP: "XRP (Ripple)",
+};
 
 type BalanceCard = {
   icon: typeof DollarSign;
@@ -24,11 +43,10 @@ type BalanceCard = {
   badgeTone: string;
 };
 
-const balances: BalanceCard[] = [
+const BALANCE_META: Omit<BalanceCard, "amount">[] = [
   {
     icon: DollarSign,
     name: "USDT",
-    amount: "$0.00",
     unit: "",
     badge: "USDT",
     card: "bg-emerald-50 border-emerald-100",
@@ -38,7 +56,6 @@ const balances: BalanceCard[] = [
   {
     icon: Bitcoin,
     name: "BTC",
-    amount: "0.000000",
     unit: "",
     badge: "BTC",
     card: "bg-amber-50 border-amber-100",
@@ -48,7 +65,6 @@ const balances: BalanceCard[] = [
   {
     icon: Rocket,
     name: "XLM",
-    amount: "0.0000",
     unit: "",
     badge: "XLM",
     card: "bg-violet-50 border-violet-100",
@@ -58,7 +74,6 @@ const balances: BalanceCard[] = [
   {
     icon: Zap,
     name: "XRP",
-    amount: "0.00",
     unit: "",
     badge: "XRP",
     card: "bg-sky-50 border-sky-100",
@@ -67,33 +82,91 @@ const balances: BalanceCard[] = [
   },
 ];
 
-const currencies = [
-  { label: "USDT (Tether)", balance: "$0.00" },
-  { label: "BTC (Bitcoin)", balance: "0.000000" },
-  { label: "XLM (Stellar)", balance: "0.0000" },
-  { label: "XRP (Ripple)", balance: "0.00" },
-];
-
 export default function CreateVoucherPage() {
+  const { balances: walletBalances } = useWalletBalances();
   const [email, setEmail] = useState("");
   const [currency, setCurrency] = useState(0);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [voucherCode, setVoucherCode] = useState<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
-  function handleSubmit() {
+  const balances: BalanceCard[] = BALANCE_META.map((b) => ({
+    ...b,
+    amount: formatWalletAmount(
+      walletBalances[b.name as WalletCurrency],
+      b.name as WalletCurrency,
+    ),
+  }));
+
+  const currencyOptions = CURRENCY_ORDER.map((code) => ({
+    code,
+    label: CURRENCY_LABELS[code],
+    balance: formatWalletAmount(walletBalances[code], code),
+  }));
+
+  const activeCurrency = CURRENCY_ORDER[currency];
+  const activeDecimals = WALLET_CURRENCIES[activeCurrency].decimals;
+  const activeUnits = walletBalances[activeCurrency];
+  const activeAvailable = formatWalletAmount(activeUnits, activeCurrency);
+  const activeAvailableHuman = activeUnits / 10 ** activeDecimals;
+
+  async function handleSubmit() {
+    if (submitting) return;
     setSuccess(false);
-    const amt = parseFloat(amount);
-    if (!amount.trim() || isNaN(amt) || amt <= 0) {
+    setVoucherCode(null);
+    setError(null);
+
+    const amountStr = amount.trim();
+
+    if (!amountStr || !/^\d+(\.\d+)?$/.test(amountStr) || !(parseFloat(amountStr) > 0)) {
       setError("Please enter a valid voucher amount greater than zero.");
       return;
     }
-    setError(null);
-    setSuccess(true);
-    setAmount("");
-    setNote("");
-    setEmail("");
+    if ((amountStr.split(".")[1] ?? "").length > activeDecimals) {
+      setError(
+        `Enter a valid ${activeCurrency} amount (up to ${activeDecimals} decimal places).`,
+      );
+      return;
+    }
+    if (parseFloat(amountStr) - activeAvailableHuman > 1e-9) {
+      setError(
+        `Insufficient ${activeCurrency} balance. Available: ${activeAvailable} ${activeCurrency}.`,
+      );
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      idempotencyKeyRef.current ??= crypto.randomUUID();
+      const result = await postWalletAction<WalletActionResult>(
+        "/api/wallet/voucher",
+        {
+          currency: activeCurrency,
+          recipientEmail: email.trim(),
+          note: note.trim(),
+          amount: amountStr,
+          idempotencyKey: idempotencyKeyRef.current,
+        },
+      );
+      idempotencyKeyRef.current = null;
+      setSuccess(true);
+      setVoucherCode(typeof result.code === "string" ? result.code : null);
+      setAmount("");
+      setNote("");
+      setEmail("");
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "The voucher could not be created. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -174,8 +247,8 @@ export default function CreateVoucherPage() {
                 onChange={(e) => setCurrency(Number(e.target.value))}
                 className="dash-input w-full appearance-none py-3.5 pl-4 pr-10 text-[14px] font-medium text-slate-800"
               >
-                {currencies.map((c, i) => (
-                  <option key={c.label} value={i}>
+                {currencyOptions.map((c, i) => (
+                  <option key={c.code} value={i}>
                     {c.label}
                   </option>
                 ))}
@@ -186,7 +259,7 @@ export default function CreateVoucherPage() {
               />
             </div>
             <p className="mt-1.5 text-[11.5px] text-slate-400">
-              Available Balance: {currencies[currency].balance}
+              Available Balance: {currencyOptions[currency].balance}
             </p>
           </div>
 
@@ -204,7 +277,7 @@ export default function CreateVoucherPage() {
               className="dash-input w-full py-3.5 px-4 text-[14px]"
             />
             <p className="mt-1.5 text-[11.5px] text-slate-400">
-              Minimum amount: 0.000001
+              Minimum amount: 0.000001 · No platform fee applied
             </p>
           </div>
 
@@ -228,7 +301,8 @@ export default function CreateVoucherPage() {
           <button
             type="button"
             onClick={handleSubmit}
-            className="dash-submit mt-6 w-full rounded-xl py-4 text-[15px] font-bold"
+            disabled={submitting}
+            className="dash-submit mt-6 w-full rounded-xl py-4 text-[15px] font-bold disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="inline-flex items-center gap-2">
               <Ticket size={17} /> Create Voucher
@@ -245,7 +319,9 @@ export default function CreateVoucherPage() {
             <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
               <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
               <p className="text-[12.5px] font-medium text-emerald-700">
-                Your voucher has been created successfully.
+                {voucherCode
+                  ? `Your voucher has been created successfully. Code: ${voucherCode}`
+                  : "Your voucher has been created successfully."}
               </p>
             </div>
           )}

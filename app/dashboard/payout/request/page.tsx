@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   DollarSign,
   Bitcoin,
@@ -12,40 +12,49 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
-import { createPayout } from "@/lib/firebase/money";
+import { useWalletBalances } from "@/lib/hooks/use-wallet-balances";
+import {
+  postWalletAction,
+  type WalletActionResult,
+} from "@/lib/firebase/wallet-api";
+import {
+  WALLET_CURRENCIES,
+  formatWalletAmount,
+  type WalletCurrency,
+} from "@/lib/server/wallet-currency";
 
-const balances = [
+const BALANCE_META = [
   {
+    currency: "USDT" as WalletCurrency,
     icon: DollarSign,
     label: "USDT Balance",
-    amount: "$0.00",
     pill: "USDT",
     card: "bg-emerald-50 border-emerald-100",
     iconBg: "bg-emerald-500",
     pillBg: "bg-emerald-100 text-emerald-700",
   },
   {
+    currency: "BTC" as WalletCurrency,
     icon: Bitcoin,
     label: "BTC Balance",
-    amount: "0.000000",
     pill: "BTC",
     card: "bg-amber-50 border-amber-100",
     iconBg: "bg-amber-500",
     pillBg: "bg-amber-100 text-amber-700",
   },
   {
+    currency: "XLM" as WalletCurrency,
     icon: Rocket,
     label: "XLM Balance",
-    amount: "0.0000",
     pill: "XLM",
     card: "bg-violet-50 border-violet-100",
     iconBg: "bg-violet-500",
     pillBg: "bg-violet-100 text-violet-700",
   },
   {
+    currency: "XRP" as WalletCurrency,
     icon: Zap,
     label: "XRP Balance",
-    amount: "0.00",
     pill: "XRP",
     card: "bg-sky-50 border-sky-100",
     iconBg: "bg-sky-500",
@@ -53,20 +62,37 @@ const balances = [
   },
 ];
 
+function formatAvailable(units: number, currency: WalletCurrency): string {
+  const formatted = formatWalletAmount(units, currency);
+  return currency === "USDT" ? `$${formatted}` : formatted;
+}
+
 export default function RequestPayoutPage() {
-  const [asset, setAsset] = useState("USDT - Available: $0.00");
+  const { balances: walletBalances } = useWalletBalances();
+  const [asset, setAsset] = useState<WalletCurrency>("USDT");
   const [method, setMethod] = useState("Direct Crypto Blockchain Wallet");
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
+
+  const balanceCards = BALANCE_META.map((b) => ({
+    ...b,
+    amount: formatAvailable(walletBalances[b.currency], b.currency),
+  }));
+
+  const decimals = WALLET_CURRENCIES[asset].decimals;
+  const availableHuman = walletBalances[asset] / 10 ** decimals;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submitting) return;
 
     const numeric = parseFloat(amount) || 0;
+    const amountStr = amount.trim();
+
     if (!address.trim()) {
       setSuccess(null);
       setError("Enter a destination wallet address or IBAN.");
@@ -77,20 +103,39 @@ export default function RequestPayoutPage() {
       setError("Enter a payout amount greater than zero.");
       return;
     }
+    if (
+      !/^\d+(\.\d+)?$/.test(amountStr) ||
+      (amountStr.split(".")[1] ?? "").length > decimals
+    ) {
+      setSuccess(null);
+      setError(`Enter a valid ${asset} amount (up to ${decimals} decimal places).`);
+      return;
+    }
+    if (numeric - availableHuman > 1e-9) {
+      setSuccess(null);
+      setError(
+        `Insufficient ${asset} balance. Available: ${formatWalletAmount(walletBalances[asset], asset)} ${asset}.`,
+      );
+      return;
+    }
 
     setError(null);
     setSuccess(null);
     setSubmitting(true);
     try {
-      await createPayout({
-        asset: asset.split(" - ")[0].trim(),
-        method,
-        address: address.trim(),
-        amount: numeric,
-      });
-      setSuccess(
-        "Payout request submitted. It now appears in your payout history as pending review.",
+      idempotencyKeyRef.current ??= crypto.randomUUID();
+      const result = await postWalletAction<WalletActionResult>(
+        "/api/wallet/payout",
+        {
+          currency: asset,
+          method,
+          address: address.trim(),
+          amount: amountStr,
+          idempotencyKey: idempotencyKeyRef.current,
+        },
       );
+      idempotencyKeyRef.current = null;
+      setSuccess(result.message);
       setAddress("");
       setAmount("");
     } catch (caught) {
@@ -110,7 +155,7 @@ export default function RequestPayoutPage() {
       <section>
         <h2 className="text-[18px] font-bold text-slate-900">Available Balances</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {balances.map((b) => {
+          {balanceCards.map((b) => {
             const Icon = b.icon;
             return (
               <div key={b.label} className={`rounded-2xl border p-5 ${b.card}`}>
@@ -154,13 +199,15 @@ export default function RequestPayoutPage() {
             <div className="relative">
               <select
                 value={asset}
-                onChange={(e) => setAsset(e.target.value)}
+                onChange={(e) => setAsset(e.target.value as WalletCurrency)}
                 className="dash-input w-full appearance-none py-3 pl-4 pr-10 text-[13.5px] font-medium text-slate-800"
               >
-                <option>USDT - Available: $0.00</option>
-                <option>BTC - Available: 0.000000</option>
-                <option>XLM - Available: 0.0000</option>
-                <option>XRP - Available: 0.00</option>
+                {BALANCE_META.map((b) => (
+                  <option key={b.currency} value={b.currency}>
+                    {b.currency} - Available:{" "}
+                    {formatAvailable(walletBalances[b.currency], b.currency)}
+                  </option>
+                ))}
               </select>
               <ChevronDown
                 size={18}

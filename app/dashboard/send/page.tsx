@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Send,
   Zap,
@@ -11,28 +11,48 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
-import { createTransfer } from "@/lib/firebase/money";
+import { useWalletBalances } from "@/lib/hooks/use-wallet-balances";
+import {
+  postWalletAction,
+  type WalletActionResult,
+} from "@/lib/firebase/wallet-api";
+import { WALLET_CURRENCIES } from "@/lib/server/wallet-currency";
 
-const assets = [
-  { label: "Tether USD (USDT) — Bal: 0.00 USDT (~$0.00 USD)", symbol: "USDT", price: 1, balanceUsd: 0, network: "Tron (TRC20)" },
-  { label: "Bitcoin (BTC) — Bal: 0.000000 BTC (~$0.00 USD)", symbol: "BTC", price: 97000, balanceUsd: 0, network: "Bitcoin Network" },
-  { label: "Stellar Lumens (XLM) — Bal: 0.0000 XLM (~$0.00 USD)", symbol: "XLM", price: 0.2489, balanceUsd: 0, network: "Stellar Network" },
-  { label: "Ripple XRP (XRP) — Bal: 0.00 XRP (~$0.00 USD)", symbol: "XRP", price: 1.5, balanceUsd: 0, network: "XRP Ledger" },
-];
+const NETWORKS: Record<string, string> = {
+  USDT: "Tron (TRC20)",
+  BTC: "Bitcoin Network",
+  XLM: "Stellar Network",
+  XRP: "XRP Ledger",
+};
 
 export default function SendMoneyPage() {
+  const { assets: walletAssets } = useWalletBalances();
   const [assetIndex, setAssetIndex] = useState(0);
   const [recipient, setRecipient] = useState("");
   const [usdAmount, setUsdAmount] = useState("");
+  const [useMax, setUseMax] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
-  const asset = assets[assetIndex];
+  const assets = walletAssets.map((a) => ({
+    ...a,
+    symbol: a.currency,
+    price: a.priceUsd ?? 0,
+    balanceUsd: a.usdValue ?? 0,
+    label: `${WALLET_CURRENCIES[a.currency].label} (${a.currency}) — Bal: ${a.amount} ${a.currency} (~$${(a.usdValue ?? 0).toFixed(2)} USD)`,
+    network: NETWORKS[a.currency],
+  }));
+
+  const asset = assets[assetIndex] ?? assets[0];
   const amount = parseFloat(usdAmount) || 0;
-  const equivalentCoin = asset.price > 0 ? (amount / asset.price).toFixed(4) : "0.0000";
+  const equivalentCoin =
+    asset.price > 0 ? (amount / asset.price).toFixed(4) : "0.0000";
+  const availableHuman = asset.units / 10 ** WALLET_CURRENCIES[asset.currency].decimals;
 
   function handleMax() {
+    setUseMax(true);
     setUsdAmount(asset.balanceUsd.toFixed(2));
   }
 
@@ -50,24 +70,51 @@ export default function SendMoneyPage() {
       setError("Enter a transfer amount greater than zero.");
       return;
     }
+    if (asset.price <= 0) {
+      setSuccess(null);
+      setError("Live pricing for this asset is unavailable. Please try again shortly.");
+      return;
+    }
+
+    const decimals = WALLET_CURRENCIES[asset.currency].decimals;
+    const coinAmount = useMax
+      ? asset.amount
+      : (amount / asset.price).toFixed(decimals);
+    const coinValue = useMax ? availableHuman : amount / asset.price;
+
+    if (coinValue - availableHuman > 1e-9) {
+      setSuccess(null);
+      setError(
+        `Insufficient ${asset.currency} balance. Available: ${asset.amount} ${asset.currency}.`,
+      );
+      return;
+    }
+    if (!(parseFloat(coinAmount) > 0)) {
+      setSuccess(null);
+      setError("Enter a transfer amount greater than zero.");
+      return;
+    }
 
     setError(null);
     setSuccess(null);
     setSubmitting(true);
     try {
-      await createTransfer({
-        asset: asset.label,
-        symbol: asset.symbol,
-        network: asset.network,
-        recipient: recipient.trim(),
-        usdAmount: amount,
-        coinAmount: parseFloat(equivalentCoin) || 0,
-      });
-      setSuccess(
-        "Transfer request submitted. It now appears in your transfer records as pending review.",
+      idempotencyKeyRef.current ??= crypto.randomUUID();
+      const result = await postWalletAction<WalletActionResult>(
+        "/api/wallet/transfer",
+        {
+          currency: asset.currency,
+          recipient: recipient.trim(),
+          amount: coinAmount,
+          usdAmount: amount,
+          idempotencyKey: idempotencyKeyRef.current,
+        },
       );
+      idempotencyKeyRef.current = null;
+      setSuccess(result.message);
       setRecipient("");
       setUsdAmount("");
+      setUseMax(false);
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -128,13 +175,16 @@ export default function SendMoneyPage() {
               Select Asset
             </label>
             <span className="text-[11.5px] font-semibold text-indigo-600">
-              Bal: 0.00 {asset.symbol} (~$0.00)
+              Bal: {asset.amount} {asset.symbol} (~${asset.balanceUsd.toFixed(2)})
             </span>
           </div>
           <div className="relative">
             <select
               value={assetIndex}
-              onChange={(e) => setAssetIndex(Number(e.target.value))}
+              onChange={(e) => {
+                setAssetIndex(Number(e.target.value));
+                setUseMax(false);
+              }}
               className="dash-input w-full appearance-none py-3 pl-4 pr-10 text-[13.5px] font-medium text-slate-800"
             >
               {assets.map((a, i) => (
@@ -186,7 +236,10 @@ export default function SendMoneyPage() {
                 type="text"
                 inputMode="decimal"
                 value={usdAmount}
-                onChange={(e) => setUsdAmount(e.target.value)}
+                onChange={(e) => {
+                  setUsdAmount(e.target.value);
+                  setUseMax(false);
+                }}
                 placeholder="0.00"
                 className="dash-input w-full py-3 pl-7 pr-16 text-[14px]"
               />
